@@ -8,8 +8,8 @@ KCSD1::Application.routes.draw do
   get "deployment/clean"
 
   get "chef_node/check"
-  get "chef_node/showAll"
-  get "chef_node/stopAll"
+  get "chef_node/show_all"
+  get "chef_node/stop_all"
 
   get "chef_node/start"
   post "chef_node/start"
