@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
-<title>KIT Cloud Serving Deployment</title>
+<title>KIT Cloud Serving Deployment and Benchmark</title>
 <style type="text/css" media="screen">
     body {
         margin: 0;
@@ -60,15 +60,15 @@
     }
 
     #header, #about, #getting-started {
-        padding-left: 175px;
+        padding-left: 200px;
         padding-right: 100px;
     }
 
     #header {
-        background-image: url("assets/aifb_logo.png");
+        background-image: url("assets/aifb_logo.png"), url("assets/fzi_logo.png");
         background-repeat: no-repeat;
-        background-position: top left;
-        height: 64px;
+        background-position: top left, top right;
+        height: 99px;
     }
 
     #header h1, #header h2 {
@@ -172,26 +172,6 @@
         font-size: 13px;
     }
 
-    #sidebar ul {
-        margin-left: 0;
-        padding-left: 0;
-    }
-
-    #sidebar ul h3 {
-        margin-top: 25px;
-        font-size: 16px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #ccc;
-    }
-
-    #sidebar li {
-        list-style-type: none;
-    }
-
-    #sidebar ul.links li {
-        margin-bottom: 5px;
-    }
-
     .filename {
         font-style: italic;
     }
@@ -210,14 +190,11 @@
 <div id="content">
 
 <div id="header">
-  <h1>KIT Cloud Serving Deployment</h1>
-
-  <h2>You&rsquo;re building the cloud. With KCSD.</h2>
+  <h1>KIT Cloud Serving Deployment and Benchmark</h1>
+  <h2>You&rsquo;re building the cloud. With KCSDB.</h2>
 </div>
 
-<div id="getting-started">
-
-</div>
+<div id="getting-started"></div>
 
 <div id="tabs">
 
@@ -849,12 +826,9 @@ take EC2 AWS Credentials and Name for Key Pair and Security Group
           })
       </script>
   <% end %>
-
-
-
 </div>
 
-<div id="footer">Copyright &copy; | Version 0.7 | 2012 | AIFB | KIT</div>
+<div id="footer">Copyright &copy; | Version 0.7 | 2012 | <a href="http://aifb.kit.edu/">AIFB</a> | <a href="http://www.fzi.de/">FZI</a></div>
 </div>
 </body>
 </html>
