@@ -1,0 +1,16 @@
+---
+chef_server_url: dummy
+node_name: dummy
+client_key: dummy
+validation_client_name: dummy
+validation_key: dummy
+cookbook_path: dummy
+knife[:aws_access_key_id]: dummy
+knife[:aws_secret_access_key]: dummy
+knife[:region]: us-east-1
+knife[:aws_ssh_key_id]: dummy
+knife[:flavor]: m1.small
+knife[:image]: ami-a09c46c9
+knife[:identify_file]: dummy
+knife[:ssh_user]: dummy
+knife[:security_groups]: dummy

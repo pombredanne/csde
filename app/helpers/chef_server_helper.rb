@@ -1,0 +1,2 @@
+module ChefServerHelper
+end

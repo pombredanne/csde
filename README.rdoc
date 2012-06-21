@@ -1,0 +1,39 @@
+= KIT Cloud Serving Deployment and Benchmark
+
+= DESCRIPTION:
+
+KIT Cloud Serving Deployment and Benchmark (KCSDB), which is currently developed by AIFB(KIT) and FZI, is a web based tool to help you do following tasks
+
+1. rapidly deploy and easily manage distributed database systems in your cloud infrastructure. 
+Now, supported only Cassandra with AWS EC2
+2. automated benchmark the databases with various workload distributions like hotspot, zipfian...
+ 
+With KCSDB, you can concentrate on your work with the databases, not dealing with setup and configuration. KCSD automates it already for you.
+However, like any software on the earth, written by human, there may be bugs and issues. Therefore, please read the description below carefully.
+  
+= ARCHITECTURE:
+  
+KCSDB consists of 3 main components
+ 
+1. KCSDB Web Server Component
+This is the machine where the web application is now running.
+  
+2. KCSDB Configuration Management Component
+KCSD uses a dedicated Chef Server to manage the infrastructure. At the first beginning, you don't have any Chef Server. KCSD will create a new one for you.
+    
+3. KCSDB Infrastructure
+The infrastructure contains machines, on that you will deploy your databases.
+  
+= USAGE:
+For now, KCSD uses AWS EC2 as its infrastructure environment. That means, you will use the Chef Server and your machines in AWS EC2.
+You can create machines with your desirable flavor for machine type (small, medium, large), start and stop them.
+Chef Server is used to manage your infrastructure, for example you write a cook book for your machines, upload to Chef Server and delegate machines to do it.
+All machines in your infrastructure have to register themselves by Chef Server
+    
+Therefore, if you want to create machines, Chef Server must be ON
+If you just want to deploy a database, Chef Server can be OFF
+    
+KCSDB needs your AWS Credentials (in tab Configuration) to perform requests to AWS EC2. Ensure all your credentials are correct
+    
+Last but not least, mostly dialogs and forms in KCSDB request Ajax calls to the KCSDB Web Server. Thus, please wait for
+responses. For better use, you can trace the logger with the console. Maybe you can find something strange.

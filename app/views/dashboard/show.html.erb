@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+<title>KIT Cloud Serving Deployment</title>
+<style type="text/css" media="screen">
+    body {
+        margin: 0;
+        margin-bottom: 25px;
+        padding: 0;
+        background-color: #f0f0f0;
+        font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
+        font-size: 13px;
+        color: #333;
+    }
+
+    h1 {
+        font-size: 28px;
+        color: #000;
+    }
+
+    a {
+        color: #03c
+    }
+
+    a:hover {
+        background-color: #03c;
+        color: white;
+        text-decoration: none;
+    }
+
+    #page {
+        background-color: #f0f0f0;
+        width: 750px;
+        margin: 0;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #content {
+        float: left;
+        background-color: white;
+        border: 3px solid #aaa;
+        border-top: none;
+        padding: 25px;
+        width: 700px;
+    }
+
+    #sidebar {
+        float: right;
+        width: 175px;
+    }
+
+    #footer {
+        clear:left;
+        margin-top:1em;
+        background:#efefef;
+        text-align:center;
+        padding:10px;
+        font-weight: bold;
+    }
+
+    #header, #about, #getting-started {
+        padding-left: 175px;
+        padding-right: 100px;
+    }
+
+    #header {
+        background-image: url("assets/aifb_logo.png");
+        background-repeat: no-repeat;
+        background-position: top left;
+        height: 64px;
+    }
+
+    #header h1, #header h2 {
+        margin: 0
+    }
+
+    #header h2 {
+        color: #888;
+        font-weight: normal;
+        font-size: 16px;
+    }
+
+    #about h3 {
+        margin: 0;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    #about-content {
+        background-color: #ffd;
+        border: 1px solid #fc0;
+        margin-left: -55px;
+        margin-right: -10px;
+    }
+
+    #about-content table {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 11px;
+        border-collapse: collapse;
+    }
+
+    #about-content td {
+        padding: 10px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    #about-content td.name {
+        color: #555
+    }
+
+    #about-content td.value {
+        color: #000
+    }
+
+    #about-content ul {
+        padding: 0;
+        list-style-type: none;
+    }
+
+    #about-content.failure {
+        background-color: #fcc;
+        border: 1px solid #f00;
+    }
+
+    #about-content.failure p {
+        margin: 0;
+        padding: 10px;
+    }
+
+    #getting-started {
+        border-top: 1px solid #ccc;
+        margin-top: 25px;
+        padding-top: 15px;
+    }
+
+    #getting-started h1 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    #getting-started h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: normal;
+        color: #333;
+        margin-bottom: 25px;
+    }
+
+    #getting-started ol {
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    #getting-started li {
+        font-size: 18px;
+        color: #888;
+        margin-bottom: 25px;
+    }
+
+    #getting-started li h2 {
+        margin: 0;
+        font-weight: normal;
+        font-size: 18px;
+        color: #333;
+    }
+
+    #getting-started li p {
+        color: #555;
+        font-size: 13px;
+    }
+
+    #sidebar ul {
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    #sidebar ul h3 {
+        margin-top: 25px;
+        font-size: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    #sidebar li {
+        list-style-type: none;
+    }
+
+    #sidebar ul.links li {
+        margin-bottom: 5px;
+    }
+
+    .filename {
+        font-style: italic;
+    }
+
+    label {
+        font-weight: bold;
+    }
+</style>
+
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="content">
+
+<div id="header">
+  <h1>KIT Cloud Serving Deployment</h1>
+
+  <h2>You&rsquo;re building the cloud. With KCSD.</h2>
+</div>
+
+<div id="getting-started">
+
+</div>
+
+<div id="tabs">
+
+<ul>
+
+  <li>
+    <a href="#tabs-1">Infrastructure</a>
+  </li>
+
+  <li>
+    <a href="#tabs-2">Deployment</a>
+  </li>
+
+  <li>
+    <a href="#tabs-3">Configuration</a>
+  </li>
+
+  <li>
+    <a href="#tabs-4">Monitor</a>
+  </li>
+
+  <li>
+    <a href="#tabs-5">About</a>
+  </li>
+
+  <li>
+    <a href="#tabs-6">Reset</a>
+  </li>
+
+</ul>
+
+
+
+
+<!-- Manage the Infrastructure -->
+<div id="tabs-1">
+  <div id="infrastructure_accordion">
+    <h2><a href="#">Chef Server</a></h2>
+    <div id="contentPanel_1">
+      <div id="chefServerStatusDialog"></div>
+
+			<!-- Chef Server is NOT available -->
+      <% if (@state['chef_server_state'] == 'not_setup') %>
+      	<button id="setupChefServer">Set up</button>
+          <script>
+              var buttonSetupOpts = {
+                  icons:{
+                      primary:"ui-icon-wrench"
+                  }
+              };
+              $("#setupChefServer").button(buttonSetupOpts);
+              $("#setupChefServer").click(function () {
+                  $("#chefServerStatusDialog").dialog({
+                      title:"Set up a fresh Chef Server. KCSD's automating everything in the background for you. Time to take a coffee now, just 5 minutes. When you come back, it's already done!",
+                      show:"slide",
+                      hide:"puff",
+                      open:function (event) {
+                          $(this).empty();
+                          $(this).load("/chef_server/setup");
+                      }
+                  });
+              });
+          </script>
+      
+			<!-- Chef Server is AVAILABLE -->
+      <% else %>
+          <button id="checkChefServer">Check</button></br>
+          <button id="startChefServer">Start</button></br>
+          <button id="stopChefServer">Stop</button></br>
+          <button id="goToChefServer">Go to Chef Server</button></br>
+          <script>
+              var buttonCheckOpts = {
+                  icons:{
+                      primary:"ui-icon-heart"
+                  }
+              };
+              var buttonStartOpts = {
+                  icons:{
+                      primary:"ui-icon-power"
+                  }
+              };
+              var buttonStopOpts = {
+                  icons:{
+                      primary:"ui-icon-stop"
+                  }
+              };
+              var buttonGoToOpts = {
+                  icons:{
+                      primary:"ui-icon-home"
+                  }
+              };
+              
+              $("#checkChefServer").button(buttonCheckOpts);
+              $("#startChefServer").button(buttonStartOpts);
+              $("#stopChefServer").button(buttonStopOpts);
+              $("#goToChefServer").button(buttonGoToOpts);
+
+              $("#checkChefServer").click(function () {
+                  $("#chefServerStatusDialog").dialog({
+                      title:"Check Chef Server. Please wait.....",
+                      show:"slide",
+                      hide:"puff",
+                      open:function (event) {
+                          $(this).empty();
+                          $(this).load("/chef_server/check");
+                      }
+                  });
+              });
+              $("#startChefServer").click(function () {
+                  $("#chefServerStatusDialog").dialog({
+                      title:"Start Chef Server. KCSD has to configure Chef Server. It could take a while. Please wait.....",
+                      show:"slide",
+                      hide:"puff",
+                      open:function (event) {
+                          $(this).empty();
+                          $(this).load("/chef_server/start");
+                      }
+                  });
+              });
+              $("#stopChefServer").click(function () {
+                  $("#chefServerStatusDialog").dialog({
+                      title:"Stop Chef Server. KCSD has to configure Chef Server. It could take a while. Please wait.....",
+                      show:"slide",
+                      hide:"puff",
+                      open:function (event) {
+                          $(this).empty();
+                          $(this).load("/chef_server/stop");
+                      }
+                  });
+              });
+              $("#goToChefServer").click(function () {
+                  window.open("/chef_server/go_to");
+              });
+          </script>
+      <% end %>
+    </div>
+
+    <h2><a href="#">Machines</a></h2>
+    <div id="contentPanel_2">
+      <!--only available if Chef Server is set up-->
+      <% if (@state['chef_server_state'] == 'setup') %>
+          <button id="checkChefNodes">Check</button>
+          <button id="showAllChefNodes">Show all machines</button>
+          <button id="stopAllChefNodes">Stop all machines</button></br>
+
+          <div id="chefNodeStatusDialog"></div>
+
+          <div id="machine_accordion">
+            <h2><a href="#">Create machines</a></h2>
+            <div id="contentPanel_3">
+              <%= form_tag('/chef_node/create') do %>
+                  <%= label_tag "Flavor Create", "Choose a machine type" %>
+                  <input type="radio" name="flavor_create" id="small_create" value="small_create"><label for="small_create">Small</label></input>
+                  <input type="radio" name="flavor_create" id="medium_create" value="medium_create"><label for="medium_create">Medium</label></input>
+                  <input type="radio" name="flavor_create" id="large_create" value="large_create"><label for="large_create">Large</label></input>
+                 	</br>
+
+                  <%= label_tag "Number", "How many machines" %>
+                  <td><%= text_field_tag "number_create", "dummy" %></td>
+
+                  <button id="createChefNodes" type="submit">Create</button>
+              <% end %>
+            </div>
+
+            <h2><a href="#">Start machines</a></h2>
+            <div id="contentPanel_4">
+              <%= form_tag('/chef_node/start') do %>
+                  <%= label_tag "Flavor Start", "Choose a machine type" %>
+                  <input type="radio" name="flavor_start" id="small_start" value="small_start"><label for="small_start">Small</label></input>
+                  <input type="radio" name="flavor_start" id="medium_start" value="medium_start"><label for="medium_start">Medium</label></input>
+                  <input type="radio" name="flavor_start" id="large_start" value="large_start"><label for="large_start">Large</label></input>
+                  </br>
+
+                  <%= label_tag "Number", "How many machines" %>
+                  <td><%= text_field_tag "number_start", "dummy" %></td>
+
+                  <button id="startChefNodes" type="submit">Start</button>
+              <% end %>
+            </div>
+          </div>
+
+          <script>
+              $("input#small_create, input#medium_create, input#large_create").button();
+              $("input#small_start, input#medium_start, input#large_start").button();
+
+              $("#machine_accordion").accordion();
+          
+              var buttonSetupOpts = {
+                  icons:{
+                      primary:"ui-icon-wrench"
+                  }
+              };
+              var buttonStartOpts = {
+                  icons:{
+                      primary:"ui-icon-power"
+                  }
+              };
+              var buttonCheckOpts = {
+                  icons:{
+                      primary:"ui-icon-heart"
+                  }
+              };
+              var buttonShowAllOpts = {
+                  icons:{
+                      primary:"ui-icon-search"
+                  }
+              };
+              var buttonStopAllOpts = {
+                  icons:{
+                      primary:"ui-icon-stop"
+                  }
+              };
+          
+              $("#createChefNodes").button(buttonSetupOpts);
+              $("#startChefNodes").button(buttonStartOpts);
+              $("#checkChefNodes").button(buttonCheckOpts);
+              $("#showAllChefNodes").button(buttonShowAllOpts);
+              $("#stopAllChefNodes").button(buttonStopAllOpts);
+
+              $("#checkChefNodes").click(function () {
+                  $("#chefNodeStatusDialog").dialog({
+                      title:"Check machines. Please wait.....",
+                      show:"slide",
+                      hide:"puff",
+                      open:function (event) {
+                          $(this).empty();
+                          $(this).load("/chef_node/check");
+                      }
+                  });
+              });
+              $("#showAllChefNodes").click(function () {
+                  $("#chefNodeStatusDialog").dialog({
+                      title:"Show all machines. It could take a while. Please wait...",
+                      show:"slide",
+                      hide:"puff",
+                      width:"600",
+                      open:function (event) {
+                          $(this).empty();
+                          $(this).load("/chef_node/showAll");
+                      }
+                  });
+              });
+
+              $("#stopAllChefNodes").click(function () {
+                  $("#chefNodeStatusDialog").dialog({
+                      title:"Stop all machines. It could take a while. Please wait...",
+                      show:"slide",
+                      hide:"puff",
+                      width:"600",
+                      open:function (event) {
+                          $(this).empty();
+                          $(this).load("/chef_node/stopAll");
+                      }
+                  });
+              });
+
+              $("#createChefNodes").click(function () {
+                  $("#chefNodeStatusDialog").dialog({
+                      title:"Creating machines. It could take a while. Please wait...",
+                      show:"slide",
+                      hide:"puff",
+                      height: "0",
+                      resizable: false
+                  });
+              });
+
+              $("#startChefNodes").click(function () {
+                  $("#chefNodeStatusDialog").dialog({
+                      title:"Starting machines. It could take a while. Please wait...",
+                      show:"slide",
+                      hide:"puff",
+                      height: "0",
+                      resizable: false
+                  });
+              });
+          </script>
+      <% end %>
+    </div>
+  </div>
+
+  <script>
+      $("#infrastructure_accordion").accordion();
+  </script>
+</div>
+
+
+
+
+
+<div id="tabs-2">
+
+    <div id="deploymentStatusDialog"></div>
+
+
+    <div id="cassandra_accordion">
+
+      <!--only available if Chef Server is set up-->
+      <% if (@state['chef_server_state'] == 'setup') %>
+
+          <h2><a href="#">Pre-defined</a></h2>
+          <div id="contentPanel_6">
+
+            <%= form_tag('/deployment/deploy') do %>
+                <%= label_tag "Cassandra version", "Choose a predefined Cassandra version:" %>
+
+                <input type="radio" name="cassandra_version" id="7" value="7"><label for="7">7</label></input>
+                <input type="radio" name="cassandra_version" id="8" value="8"><label for="8">8</label></input>
+                <input type="radio" name="cassandra_version" id="10" value="10"><label for="10">10</label></input>
+                </br>
+
+                <button id="deploy_pre_defined" type="submit">Deploy</button>
+            <% end %>
+
+            <%= label_tag "Clean up", "Clean everything from the last distribution" %>
+            </br>
+            <button id="clean">Clean up</button>
+
+            <script>
+                $("input#7, input#8, input#10").button();
+                $("#deploy_pre_defined").button();
+                $("#clean").button();
+                $("#deploy_pre_defined").click(function () {
+                    $("#deploymentStatusDialog").dialog({
+                        title:"Deploying machines. It could take a while. Please wait...",
+                        show:"slide",
+                        hide:"puff",
+                        height: "0",
+                        resizable: false
+                    });
+                });
+                $("#clean").click(function () {
+                    $("#deploymentStatusDialog").dialog({
+                        title:"Cleaning all stuff from the last distribution. It could take a while. Please wait...",
+                        show:"slide",
+                        hide:"puff",
+                        open:function (event) {
+                            $(this).empty();
+                            $(this).load("/deployment/clean");
+                        }
+                    });
+                });
+
+            </script>
+
+          </div>
+
+
+
+
+
+    <% end %>
+
+
+
+    </div>
+
+
+    <script>
+        $("#cassandra_accordion").accordion();
+    </script>
+
+</div>
+
+
+
+
+<!-- 
+Configuration Accordion
+take EC2 AWS Credentials and Name for Key Pair and Security Group 
+-->
+<div id="tabs-3">
+  <div id="configuration_accordion">
+      <h2><a href="#">AWS Credentials</a></h2>
+      <div id="contentPanel_5">
+
+        <%= form_tag('/configuration/edit_aws', :remote => true) do %>
+
+            <div id="aws_info" style="color: #ff0000;">
+              <li>
+                Input the your <strong>AWS Credentials</strong>. Make sure that they are <strong>CORRECT!</strong>
+              </li>
+              <li>
+                Input the name you want for <strong>key pair</strong> and <strong>security group</strong> in AWS. Make sure that there is <strong>NO CONFLICT!</strong>
+              </li>
+            </div>
+
+            <table>
+
+              <tr>
+                <td><%= label_tag "AWS Access Key ID", "AWS Access Key ID" %></td>
+                <td><%= text_field_tag "aws_access_key_id", @state['aws_access_key_id'], :size => 60 %></td>
+              </tr>
+              <tr>
+                <td><%= label_tag "AWS Secret Key Access", "AWS Secret Key Access" %></td>
+                <td><%= text_field_tag "aws_secret_access_key", @state['aws_secret_access_key'], :size => 60 %></td>
+              </tr>
+              <tr>
+                <td><%= label_tag "AWS Key Pair and Security Group", "AWS Key Pair and Security Group" %></td>
+                <td><%= text_field_tag "key_pair_and_group", @state['key_pair_name'], :size => 60 %></td>
+              </tr>
+
+            </table>
+
+            <button id="submitAWS" type="submit">Submit</button>
+
+        <% end %>
+
+        <div id="awsCredentialsDialog">
+
+        </div>
+
+      </div>
+  </div>
+
+  <script>
+    $("#configuration_accordion").accordion();
+  </script>
+</div>
+
+
+
+
+
+
+
+
+<div id="tabs-4">
+
+  <% if (@state['chef_server_state'] == 'setup') %>
+
+      <div id="install_opscode">
+        <p>
+          To help users analyze Cassandra database clusters, KCSD also includes a system monitoring tool called DataStax Opscenter.
+          DataStax OpsCenter is a tool for <strong>monitoring</strong> and <strong>administering</strong> Cassandra clusters for <strong>system perspective</strong>
+          via a user-friendly web interface. Click the button below to install OpsCenter.
+        </p>
+
+        <p>
+          NOTICE: OpsCenter supports only Cassandra <strong>1.0.x !!</strong>
+        </p>
+
+        <%= form_tag('/deployment/opscenter') do %>
+            <%= submit_tag "Setup Opscenter", :disable_width => "Please wait...", :confirm => "Are you sure you want to set up OpsCenter" %>
+        <% end %>
+
+      </div>
+
+  <% end %>
+
+</div>
+
+
+
+<div id="tabs-5">
+  <p>
+    KIT Cloud Serving Deployment (KCSD), which is developed by <strong>AIFB, KIT</strong>,
+    is a web based tool to help you easily <strong>manage</strong> and rapidly <strong>deploy</strong>
+    distributed database systems in your cloud infrastructure.
+  </p>
+  <p>
+    With KCSD, you can <strong>concentrate on your work</strong> with the databases, not dealing with setup and configuration.
+    KCSD automates it already for you.
+  </p>
+  <p>
+    However, like any software on the earth, written by human, there may be bugs and issues. Therefore, please read
+    the description below carefully.
+  </p>
+
+  <p>
+    <strong>::::: ARCHITECTURE</strong>
+  </p>
+
+  <p>
+    KCSD consists of <strong>3 main components</strong>
+  </p>
+
+  <p>
+    <strong>KCSD Web Server Component</strong></br>
+    This is the machine where the web application is now running.
+  </p>
+
+  <p>
+    <strong>KCSD Configuration Management Component</strong></br>
+    KCSD uses a dedicated Chef Server to manage the infrastructure. At the first beginning, you don't have any Chef
+    Server. KCSD will create a new one for you.
+  </p>
+
+  <p>
+    <strong>KCSD Infrastructure</strong></br>
+    The infrastructure is machines, on that you will deploy your databases.
+  </p>
+
+  <p>
+    <strong>::::: USAGE</strong>
+  </p>
+
+  <p>
+    For now, KCSD uses AWS EC2 as its infrastructure environment. That means, you will use the <strong>Chef Server and
+    your machines in AWS EC2</strong>. You can <strong>create</strong> machines with your desirable flavor for
+    <strong>machine type</strong> (small, medium, large), <strong>start</strong> and <strong>stop</strong> them.</br>
+    Chef Server is used to manage your infrastructure, for example you write a cook book for your machines, upload
+    to Chef Server and delegate machines to do it. All machines in your infrastructure have to register themselves
+    by Chef Server
+  </p>
+
+  <p>
+    Therefore, if you want to <strong>create machines</strong>, Chef Server <strong>must be ON</strong></br>
+    If you just want to <strong>deploy a database</strong>, Chef Server <strong>can be OFF</strong></br>
+  </p>
+
+  <p>
+    KCSD needs your <strong>AWS Credentials</strong> (in tab Configuration) to perform requests to AWS EC2. Ensure all your credentials
+    are <strong>correct</strong>
+  </p>
+
+  <p>
+    Last but not least, activate <strong>JavaScript</strong> for your browser and mostly dialogs and forms in KCSD request <strong>Ajax calls</strong> to the KCSD Web Server. Thus, please wait for
+    responses. For better use, you can trace the logger with the console. Maybe you can find something strange.
+  </p>
+
+</div>
+
+
+
+
+
+<div id="tabs-6">
+
+  <% if (@state['chef_server_state'] == 'setup') %>
+
+      <div id="reset_yes" style="color: #ff0000;">
+          <p>
+            If you want to reset KCSD, click the Reset button below. KCSD will <strong>reset everything</strong> and back to the fresh state.
+            The following tasks will be executed:
+          </p>
+
+          <p>
+          <li>
+            Delete Chef Server and release the associated elastic IP
+          </li>
+
+          <li>
+            Delete all your machines with their deployed databases
+          </li>
+
+          <li>
+            Delete OpsCenter in KCSD Server if it is installed
+          </li>
+
+          <li>
+            Delete all your configurations, namely AWS Credentials, Private Key
+          </li>
+          </p>
+
+          <%= form_tag('/dashboard/reset') do %>
+            <%= submit_tag "Reset", :disable_width => "Please wait...", :confirm => "Are you sure you want to reset KCSD" %>
+          <% end %>
+
+      </div>
+
+  <% else %>
+
+      <div id="reset_no" style="color: green;">
+
+          You're currently in a <strong>fresh state</strong>. There is nothing to reset.
+      </div>
+
+  <% end %>
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+  <!--jQuery functions-->
+
+  <script>
+      $("#tabs").tabs();
+
+      $("#submitAWS").click(function () {
+          $("#awsCredentialsDialog").dialog({
+              title: "OK. AWS Credentials are already updated. Please ensure they are correct!",
+              show: "slide",
+              hide: "puff",
+              height: "0",
+              resizable: false
+          });
+      });
+
+//      $("#configuration_accordion").accordion();
+  </script>
+
+  <% if (@state['chef_server_state'] == 'not_setup') %>
+      <div id="stateAlertStatusDialog">
+        <div style="color: red;"><%= simple_format(@status) %></div>
+      </div>
+      <script>
+          $("#stateAlertStatusDialog").dialog({
+              title:"Chef Server Status",
+
+              show:"slide",
+              hide:"puff"
+//
+//           buttons : {
+//               'OK' : function(event){
+//                   $(this).height("100");
+//                   $(this).empty();
+//                   $(this).load("/dashboard/setupChefServer");
+//               }
+//           }
+          })
+      </script>
+  <% else %>
+      <div id="stateAlertStatusDialog">
+        <div style="color: green;"><%= simple_format(@status) %></div>
+      </div>
+      <script>
+          $("#stateAlertStatusDialog").dialog({
+              title:"Chef Server Status",
+
+              show:"slide",
+              hide:"puff"
+          })
+      </script>
+  <% end %>
+
+
+
+</div>
+
+<div id="footer">Copyright &copy; | Version 0.7 | 2012 | AIFB | KIT</div>
+</div>
+</body>
+</html>

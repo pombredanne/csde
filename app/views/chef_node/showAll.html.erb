@@ -1,0 +1,47 @@
+<table>
+
+  <thead>
+    <tr>
+      <td style="font-weight: bold;">Instance ID</td>
+      <td style="font-weight: bold;">Public IP</td>
+      <td style="font-weight: bold;">Private IP</td>
+      <td style="font-weight: bold;">AMI</td>
+      <td style="font-weight: bold;">Flavor</td>
+      <td style="font-weight: bold;">State</td>
+    </tr>
+  </thead>
+
+  <tbody>
+
+    <% @info_array.each do |instance| %>
+        <tr>
+          <td><%= instance[0] %></td>
+          <td>
+            <% if (instance[1].nil?) %>
+                &nbsp;
+            <% else  %>
+                <%= instance[1] %>
+            <% end %>
+          </td>
+          <td>
+            <% if (instance[2].nil?) %>
+                &nbsp;
+            <% else  %>
+                <%= instance[2] %>
+            <% end %>
+          </td>
+          <td><%= instance[3] %></td>
+          <td><%= instance[4] %></td>
+          <% if (instance[5] == "running") %>
+              <td style="color: green;"><%= instance[5] %></td>
+          <% elsif (instance[5] == "stopped") %>
+              <td style="color: red;"><%= instance[5] %></td>
+          <% else %>
+              <td><%= instance[5] %></td>
+          <% end %>
+        </tr>
+    <% end %>
+
+  </tbody>
+
+</table>

@@ -1,0 +1,11 @@
+---
+chef_server_state: not_setup
+chef_server_ami: ami-82fa58eb
+chef_server_flavor: m1.large
+chef_server_url: dummy
+chef_server_id: dummy
+chef_server_elastic_ip: dummy
+key_pair_name: dummy
+security_group_name: dummy
+aws_access_key_id: dummy
+aws_secret_access_key: dummy

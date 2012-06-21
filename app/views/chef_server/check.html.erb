@@ -1,0 +1,9 @@
+<% if (@status == "running") %>
+    <div style="color: green;">
+      Chef Server is now <strong><%= @status %></strong>
+    </div>
+<% else %>
+    <div style="color: #ff0000;">
+      Chef Server is now <strong><%= @status %></strong>
+    </div>
+<% end %>
