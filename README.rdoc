@@ -4,9 +4,8 @@
 
 KIT Cloud Serving Deployment and Benchmark (KCSDB), which is currently developed by AIFB(KIT) and FZI, is a web based tool to help you do following tasks
 
-1. rapidly deploy and easily manage distributed database systems in your cloud infrastructure. 
-Now, supported only Cassandra with AWS EC2
-2. automated benchmark the databases with various workload distributions like hotspot, zipfian...
+* rapidly deploy and easily manage distributed database systems in your cloud infrastructure. Now, supported only Cassandra with AWS EC2
+* automated benchmark the databases with various workload distributions like hotspot, zipfian...
  
 With KCSDB, you can concentrate on your work with the databases, not dealing with setup and configuration. KCSD automates it already for you.
 However, like any software on the earth, written by human, there may be bugs and issues. Therefore, please read the description below carefully.
@@ -15,13 +14,13 @@ However, like any software on the earth, written by human, there may be bugs and
   
 KCSDB consists of 3 main components
  
-1. KCSDB Web Server Component
+* KCSDB Web Server Component
 This is the machine where the web application is now running.
   
-2. KCSDB Configuration Management Component
+* KCSDB Configuration Management Component
 KCSD uses a dedicated Chef Server to manage the infrastructure. At the first beginning, you don't have any Chef Server. KCSD will create a new one for you.
     
-3. KCSDB Infrastructure
+* KCSDB Infrastructure
 The infrastructure contains machines, on that you will deploy your databases.
   
 = USAGE:
@@ -31,9 +30,28 @@ Chef Server is used to manage your infrastructure, for example you write a cook 
 All machines in your infrastructure have to register themselves by Chef Server
     
 Therefore, if you want to create machines, Chef Server must be ON
+
 If you just want to deploy a database, Chef Server can be OFF
     
 KCSDB needs your AWS Credentials (in tab Configuration) to perform requests to AWS EC2. Ensure all your credentials are correct
     
 Last but not least, mostly dialogs and forms in KCSDB request Ajax calls to the KCSDB Web Server. Thus, please wait for
 responses. For better use, you can trace the logger with the console. Maybe you can find something strange.
+
+= LICENSE:
+
+Author:: Hoang Anh Le (<me@lehoanganh.de>) | Markus Klems (<Markus.Klems@aifb.uni-karlsruhe.de>)
+Copyright:: Copyright (c) 2012
+License:: Apache License, Version 2.0
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
