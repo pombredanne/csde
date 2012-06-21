@@ -51,6 +51,8 @@ module Helper
   # get AWS credentials from state.yml
   # and create an EC2 object
   # KCSD uses this object to send/receive API requests/responses to EC2
+  # TODO
+  # Garbage Collector in Ruby??
   def create_ec2
     state = get_state
     logger.debug "::: Creating an EC2 object..."

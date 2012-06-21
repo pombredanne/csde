@@ -25,7 +25,7 @@ set -x
 # http://rubygems.org/pages/download
 #
 # --- SPECIFICATIONS ---
-# Ubuntu 12.04. x64 (e.g. ami-82fa58eb from alestic.com). Only x64 works for Chef Server, x86 NOT
+# Ubuntu 11.10. x64 (e.g. ami-4dad7424 from alestic.com). Only x64 works for Chef Server, x86 NOT
 # Rubygems 1.8.24
 # Chef latest
 # 

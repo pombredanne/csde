@@ -1,7 +1,8 @@
 ---
 chef_server_state: not_setup
-chef_server_ami: ami-82fa58eb
+chef_server_ami: ami-4dad7424
 chef_server_flavor: m1.large
+chef_server_ssh_user: ubuntu
 chef_server_url: dummy
 chef_server_id: dummy
 chef_server_elastic_ip: dummy

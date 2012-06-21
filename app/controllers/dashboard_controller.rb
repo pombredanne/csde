@@ -2,113 +2,85 @@ require 'helper'
 class DashboardController < ApplicationController
   include Helper
 
+  # KCSDB starts from here
   def show
     # check if Chef Server is set up or not
     @state = get_state
     if(@state["chef_server_state"] == "not_setup")
       @status = ""
-      @status += ":::::: Chef Server is <strong>not setup</strong> ::::::\n"
-      @status += "\n"
-      @status += "This is the first time you use KCSD, please click on tab <strong>About</strong> to get more information\n"
-      @status += "\n"
-      @status += "After reading, do as follows\n"
-      @status += "\n"
-      @status += "<em>First</em>, click on tab <strong>Configuration</strong>, input your <strong>AWS Credentials</strong>\n"
-      @status += "\n"
-      @status += "<em>Second</em>, click on tab <strong>Infrastructure</strong>, create a <strong>fresh Chef Server</strong>\n"
+      @status << ":::::: Chef Server is <strong>not setup</strong> ::::::\n\n"
+      @status << "This is the first time you use KCSD, please click on tab <strong>About</strong> to get more information\n\n"
+      @status << "After reading, do as follows\n"
+      @status << "<em>First</em>, click on tab <strong>Configuration</strong>, input your <strong>AWS Credentials</strong>\n\n"
+      @status << "<em>Second</em>, click on tab <strong>Infrastructure</strong>, create a <strong>fresh Chef Server</strong>"
     else
       @status = ""
-      @status += ":::::: Chef Server is now <strong>ready</strong> ::::::\n"
-      @status += "\n"
-      @status += "Click on tab <strong>Infrastructure</strong>, then <strong>Check | Start | Stop | Go to Chef Server</strong>\n"
-      @status += "\n"
+      @status += ":::::: Chef Server is now <strong>ready</strong> ::::::\n\n"
+      @status += "Click on tab <strong>Infrastructure</strong>, then <strong>Check | Start | Stop | Go to Chef Server</strong>\n\n"
       @status += "Please ensure that all <strong>AWS credentials</strong> are correct!"
     end
   end
 
-
-  # reset KCSD
+  # reset KCSDB
   def reset
-    # get all machines including Chef Server
-    puts "Get all machines including Chef Server"
-    all = getAll()
-
-    puts "Iterating..."
-    # iterate and terminate
-    all.each do |machine|
-      # machine has elastic IP => Chef Server => Release the elastic IP
-      if(machine.has_elastic_ip?)
-        puts "Deleting the elastic IP..."
-        elastic_ip = machine.elastic_ip()
-        elastic_ip.delete()
+    
+    # initialize
+    machine_array = []
+    ec2 = create_ec2
+    state = get_state
+    knife_config = get_knife_config
+    key_pair_name = state['key_pair_name']
+    elastic_ip = state['chef_server_elastic_ip']
+    
+    logger.debug "::: Getting all machines including Chef Server..."
+    ec2.servers.each do |server|
+      # show all the instances that KCSD manages
+      if server.key_name == key_pair_name
+        # the machine is not terminated
+        if server.state.to_s != "terminated"
+          machine_array << server.id
+        end
       end
-
-      # terminate
-      machine.terminate()
     end
 
-    # update state.yml
-    puts "Updating state.yml..."
-    state = getState()
+    logger.debug "::: Terminating all machines including Chef Server..."
+    ec2.terminate_instances machine_array
+
+    logger.debug "::: Releasing Chef Server's elastic IP..."
+    ec2.release_address elastic_ip
+
     state["chef_server_state"] = "not_setup"
     state["chef_server_url"] = "dummy"
+    state["chef_server_id"] = "dummy"
     state["chef_server_elastic_ip"] = "dummy"
-    state["chef_server_instance_id"] = "dummy"
     state["key_pair_name"] = "dummy"
-    state["security_group"] = "dummy"
+    state["security_group_name"] = "dummy"
     state["aws_access_key_id"] = "dummy"
     state["aws_secret_access_key"] = "dummy"
-    updateState(state)
+    update_state state
 
-    # update knife.yml
-    puts "Updating knife.yml..."
-    state = getStateKnife()
-    state["chef_server_url"] = "dummy"
-    state["node_name"] = "dummy"
-    state["client_key"] = "dummy"
-    state["validation_client_name"] = "dummy"
-    state["validation_key"] = "dummy"
-    state["cookbook_path"] = "dummy"
-    state['knife[:aws_ssh_key_id]'] = "dummy"
-    state['knife[:identify_file]'] = "dummy"
-    state['knife[:ssh_user]'] = "dummy"
-    state['knife[:security_groups]'] = "dummy"
-    state['knife[:aws_access_key_id]'] = "dummy"
-    state['knife[:aws_secret_access_key]'] = "dummy"
-    updateStateKnife(state)
+    knife_config["chef_server_url"] = "dummy"
+    knife_config["node_name"] = "dummy"
+    knife_config["client_key"] = "dummy"
+    knife_config["validation_client_name"] = "dummy"
+    knife_config["validation_key"] = "dummy"
+    knife_config["cookbook_path"] = "dummy"
+    knife_config['knife[:aws_access_key_id]'] = "dummy"
+    knife_config['knife[:aws_secret_access_key]'] = "dummy"
+    knife_config['knife[:aws_ssh_key_id]'] = "dummy"
+    knife_config['knife[:identify_file]'] = "dummy"
+    knife_config['knife[:ssh_user]'] = "dummy"
+    knife_config['knife[:security_groups]'] = "dummy"
+    update_knife_config knife_config
 
-    # delete all private key
-    puts "Deleting all pem files..."
-    system "rm #{Rails.root}/chef-repo/.chef/pem/*"
+    logger.debug "::: Deleting all pem files..."
+    system "rm #{Rails.root}/chef-repo/.chef/pem/*pem"
 
     # delete opscenter if installed in KCSD Server
+    logger.debug "::: Deleting OpsCenter in KCSD Server if exist..."
     system "if [ -e $HOME/opscenter ]; then rm -rf $HOME/opscenter; fi"
 
-    # done, back to dashboard
-    puts "Reset done [OK]"
+    logger.debug "Reset done [OK]"
     redirect_to "/"
   end
-
-
-
-
-  # return the machines including Chef Server that KCSD manages in an array
-  private
-  def getAll
-    machine_array = []
-    state = getState()
-    key_pair_name = state["key_pair_name"]
-    ec2 = init()
-    ec2.instances.each do |instance|
-      # show all the instances that KCSD manages
-      if (instance.key_name == key_pair_name)
-        # the machine is not terminated
-          if (instance.status != :terminated)
-            machine_array << instance
-          end
-      end
-    end
-    return machine_array
-  end
-
 end

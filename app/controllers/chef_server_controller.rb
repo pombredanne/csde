@@ -14,6 +14,7 @@ class ChefServerController < ApplicationController
     security_group_name = state['security_group_name']
     chef_server_ami = state['chef_server_ami']
     chef_server_flavor = state['chef_serve_flavor']
+    ec2_user = state['chef_server_ssh_user']
 
     logger.debug "============================"
     logger.debug "Setting up a new Chef Server"
@@ -126,10 +127,6 @@ class ChefServerController < ApplicationController
       file << "\t" << "StrictHostKeyChecking no" << "\n"
     end
     
-    # the user to log in the machine
-    # TODO
-    # now, the user is hard coded, because KCSD use AMIs provided by Cannonical
-    ec2_user = "ubuntu"
     logger.debug "::: User login to the machine: #{ec2_user}"
 
     logger.debug "::: Uploading bootstrap scripts to machine: #{chef_server_id}..."
@@ -168,134 +165,103 @@ class ChefServerController < ApplicationController
     knife_config["cookbook_path"] = "#{Rails.root}/chef-repo/cookbooks"
     knife_config['knife[:aws_ssh_key_id]'] = "#{key_pair_name}"
     knife_config['knife[:identify_file]'] = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"
-    knife_config['knife[:ssh_user]'] = "#{ec2_user}"
     knife_config['knife[:security_groups]'] = "#{security_group_name}"
     update_knife_config knife_config
 
-    @status += "Thank you for waiting :)\n\n"
-    @status += "Your Chef Server is already <strong>set up</strong>\n\n"
-    @status += "Please <strong>refresh</strong> the page\n\n"
-    @status += "You can go the Chef Server by clicking <strong>Go to Chef Server</strong>"
+    @status << "Thank you for waiting :)\n\n"
+    @status << "Your Chef Server is already <strong>set up</strong>\n\n"
+    @status << "Please <strong>refresh</strong> the page\n\n"
+    @status << "You can go the Chef Server by clicking <strong>Go to Chef Server</strong>"
     
     logger.debug "::: The installation of a new fresh Chef Server takes #{Time.now - beginning} seconds"
   end
 
-
-
-
-
+  # check the chef server's state
   def check
-    chef_server_instance = getChef()
-    @status = chef_server_instance.status.to_s
-    return @status
+    chef_server = get_chef
+    @status = chef_server.state.to_s
+    @status
   end
 
-
-
-
-
-
+  # start chef server
   def start
-    state = getState()
-    stateKnife = getStateKnife()
-    chef_server_instance = getChef()
+    # initialize
+    ec2 = create_ec2
+    state = get_state
+    chef_server_id = state['chef_server_id']
+    elastic_ip = state['chef_server_elastic_ip']
+    ssh_user = state['chef_server_ssh_user']
+    key_pair_name = state['key_pair_name']
+    identity_file = File.expand_path "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"
+    @status = ""
 
-    if(chef_server_instance.status != :stopped)
-      @status = "Chef Server now is <strong>#{chef_server_instance.status}</strong> and not in the state that can be started. Please try again later!"
+    # get the chef server
+    chef_server = ec2.servers.get chef_server_id
+
+    if chef_server.state.to_s != "stopped"
+      logger.debug "::: Chef Server is now #{chef_server.state.to_s} and not in the state that can be started."
+      logger.debug "::: Please, try again later!"
+      @status << "Chef Server now is <strong>#{chef_server.state.to_s}</strong> and not in the state that can be started. Please try again later!"
     else
-      chef_server_instance.start
+      logger.debug "::: Starting Chef Server..."
+      chef_server.start
 
-      # until chef server instance is NOT pending any more
-      # than associate with the given elastic IP read from knife.rb
-      puts "Please wait another moment, the Chef Server is now pending..."
-      sleep 1 until chef_server_instance.status != :pending
+      logger.debug "::: Waiting for Chef Server: #{chef_server.id}..."
+      chef_server.wait_for { print "."; ready? }
+      puts "\n"
+      logger.debug "::: Chef Server: #{chef_server.id} is ready [OK]"
 
-      puts "Assigning elastic ip..."
-      chef_server_instance.associate_elastic_ip(state["chef_server_elastic_ip"])
-      sleep 10
-      # until chef server instance has an elastic ip
-      # than invoke task rabbitmq to add a new "chef" user in vhost "/chef" in RabbitMQ in Chef Server
-      #sleep 1 until chef_server_instance.elastic_ip.nil? == false
+      logger.debug "::: Assinging the elastic IP: #{elastic_ip} to Chef Server: #{chef_server.id}..."    
+      ec2.associate_address(chef_server.id, elastic_ip)
+      logger.debug "::: The elastic IP: #{elastic_ip} is assigned to Chef Server: #{chef_server.id} [OK]"
 
-      # preparation
-      identity_file = stateKnife['knife[:identify_file]']
-      ssh_user = stateKnife['knife[:ssh_user]']
-      elastic_ip = state['chef_server_elastic_ip']
-
-      #delete old stuff of ssh
-      system "if [ -e $HOME/.ssh/known_hosts ]; then rm $HOME/.ssh/known_hosts; fi"
-
-      # ping
-      system "while ! ssh -o StrictHostKeyChecking=no -i #{identity_file} #{ssh_user}@#{elastic_ip} true; do echo -n .; sleep .5; done"
-
-      # adding new user "chef" in vhost "/chef" to Chef Server
-      # run the script
-      system "ssh -i #{identity_file} #{ssh_user}@#{elastic_ip} 'sudo bash start_chef_conf.sh'"
-
-      @status = "Chef Server is now <strong>running</strong>...\n"
-      @status += "\n"
-      @status += "Please wait a while to go to Chef Server Web UI by clicking <strong>Go to Chef Server</strong>"
-
+      logger.debug "::: Checking if sshd in Chef Server: #{chef_server.id} is ready, please wait..."
+      print "." until tcp_test_ssh(elastic_ip) { sleep 1 }
+      logger.debug "::: SSHD in Chef Server: #{chef_server.id} with IP: #{elastic_ip} [OK]"
+      
+      logger.debug "::: Executing start script in Chef Server..."
+      system "ssh -i #{identity_file} #{ssh_user}@#{elastic_ip} 'sudo bash start_chef.sh'"
+      
+      logger.debug "::: Chef Server is now running..."
+      logger.debug "::: Please wait a while to go to Chef Server WebUI"
+      @status << "Chef Server is now <strong>running</strong>...\n\n"
+      @status << "Please wait a while to go to Chef Server Web UI by clicking <strong>Go to Chef Server</strong>"
     end
   end
 
-
-
-
-
-
+  # stop chef server
   def stop
-    state = getState()
-    stateKnife = getStateKnife()
-    chef_server_instance = getChef()
+    # initialize
+    ec2 = create_ec2
+    state = get_state
+    chef_server_id = state['chef_server_id']
+    elastic_ip = state['chef_server_elastic_ip']
+    ssh_user = state['chef_server_ssh_user']
+    key_pair_name = state['key_pair_name']
+    identity_file = File.expand_path "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"
+    @status = ""
 
-    if(chef_server_instance.status != :running)
-      @status = "Chef Server now is <strong>#{chef_server_instance.status.to_s}</strong> and not in the state that can be stopped. Please try again later"
+    # get the chef server
+    chef_server = ec2.servers.get chef_server_id
+
+    if chef_server.state.to_s != "running"
+      logger.debug "::: Chef Server is now #{chef_server.state.to_s} and not in the state that can be stopped."
+      logger.debug "::: Please try again later!"
+      @status << "Chef Server now is <strong>#{chef_server.state.to_s}</strong> and not in the state that can be stopped. Please try again later"
     else
+      logger.debug "::: Executing stop script in Chef Server..."
+      system "ssh -i #{identity_file} #{ssh_user}@#{elastic_ip} 'sudo bash stop_chef.sh'"
 
-      # preparation
-      identity_file = stateKnife['knife[:identify_file]']
-      ssh_user = stateKnife['knife[:ssh_user]']
-      elastic_ip = state['chef_server_elastic_ip']
+      logger.debug "::: Stopping Chef Server..."
+      chef_server.stop
 
-      #delete old stuff of ssh
-      system "if [ -e $HOME/.ssh/known_hosts ]; then rm $HOME/.ssh/known_hosts; fi"
-
-      # ping
-      system "while ! ssh -o StrictHostKeyChecking=no -i #{identity_file} #{ssh_user}@#{elastic_ip} true; do echo -n .; sleep .5; done"
-
-      # run the script
-      system "ssh -i #{identity_file} #{ssh_user}@#{elastic_ip} 'sudo bash stop_chef_conf.sh'"
-
-      chef_server_instance.stop()
-      sleep(1) until chef_server_instance.status != :stopping
-
-      @status = "Chef Server is now <strong>stopped</strong>!"
+      @status << "Chef Server is now <strong>stopped</strong>!"
     end
   end
 
-
-
-
-
+  # go to Chef Server WebUI
   def go_to
     state = get_state
     redirect_to "http://#{state['chef_server_elastic_ip']}:4040"
-  end
-
-
-
-
-
-
-  private
-  def getChef
-    state = getState()
-    ec2 = init()
-
-    chef_server_instance_id = state["chef_server_instance_id"]
-    chef_server_instance = ec2.instances[chef_server_instance_id]
-
-    return chef_server_instance
   end
 end

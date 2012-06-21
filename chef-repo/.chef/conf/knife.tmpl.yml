@@ -11,6 +11,6 @@ knife[:region]: us-east-1
 knife[:aws_ssh_key_id]: dummy
 knife[:flavor]: m1.small
 knife[:image]: ami-a09c46c9
+knife[:ssh_user]: ubuntu
 knife[:identify_file]: dummy
-knife[:ssh_user]: dummy
 knife[:security_groups]: dummy
