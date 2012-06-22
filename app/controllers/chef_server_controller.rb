@@ -101,8 +101,8 @@ class ChefServerController < ApplicationController
       groups: security_group_name
     }
     chef_server = ec2.servers.create chef_server_def
-
-    #TODO Tag
+    logger.debug "::: Adding tag KCSDB Chef Server..."
+    ec2.tags.create :key => "Name", :value => "KCSDB Chef Server", :resource_id => chef_server.id
 
     logger.debug "::: Waiting for machine: #{chef_server.id}..."
     chef_server.wait_for { print "."; ready? }
@@ -222,7 +222,7 @@ class ChefServerController < ApplicationController
       ec2.associate_address(chef_server_id, chef_server_elastic_ip)
       logger.debug "::: Assinging the elastic IP: #{chef_server_elastic_ip} to Chef Server: #{chef_server_id}... [OK]"
       
-      print "." until tcp_test_ssh(elastic_ip) { sleep 1 }
+      print "." until tcp_test_ssh(chef_server_elastic_ip) { sleep 1 }
       
       logger.debug "::: Executing start script in Chef Server..."
       system "ssh -i #{chef_server_identity_file} #{chef_server_ssh_user}@#{chef_server_elastic_ip} 'sudo bash start_chef.sh'"
