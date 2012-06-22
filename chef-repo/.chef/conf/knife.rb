@@ -1,0 +1,6 @@
+chef_server_url 'http://50.17.226.9:4000'
+node_name 'chef-webui'
+client_key '/home/lha/Dev/git/kcsd/chef-repo/.chef/pem/webui.pem'
+validation_client_name 'chef-validator'
+validation_key '/home/lha/Dev/git/kcsd/chef-repo/.chef/pem/validation.pem'
+cookbook_path '/home/lha/Dev/git/kcsd/chef-repo/cookbooks'

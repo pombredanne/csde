@@ -6,15 +6,14 @@ class ChefServerController < ApplicationController
   def setup
     # INITIALIZE
     beginning = Time.now
-    @status = "" # for view
-    state = get_state
-    knife_config = get_knife_config
+    @status = ""
     ec2 = create_ec2
+    state = get_state
     key_pair_name = state['key_pair_name']
     security_group_name = state['security_group_name']
     chef_server_ami = state['chef_server_ami']
-    chef_server_flavor = state['chef_serve_flavor']
-    ec2_user = state['chef_server_ssh_user']
+    chef_server_flavor = state['chef_server_flavor']
+    chef_server_ssh_user = state['chef_server_ssh_user']
 
     logger.debug "============================"
     logger.debug "Setting up a new Chef Server"
@@ -28,35 +27,39 @@ class ChefServerController < ApplicationController
     
     # the public key in EC2 with given name and the private key in KCSD Server have to exist
     if  (File.exist? private_key_path) && (! ec2.key_pairs.get(key_pair_name).nil?)
-      logger.debug "::: The private key #{key_pair_name}.pem in KCSD Web Server: [OK]"
+      logger.debug "::: The private key #{key_pair_name}.pem in KCSDB Web Server: [OK]"
       logger.debug "::: The public key #{key_pair_name} in AWS EC2: [OK]"
     else
       logger.debug "::: Something wrong with the key pair..."
       logger.debug "::: That means, at least one of two following problems happens:"
-      logger.debug "::: 1. The private key does NOT exist in KCSD Web Server"
+      logger.debug "::: 1. The private key does NOT exist in KCSDB Web Server"
       logger.debug "::: 2. The public key does NOT exist in AWS EC2"
       if File.exist? private_key_path
-        logger.debug "::: Deleting the private key in KCSD Server..."
+        logger.debug "::: Deleting the private key in KCSDB Server..."
         File.delete private_key_path
+        logger.debug "::: Deleting the private key in KCSDB Server... [OK]"
       end
       if ! ec2.key_pairs.get(key_pair_name).nil?
         logger.debug "::: Deleting the public key in AWS EC2..."
         ec2.delete_key_pair key_pair_name
+        logger.debug "::: Deleting the public key in AWS EC2... [OK]"
       end
 
       logger.debug "::: Creating a new key pair..."
       key_pair = ec2.create_key_pair key_pair_name
+      logger.debug "::: Creating a new key pair... [OK]"
 
       logger.debug "::: Saving #{key_pair_name}.pem..."
       private_key = key_pair.body['keyMaterial']
-      # write in file      
       File.open(private_key_path,'w') {|file| file << private_key}
+      logger.debug "::: Saving #{key_pair_name}.pem... [OK]"
 
       # only user can read/write
       logger.debug "::: Setting mode 600 for the #{key_pair_name}.pem..."
       File.chmod(0600,private_key_path)
+      logger.debug "::: Setting mode 600 for the #{key_pair_name}.pem... [OK]"
       
-      logger.debug "::: The private key #{key_pair_name}.pem in KCSD Web Server: [OK]"
+      logger.debug "::: The private key #{key_pair_name}.pem in KCSDB Web Server: [OK]"
       logger.debug "::: The public key #{key_pair_name} in AWS EC2: [OK]"
     end
 
@@ -76,44 +79,47 @@ class ChefServerController < ApplicationController
       # logger.debug "::: Opening ALL ports from ALL sources for TCP and UDP..."
       group = ec2.security_groups.get security_group_name
       group.authorize_port_range(0..65535)
+      logger.debug "::: Creating a new security group #{security_group_name} in AWS EC2... [OK]"
       
       logger.debug "::: The security group #{security_group_name} in AWS EC2: [OK]"
     end
     
-    logger.debug "=================================="
-    logger.debug "Lauchning a new machine in AWS EC2"
-    logger.debug "=================================="
+    logger.debug "==================================="
+    logger.debug "Launchning a new machine in AWS EC2"
+    logger.debug "==================================="
     
-    logger.debug "::: Now, lauching a new machine using AMI: #{chef_server_ami}..."
+    logger.debug "::: Now, launching a new machine with following configurations..."
+    logger.debug "::: AMI: #{chef_server_ami}"
+    logger.debug "::: Flavor: #{chef_server_flavor}"
+    logger.debug "::: SSH User: #{chef_server_ssh_user}"
+    logger.debug "::: Key Pair: #{key_pair_name}"
+    logger.debug "::: Security Group: #{security_group_name}"
     chef_server_def = {
       image_id: chef_server_ami,
       flavor_id: chef_server_flavor,
-      groups: security_group_name,
-      key_name: key_pair_name
+      key_name: key_pair_name,
+      groups: security_group_name
     }
-    chef_server = ec2.servers.create(chef_server_def)
-    chef_server_id = chef_server.id
+    chef_server = ec2.servers.create chef_server_def
 
-    logger.debug "::: Waiting for machine: #{chef_server_id}..."
+    logger.debug "::: Waiting for machine: #{chef_server.id}..."
     chef_server.wait_for { print "."; ready? }
     puts "\n"
-    logger.debug "::: The machine: #{chef_server_id} is ready [OK]"
+    logger.debug "::: Waiting for machine: #{chef_server.id}... [OK]"
 
     logger.debug "::: Allocating an elastic IP from AWS EC2..."
     elastic_address = ec2.allocate_address
     elastic_ip = elastic_address.body['publicIp']
-    logger.debug "::: The new elastic IP: #{elastic_ip} is allocated in EC2 [OK]"
+    logger.debug "::: Allocating an elastic IP from AWS EC2... [OK]"
 
-    logger.debug "::: Assinging the newly allocated elastic IP: #{elastic_ip} to machine: #{chef_server_id}..."    
-    ec2.associate_address(chef_server_id, elastic_ip)
-    logger.debug "::: The new elastic IP: #{elastic_ip} is assigned to machine: #{chef_server_id} [OK]"
+    logger.debug "::: Assinging the newly allocated elastic IP: #{elastic_ip} to machine: #{chef_server.id}..."    
+    ec2.associate_address(chef_server.id, elastic_ip)
+    logger.debug "::: Assinging the newly allocated elastic IP: #{elastic_ip} to machine: #{chef_server.id}... [OK]"
     
-    logger.debug "::: Checking if sshd in machine: #{chef_server_id} is ready, please wait..."
-    print(".") until tcp_test_ssh(elastic_ip) {sleep 1}
-    logger.debug "::: SSHD in machine: #{chef_server_id} with IP: #{elastic_ip} [OK]"
+    print "." until tcp_test_ssh(elastic_ip) { sleep 1 }
 
     logger.debug "===================================================="
-    logger.debug "Installing Chef Server in machine: #{chef_server_id}"
+    logger.debug "Installing Chef Server in machine: #{chef_server.id}"
     logger.debug "===================================================="
 
     # ssh stuff    
@@ -126,47 +132,44 @@ class ChefServerController < ApplicationController
       file << "Host #{elastic_ip}" << "\n"
       file << "\t" << "StrictHostKeyChecking no" << "\n"
     end
+
+    logger.debug "::: Uploading a bootstrap script to machine: #{chef_server.id}..."
+    system "scp -i #{private_key_path} #{Rails.root}/chef-repo/.chef/sh/* #{chef_server_ssh_user}@#{elastic_ip}:/home/#{chef_server_ssh_user}"
+    logger.debug "::: Uploading a bootstrap script to machine: #{chef_server.id}... [OK]"
+
+    logger.debug "::: Executing the bootstrap script..."
+    system "ssh -i #{private_key_path} #{chef_server_ssh_user}@#{elastic_ip} 'sudo bash bootstrap.sh'"
+    logger.debug "::: Executing the bootstrap script... [OK]"
     
-    logger.debug "::: User login to the machine: #{ec2_user}"
-
-    logger.debug "::: Uploading bootstrap scripts to machine: #{chef_server_id}..."
-    system "scp -i #{private_key_path} #{Rails.root}/chef-repo/.chef/sh/*.sh #{ec2_user}@#{elastic_ip}:/home/#{ec2_user}"
-    logger.debug "::: Upload script [OK]"
-
-    logger.debug "::: Executing bootstrap scripts..."
-    system "ssh -i #{private_key_path} #{ec2_user}@#{elastic_ip} 'sudo bash bootstrap.sh'"
-    logger.debug "::: Execute script [OK]"
-
     logger.debug "::: Downloading webui.pem and validation.pem..."
-    system "scp -i #{private_key_path} #{ec2_user}@#{elastic_ip}:/home/#{ec2_user}/.chef/*pem #{Rails.root}/chef-repo/.chef/pem"
-    logger.debug "::: Download pem files [OK]"
+    system "scp -i #{private_key_path} #{chef_server_ssh_user}@#{elastic_ip}:/home/#{chef_server_ssh_user}/.chef/*pem #{Rails.root}/chef-repo/.chef/pem"
+    logger.debug "::: Downloading webui.pem and validation.pem... [OK]"
 
-    logger.debug "======================================"
-    logger.debug "Updating configurations in KCSD Server"
-    logger.debug "======================================"
+    logger.debug "======================================="
+    logger.debug "Updating configurations in KCSDB Server"
+    logger.debug "======================================="
     
-    state["chef_server_state"] = "setup"
-    state["chef_server_url"] = "http://#{elastic_ip}:4000"
-    state["chef_server_elastic_ip"] = "#{elastic_ip}"
-    state["chef_server_id"] = "#{chef_server_id}"
-    state["key_pair_name"] = "#{key_pair_name}"
-    state["security_group_name"] = "#{security_group_name}"
+    state['chef_server_state'] = 'setup'
+    state['chef_server_id'] = chef_server.id
+    state['chef_server_elastic_ip'] = elastic_ip
+    state['chef_client_identity_file'] = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"
+    state['chef_client_template_file'] = "#{Rails.root}/chef-repo/bootstrap/ubuntu12.04-gems.erb"
     update_state state
 
     # TODO
     # KCSD Server uses P2P protocol to distribute binaries code among the machines
     # And they must exist in the same region that KCSD exists
-    # Now only us-east-1
-    knife_config["chef_server_url"] = "http://#{elastic_ip}:4000"
-    knife_config["node_name"] = "chef-webui"
-    knife_config["client_key"] = "#{Rails.root}/chef-repo/.chef/pem/webui.pem"
-    knife_config["validation_client_name"] = "chef-validator"
-    knife_config["validation_key"] = "#{Rails.root}/chef-repo/.chef/pem/validation.pem"
-    knife_config["cookbook_path"] = "#{Rails.root}/chef-repo/cookbooks"
-    knife_config['knife[:aws_ssh_key_id]'] = "#{key_pair_name}"
-    knife_config['knife[:identify_file]'] = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"
-    knife_config['knife[:security_groups]'] = "#{security_group_name}"
-    update_knife_config knife_config
+    # Now only us-east-1    
+    logger.debug "::: Updating knife.rb..."
+    File.open("#{Rails.root}/chef-repo/.chef/conf/knife.rb",'w') do |file|
+      file << "chef_server_url \'http://#{elastic_ip}:4000\'" << "\n"
+      file << "node_name \'chef-webui\'" << "\n"
+      file << "client_key \'#{Rails.root}/chef-repo/.chef/pem/webui.pem\'" << "\n"
+      file << "validation_client_name \'chef-validator\'" << "\n"
+      file << "validation_key \'#{Rails.root}/chef-repo/.chef/pem/validation.pem\'" << "\n"
+      file << "cookbook_path \'#{Rails.root}/chef-repo/cookbooks\'"   
+    end
+    logger.debug "::: Updating knife.rb... [OK]"
 
     @status << "Thank you for waiting :)\n\n"
     @status << "Your Chef Server is already <strong>set up</strong>\n\n"
@@ -178,8 +181,11 @@ class ChefServerController < ApplicationController
 
   # check the chef server's state
   def check
-    chef_server = get_chef
-    @status = chef_server.state.to_s
+    # initialize
+    ec2 = create_ec2
+    state = get_state
+    chef_server_id = state['chef_server_id']
+    @status = ec2.servers.get(chef_server_id).state.to_s 
     @status
   end
 
@@ -189,10 +195,9 @@ class ChefServerController < ApplicationController
     ec2 = create_ec2
     state = get_state
     chef_server_id = state['chef_server_id']
-    elastic_ip = state['chef_server_elastic_ip']
-    ssh_user = state['chef_server_ssh_user']
-    key_pair_name = state['key_pair_name']
-    identity_file = File.expand_path "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"
+    chef_server_elastic_ip = state['chef_server_elastic_ip']
+    chef_server_ssh_user = state['chef_server_ssh_user']
+    chef_server_identity_file = state['chef_client_identity_file']
     @status = ""
 
     # get the chef server
@@ -206,21 +211,20 @@ class ChefServerController < ApplicationController
       logger.debug "::: Starting Chef Server..."
       chef_server.start
 
-      logger.debug "::: Waiting for Chef Server: #{chef_server.id}..."
+      logger.debug "::: Waiting for Chef Server: #{chef_server_id}..."
       chef_server.wait_for { print "."; ready? }
       puts "\n"
-      logger.debug "::: Chef Server: #{chef_server.id} is ready [OK]"
+      logger.debug "::: Waiting for Chef Server: #{chef_server_id}... [OK]"
 
-      logger.debug "::: Assinging the elastic IP: #{elastic_ip} to Chef Server: #{chef_server.id}..."    
-      ec2.associate_address(chef_server.id, elastic_ip)
-      logger.debug "::: The elastic IP: #{elastic_ip} is assigned to Chef Server: #{chef_server.id} [OK]"
-
-      logger.debug "::: Checking if sshd in Chef Server: #{chef_server.id} is ready, please wait..."
+      logger.debug "::: Assinging the elastic IP: #{chef_server_elastic_ip} to Chef Server: #{chef_server_id}..."    
+      ec2.associate_address(chef_server_id, chef_server_elastic_ip)
+      logger.debug "::: Assinging the elastic IP: #{chef_server_elastic_ip} to Chef Server: #{chef_server_id}... [OK]"
+      
       print "." until tcp_test_ssh(elastic_ip) { sleep 1 }
-      logger.debug "::: SSHD in Chef Server: #{chef_server.id} with IP: #{elastic_ip} [OK]"
       
       logger.debug "::: Executing start script in Chef Server..."
-      system "ssh -i #{identity_file} #{ssh_user}@#{elastic_ip} 'sudo bash start_chef.sh'"
+      system "ssh -i #{chef_server_identity_file} #{chef_server_ssh_user}@#{chef_server_elastic_ip} 'sudo bash start_chef.sh'"
+      logger.debug "::: Executing start script in Chef Server... [OK]"
       
       logger.debug "::: Chef Server is now running..."
       logger.debug "::: Please wait a while to go to Chef Server WebUI"
@@ -235,10 +239,9 @@ class ChefServerController < ApplicationController
     ec2 = create_ec2
     state = get_state
     chef_server_id = state['chef_server_id']
-    elastic_ip = state['chef_server_elastic_ip']
-    ssh_user = state['chef_server_ssh_user']
-    key_pair_name = state['key_pair_name']
-    identity_file = File.expand_path "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"
+    chef_server_elastic_ip = state['chef_server_elastic_ip']
+    chef_server_ssh_user = state['chef_server_ssh_user']
+    chef_server_identity_file = state['chef_client_identity_file']
     @status = ""
 
     # get the chef server
@@ -250,7 +253,8 @@ class ChefServerController < ApplicationController
       @status << "Chef Server now is <strong>#{chef_server.state.to_s}</strong> and not in the state that can be stopped. Please try again later"
     else
       logger.debug "::: Executing stop script in Chef Server..."
-      system "ssh -i #{identity_file} #{ssh_user}@#{elastic_ip} 'sudo bash stop_chef.sh'"
+      system "ssh -i #{chef_server_identity_file} #{chef_server_ssh_user}@#{chef_server_elastic_ip} 'sudo bash stop_chef.sh'"
+      logger.debug "::: Executing stop script in Chef Server... [OK]"
 
       logger.debug "::: Stopping Chef Server..."
       chef_server.stop

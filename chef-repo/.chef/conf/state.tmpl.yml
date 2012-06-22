@@ -1,12 +1,21 @@
----
-chef_server_state: not_setup
-chef_server_ami: ami-4dad7424
-chef_server_flavor: m1.large
-chef_server_ssh_user: ubuntu
-chef_server_url: dummy
-chef_server_id: dummy
-chef_server_elastic_ip: dummy
-key_pair_name: dummy
-security_group_name: dummy
-aws_access_key_id: dummy
-aws_secret_access_key: dummy
+# AWS EC2
+aws_access_key_id: dummy # AWS Credentials
+aws_secret_access_key: dummy # AWS Credentials
+region: us-east-1 # Where Chef Server and Chef Clients will be launched
+key_pair_name: dummy # Key Pair in AWS EC2
+security_group_name: dummy # Security Group in AWS EC2
+
+# Chef Server
+chef_server_state: not_setup # Trigger setup | not_setup
+chef_server_ami: ami-4dad7424 # Cannonical AMI 11.10 x64
+chef_server_flavor: m1.large # Machine Type
+chef_server_ssh_user: ubuntu # SSH Login User
+chef_server_id: dummy # Instance ID in AWS EC2
+chef_server_elastic_ip: dummy # Elastic IP which is assigned to Chef Server
+
+# Chef Client
+chef_client_ami: ami-82fa58eb # Cannonical AMI Ubuntu 12.04 x64
+chef_client_flavor: m1.small # Machine Type
+chef_client_ssh_user: ubuntu # SSH Login User
+chef_client_identity_file: dummy # Full path to SSH Private Key File  
+chef_client_template_file: dummy # Full path to template file for Knife Bootstrap

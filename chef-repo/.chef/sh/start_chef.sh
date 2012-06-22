@@ -11,5 +11,5 @@ set -x
 
 /etc/init.d/chef-server start
 rabbitmqctl add_vhost /chef
-rabbitmqctl add_user chef kcsd
+rabbitmqctl add_user chef testing
 rabbitmqctl set_permissions -p /chef chef '.*' '.*' '.*'

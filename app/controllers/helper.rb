@@ -5,44 +5,24 @@ module Helper
   
   # ============================================================ #
   # state.yml contains all related information for KCSD
-  # KCSD stores data in files such as state.yml, not in database 
+  # KCSDB stores data in files such as state.yml, not in database 
   # ============================================================ #
   
   # return state as a YAML object
   def get_state
     logger.debug "::: Loading state.yml..."
     state = YAML.load(File.open("#{Rails.root}/chef-repo/.chef/conf/state.yml"))
+    logger.debug "::: Loading state.yml... [OK]"
     state
   end
-
-
 
   # update state.yml
   # input as a YAML object
   def update_state state
     logger.debug "::: Updating state.yml..."
     File.open("#{Rails.root}/chef-repo/.chef/conf/state.yml","w") {|file| YAML.dump(state,file)}
+    logger.debug "::: Updating state.yml... [OK]"
   end
-
-
-
-  # return knife_config as a YAML object
-  def get_knife_config
-    logger.debug "::: Loading knife.yml..."
-    knife_config = YAML.load(File.open("#{Rails.root}/chef-repo/.chef/conf/knife.yml"))
-    knife_config
-  end
-
-
-
-  # update knife.yml
-  # input as a YAML object
-  def update_knife_config knife_config
-    logger.debug "::: Updating knife.yml..."
-    File.open("#{Rails.root}/chef-repo/.chef/conf/knife.yml","w") {|file| YAML.dump(knife_config,file)}
-  end
-
-
 
   # ============================================================ #
   # EC2 
@@ -50,26 +30,19 @@ module Helper
   
   # get AWS credentials from state.yml
   # and create an EC2 object
-  # KCSD uses this object to send/receive API requests/responses to EC2
-  # TODO
-  # Garbage Collector in Ruby??
+  # KCSDB uses this object to send/receive API requests/responses to EC2
+  # TODO: Garbage Collector in Ruby??
   def create_ec2
     state = get_state
+
     logger.debug "::: Creating an EC2 object..."
-    
-    # aws-sdk way
-    # ec2 = AWS::EC2.new(
-      # :access_key_id => state['aws_access_key_id'],
-      # :secret_access_key => state['aws_secret_access_key']
-    # )
-    
-    # fog way
     ec2 = Fog::Compute.new(
       provider: 'AWS',
       aws_access_key_id: state['aws_access_key_id'],
       aws_secret_access_key: state['aws_secret_access_key'],
-      region: 'us-east-1' # TODO, region is now hard coded
+      region: state['region']
     )
+    logger.debug "::: Creating an EC2 object... [OK]"
     ec2
   end
   
@@ -77,10 +50,11 @@ module Helper
   # code reused from knife-ec2 plugin
   # https://github.com/opscode/knife-ec2/blob/master/lib/chef/knife/ec2_server_create.rb
   def tcp_test_ssh hostname
+    logger.debug "::: Checking sshd in #{hostname}, please wait..."
     tcp_socket = TCPSocket.new(hostname, 22)
     readable = IO.select([tcp_socket], nil, nil, 5)
     if readable
-      logger.debug("::: sshd accepting connections on #{hostname}, banner is #{tcp_socket.gets}")
+      logger.debug "::: Checking sshd in #{hostname}, please wait... [OK]"
     yield
     true
     else

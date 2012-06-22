@@ -138,8 +138,34 @@ class ChefNodeController < ApplicationController
   # 1. provision new machines in EC2
   # 2. knife bootstrap these machines
   def create
+    
+    # Knife Bootstrap
+    logger.debug "::: Loading Knife Bootstrap..."
+    Chef::Knife::Bootstrap.load_deps
+    
+    number = params[:number_create].to_i
+    logger.debug "::: Creating #{number} machine(s)..."
 
-	# TEST
+    flavor = ""
+    if params[:flavor_create] == "small_create"
+      flavor = "m1.small"
+    elsif params[:number_create] == "medium_create"
+      flavor = "m1.medium"
+    else
+      flavor = "m1.large"  
+    end
+    logger.debug "::: Flavor: #{flavor} selected..."
+    
+    number.times do
+      logger.debug "::: [!] Launching machine..."
+      Thread.new { create_server }
+    end
+    
+    # parallel bootstrap
+    Thread.list.each { |thread| thread.join if thread != Thread.main }
+
+=begin
+	  # TEST
     ec2 = init()
 
     stateKnife = getStateKnife()
@@ -221,20 +247,20 @@ class ChefNodeController < ApplicationController
       #system "knife ec2 server create -c #{knife_rb_dummy} --identity-file #{identity_file} --ssh-user #{ssh_user} --groups #{security_groups} --verbose"
     #end
 
-	# TEST
-	threads = []
-	image = ec2.images["ami-a09c46c9"]
-	key_pair = ec2.key_pairs[identity_file]
-	security_group = ec2.security_groups[security_groups]
-	number.times do
-		thread = Thread.new do
-			instance = image.run_instance(:key_pair => key_pair,
-                                      :security_groups => security_group,
-                                      :instance_type => flavor)
-		end
-		threads << thread
-	end
-	threads.each {|thread| thread.join}
+  	# TEST
+  	threads = []
+  	image = ec2.images["ami-a09c46c9"]
+  	key_pair = ec2.key_pairs[identity_file]
+  	security_group = ec2.security_groups[security_groups]
+  	number.times do
+  		thread = Thread.new do
+  			instance = image.run_instance(:key_pair => key_pair,
+                                        :security_groups => security_group,
+                                        :instance_type => flavor)
+  		end
+  		threads << thread
+  	end
+  	threads.each {|thread| thread.join}
 	
 
 
@@ -244,6 +270,7 @@ class ChefNodeController < ApplicationController
     @status = "Create <strong>#{number}</strong> machines with flavor <strong>#{flavor}</strong>\n"
     @status += "\n"
     @status += "Click the <strong>back</strong> button below to come back dashboard\n"
+=end
   end
 
   # return the machines that KCSDB manages in an array
@@ -269,6 +296,130 @@ class ChefNodeController < ApplicationController
       end
     end
     machine_array
+  end
+  
+  # create a machine
+  private
+  def create_server
+    ec2 = create_ec2
+    state = get_state
+    knife_config = get_knife_config
+    
+    $stdout.sync = true
+
+    server_def = {
+      image_id: knife_config['knife[:image]'],
+      groups: knife_config['knife[:security_groups]'],
+      flavor_id: knife_config['knife[:flavor]'],
+      key_name: knife_config['knife[:aws_ssh_key_id]']
+    }
+    server = ec2.servers.create server_def
+    server_id = server.id
+
+    logger.debug "::: Waiting for machine: #{server_id}..."
+    server.wait_for { print "."; ready? }
+    puts "\n"
+
+
+    server_ip = server.public_ip_address #TODO: private IP should be use    
+    logger.debug "::: Checking if sshd in machine: #{server_id} with public IP: #{server_ip} is ready, please wait..."
+    print "." until tcp_test_ssh(server_ip) { sleep 1 }
+
+    # sleep 5
+    # bootstrap_server(server).run
+    system knife_bootstrap(server)
+
+    # logger.debug "::: Adding the machine into list..."
+    # puts "\n"
+    # @server_list.push server.id
+
+    rescue Fog::Compute::AWS::NotFound => error
+    logger.debug "@@@@@@@@@@@@@ ERROR @@@@@@@@@@@@@"
+    logger.debug error
+    logger.debug "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+
+    rescue Fog::Compute::AWS::Error => error
+    logger.debug "@@@@@@@@@@@@@ ERROR @@@@@@@@@@@@@"
+    logger.debug error
+    logger.debug "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+  end
+
+
+  # knife bootstrap
+  private
+  def knife_bootstrap server
+    knife_bootstrap_string = ""
+    knife_config = get_knife_config
+    logger.debug "::: Bootstrapping #{server.id}..."
+    logger.debug "::: ...with configurations:"
+    
+    dns_name = server.dns_name
+    ssh_user = knife_config['knife[:ssh_user]']
+    identity_file = knife_config['knife[:identity_file]']
+    chef_node_name = server.id
+    bootstrap_version = '10.12.0'
+    template_file = knife_config['knife[:template_file]']
+
+    knife_bootstrap_string << "knife bootstrap #{dns_name} "
+    knife_bootstrap_string << "--config /home/lha/Dev/git/kcsd/chef-repo/.chef/conf/knife.rb "
+    knife_bootstrap_string << "--identity-file #{identity_file} "
+    knife_bootstrap_string << "--node-name #{chef_node_name} "
+    knife_bootstrap_string << "--ssh-user #{ssh_user} "
+    knife_bootstrap_string << "--bootstrap-version #{bootstrap_version} "
+    knife_bootstrap_string << "--template-file #{template_file} "
+    knife_bootstrap_string << "--sudo "
+    knife_bootstrap_string << "--no-host-key-verify "
+    
+    logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
+    knife_bootstrap_string
+  end
+
+
+
+  # bootstrap a machine  
+  private
+  def bootstrap_server server
+    logger.debug "::: Bootstrapping #{server.id}..."
+    logger.debug "::: ...with configurations:"
+    
+    knife_config = get_knife_config
+    
+    logger.debug "::: Creating a new bootstrap object..."
+    bootstrap = Chef::Knife::Bootstrap.new
+    
+    bootstrap.name_args = server.dns_name #TODO private ip should be use
+    logger.debug "::: #{bootstrap.name_args}"
+    
+    # bootstrap.config[:run_list] = @slapchop_config[@build]['run_list'].split(/[\s,]+/)
+    
+    bootstrap.config[:ssh_user] = knife_config['knife[:ssh_user]']
+    logger.debug "::: #{bootstrap.config[:ssh_user]}"
+    
+    bootstrap.config[:identity_file] = knife_config['knife[:identity_file]']
+    logger.debug "::: #{bootstrap.config[:identity_file]}"
+    
+    bootstrap.config[:chef_node_name] = server.id
+    logger.debug "::: #{bootstrap.config[:chef_node_name]}"
+    
+    # bootstrap.config[:prerelease] = '--prerelease'
+    
+    bootstrap.config[:bootstrap_version] = '10.12.0'
+    logger.debug "::: #{bootstrap.config[:bootstrap_version]}"
+    
+    # bootstrap.config[:distro] = 'amazon-linux'
+    
+    bootstrap.config[:use_sudo] = true
+    logger.debug "::: #{bootstrap.config[:use_sudo]}"
+    
+    bootstrap.config[:template_file] = knife_config['knife[:template_file]']
+    logger.debug "::: #{bootstrap.config[:template_file]}"
+    
+    # bootstrap.config[:environment] = @slapchop_config[@build]['environment']
+    
+    bootstrap.config[:no_host_key_verify] = true
+    logger.debug "::: #{bootstrap.config[:no_host_key_verify]}"
+
+    bootstrap    
   end
 end
 
