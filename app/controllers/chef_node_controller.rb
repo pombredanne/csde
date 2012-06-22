@@ -1,4 +1,3 @@
-require "parseconfig"
 require 'helper'
 class ChefNodeController < ApplicationController
   include Helper
@@ -52,6 +51,7 @@ class ChefNodeController < ApplicationController
   end
 
   # stop all machines that KCSD manages
+  # TODO stop the whole list
   def stop_all
     machine_array = get_machine_array
     @status = ""
@@ -70,6 +70,7 @@ class ChefNodeController < ApplicationController
   end
 
   # start some selected machines
+  # TODO: start a whole list
   def start
     machine_array = get_machine_array
 
@@ -140,8 +141,8 @@ class ChefNodeController < ApplicationController
   def create
     
     # Knife Bootstrap
-    logger.debug "::: Loading Knife Bootstrap..."
-    Chef::Knife::Bootstrap.load_deps
+    # logger.debug "::: Loading Knife Bootstrap..."
+    # Chef::Knife::Bootstrap.load_deps
     
     number = params[:number_create].to_i
     logger.debug "::: Creating #{number} machine(s)..."
@@ -156,13 +157,17 @@ class ChefNodeController < ApplicationController
     end
     logger.debug "::: Flavor: #{flavor} selected..."
     
+    threads = []
     number.times do
-      logger.debug "::: [!] Launching machine..."
-      Thread.new { create_server }
+      # Thread.new { create_server }
+      thread = Thread.new { system(knife_ec2_bootstrap flavor)}
+      threads << thread
     end
     
     # parallel bootstrap
-    Thread.list.each { |thread| thread.join if thread != Thread.main }
+    # Thread.list.each { |thread| thread.join if thread != Thread.main }
+    threads.each {|t| t.join}
+    logger.debug "::: END"
 
 =begin
 	  # TEST
@@ -361,7 +366,7 @@ class ChefNodeController < ApplicationController
     template_file = knife_config['knife[:template_file]']
 
     knife_bootstrap_string << "knife bootstrap #{dns_name} "
-    knife_bootstrap_string << "--config /home/lha/Dev/git/kcsd/chef-repo/.chef/conf/knife.rb "
+    knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     knife_bootstrap_string << "--identity-file #{identity_file} "
     knife_bootstrap_string << "--node-name #{chef_node_name} "
     knife_bootstrap_string << "--ssh-user #{ssh_user} "
@@ -373,53 +378,49 @@ class ChefNodeController < ApplicationController
     logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
     knife_bootstrap_string
   end
-
-
-
-  # bootstrap a machine  
+  
+  # knife ec2 server create
   private
-  def bootstrap_server server
-    logger.debug "::: Bootstrapping #{server.id}..."
-    logger.debug "::: ...with configurations:"
+  def knife_ec2_bootstrap flavor
     
-    knife_config = get_knife_config
+    $stdout.sync = true
     
-    logger.debug "::: Creating a new bootstrap object..."
-    bootstrap = Chef::Knife::Bootstrap.new
+    knife_ec2_bootstrap_string = ""
+    state = get_state
     
-    bootstrap.name_args = server.dns_name #TODO private ip should be use
-    logger.debug "::: #{bootstrap.name_args}"
+    logger.debug "::: Creating a new machine..."
+    aws_access_key_id = state['aws_access_key_id']
+    aws_secret_access_key = state['aws_secret_access_key']
+    region = state['region']    
+    security_group_name = state['security_group_name']
+    chef_client_ami = state['chef_client_ami']
+    chef_client_identity_file = state['chef_client_identity_file']
+    chef_client_flavor = flavor
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
+    chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
+    chef_client_template_file = state['chef_client_template_file']
+   
+    knife_ec2_bootstrap_string << "knife ec2 server create "
+    knife_ec2_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    knife_ec2_bootstrap_string << "--aws-access-key-id #{aws_access_key_id} "
+    knife_ec2_bootstrap_string << "--aws-secret-access-key #{aws_secret_access_key} "
+    knife_ec2_bootstrap_string << "--region #{region} "
+    knife_ec2_bootstrap_string << "--groups #{security_group_name} "
+    knife_ec2_bootstrap_string << "--image #{chef_client_ami} "
+    knife_ec2_bootstrap_string << "--identity-file #{chef_client_identity_file} "
+    knife_ec2_bootstrap_string << "--flavor #{chef_client_flavor} "
+    knife_ec2_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
+    knife_ec2_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
+    knife_ec2_bootstrap_string << "--ssh-key #{chef_client_aws_ssh_key_id} "
+    knife_ec2_bootstrap_string << "--template-file #{chef_client_template_file} "
+    knife_ec2_bootstrap_string << "--yes "
+    knife_ec2_bootstrap_string << "--no-host-key-verify "
+    # knife_ec2_bootstrap_string << "-VV "
     
-    # bootstrap.config[:run_list] = @slapchop_config[@build]['run_list'].split(/[\s,]+/)
-    
-    bootstrap.config[:ssh_user] = knife_config['knife[:ssh_user]']
-    logger.debug "::: #{bootstrap.config[:ssh_user]}"
-    
-    bootstrap.config[:identity_file] = knife_config['knife[:identity_file]']
-    logger.debug "::: #{bootstrap.config[:identity_file]}"
-    
-    bootstrap.config[:chef_node_name] = server.id
-    logger.debug "::: #{bootstrap.config[:chef_node_name]}"
-    
-    # bootstrap.config[:prerelease] = '--prerelease'
-    
-    bootstrap.config[:bootstrap_version] = '10.12.0'
-    logger.debug "::: #{bootstrap.config[:bootstrap_version]}"
-    
-    # bootstrap.config[:distro] = 'amazon-linux'
-    
-    bootstrap.config[:use_sudo] = true
-    logger.debug "::: #{bootstrap.config[:use_sudo]}"
-    
-    bootstrap.config[:template_file] = knife_config['knife[:template_file]']
-    logger.debug "::: #{bootstrap.config[:template_file]}"
-    
-    # bootstrap.config[:environment] = @slapchop_config[@build]['environment']
-    
-    bootstrap.config[:no_host_key_verify] = true
-    logger.debug "::: #{bootstrap.config[:no_host_key_verify]}"
-
-    bootstrap    
+    logger.debug "::: The knife bootstrap command: #{knife_ec2_bootstrap_string}"
+    knife_ec2_bootstrap_string
   end
-end
 
+  
+end

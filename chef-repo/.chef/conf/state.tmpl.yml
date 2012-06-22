@@ -15,7 +15,8 @@ chef_server_elastic_ip: dummy # Elastic IP which is assigned to Chef Server
 
 # Chef Client
 chef_client_ami: ami-82fa58eb # Cannonical AMI Ubuntu 12.04 x64
-chef_client_flavor: m1.small # Machine Type
 chef_client_ssh_user: ubuntu # SSH Login User
+chef_client_bootstrap_version: 10.12.0
+chef_client_aws_ssh_key_id: dummy
 chef_client_identity_file: dummy # Full path to SSH Private Key File  
 chef_client_template_file: dummy # Full path to template file for Knife Bootstrap

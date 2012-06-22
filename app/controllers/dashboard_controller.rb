@@ -57,6 +57,7 @@ class DashboardController < ApplicationController
     state['chef_server_state'] = 'not_setup'
     state['chef_server_id'] = 'dummy'
     state['chef_server_elastic_ip'] = 'dummy'
+    state['chef_client_aws_ssh_key_id'] = 'dummy'
     state['chef_client_identity_file'] = 'dummy'  
     state['chef_client_template_file'] = 'dummy'
     update_state state

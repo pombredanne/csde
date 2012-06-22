@@ -102,6 +102,8 @@ class ChefServerController < ApplicationController
     }
     chef_server = ec2.servers.create chef_server_def
 
+    #TODO Tag
+
     logger.debug "::: Waiting for machine: #{chef_server.id}..."
     chef_server.wait_for { print "."; ready? }
     puts "\n"
