@@ -8,24 +8,24 @@ class DeploymentController < ApplicationController
 
   def opscenter
     # OpsCenter supports only Cassandra 1.0.x
-    editCapfile("10")
+    edit_capfile "10"
 
-    puts "::: INSTALLING OPSCENTER..."
+    logger.debug "::: Installing OpsCenter..."
 
     @status = ""
 
     # capture private IP of KCSD Server
-    capturePrivateIPOfKCSDServer
+    capture_private_ip_of_kcsdb_server
 
     # capture public IP of KCSD Server
-    capturePublicIPOfKCSDServer
+    capture_public_ip_of_kcsdb_server
 
     # get the public IP of KCSD Server from file
     @public_ip_of_KCSD = ""
-    File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsd_public_ip.txt","r").each {|line| @public_ip_of_KCSD << line}
+    File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsdb_public_ip.txt","r").each {|line| @public_ip_of_KCSD << line}
 
     # capture private IPs of running machines
-    capturePrivateIPsOfSelectedNodes
+    capture_private_ips_of_running_machines
 
     capfile = "#{Rails.root}/chef-repo/.chef/capistrano-kcsd/Capfile"
 
@@ -38,7 +38,6 @@ class DeploymentController < ApplicationController
     @status += "\n"
 
     return @status
-
   end
 
 
