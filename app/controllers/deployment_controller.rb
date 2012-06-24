@@ -1,11 +1,10 @@
-require "State"
-require "Ec2"
+# require "State"
+# require "Ec2"
+require 'helper'
 class DeploymentController < ApplicationController
-
-  include State
-  include Ec2
-
-
+  # include State
+  # include Ec2
+  include Helper
 
   def opscenter
     # OpsCenter supports only Cassandra 1.0.x
@@ -44,23 +43,21 @@ class DeploymentController < ApplicationController
 
 
 
-
+  # deploy a Cassandra cluster
   def deploy
     cassandra_version = params[:cassandra_version]
-    @status = cassandra_version
+    @status = "Cassandra version: #{cassandra_version} is selected"
 
-    puts "::: DEPLOY PRE DEFINED CASSANDRA VERSION #{cassandra_version}"
-
-    @status = ""
+    logger.debug "::: Deploying pre defined Cassandra Version: #{cassandra_version}..."
 
     # capture private IP of KCSD Server
-    capturePrivateIPOfKCSDServer
+    capture_private_ip_of_kcsdb_server
 
     # capture private IPs of running machines
-    capturePrivateIPsOfSelectedNodes
+    capture_private_ips_of_running_machines
 
     # edit Capfile
-    editCapfile(cassandra_version)
+    edit_capfile cassandra_version
 
     capfile = "#{Rails.root}/chef-repo/.chef/capistrano-kcsd/Capfile"
 
@@ -109,11 +106,11 @@ class DeploymentController < ApplicationController
 
     @status = ""
 
-    # capture private IP of KCSD Server
-    capturePrivateIPOfKCSDServer
+    # capture private IP of KCSDB Server
+    capture_private_ip_of_kcsdb_server
 
     # capture private IPs of running machines
-    capturePrivateIPsOfSelectedNodes
+    capture_private_ips_of_running_machines
 
     capfile = "#{Rails.root}/chef-repo/.chef/capistrano-kcsd/Capfile"
 
@@ -128,42 +125,41 @@ class DeploymentController < ApplicationController
     return @status
   end
 
-
-
-
-
-
   #capture private IPs of all selected running machines in EC2
   private
-  def capturePrivateIPsOfSelectedNodes
-    # machines that KCSD manages
-    machine_array = getMachineArray()
+  def capture_private_ips_of_running_machines
+    logger.debug "::: Capturing private IPs of running machines..."
 
-    #contain all running instances
-    tmp_private_ips_of_running_instances = []
+    # machines that KCSDB manages
+    machine_array = get_machine_array
+    
+    #contain all running machines
+    tmp_private_ips_of_running_machines = []
 
     #iterate all instances in EC2 environment
     #and get only the running instances
     #and add the private IPs of them to private_ips_of_running_instances array
-    machine_array.each do |instance|
-      if(instance.status == :running)
-        tmp_private_ips_of_running_instances << instance.private_ip_address
+    machine_array.each do |machine|
+      if machine.state.to_s == "running"
+        tmp_private_ips_of_running_machines << machine.private_ip_address
       end
     end
 
     #write to a temp file
-    f = File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/n_ips.txt","w")
-    line = ""
-    tmp_private_ips_of_running_instances.each do |ip|
-      line += ip
-      line += "\n"
+    File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/n_ips.txt","w") do |file|
+      tmp_private_ips_of_running_machines.each do |ip|
+        file << ip << "\n"
+      end
     end
-    f.write(line)
-    f.close()
+    # f = File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/n_ips.txt","w")
+    # line = ""
+    # tmp_private_ips_of_running_instances.each do |ip|
+      # line += ip
+      # line += "\n"
+    # end
+    # f.write(line)
+    # f.close()
   end
-
-
-
 
   # capture private IP of KCSD server
   #private
@@ -175,107 +171,94 @@ class DeploymentController < ApplicationController
   #  #system "/sbin/ifconfig $1 | grep 'inet addr:' | awk -F: '{print $2}' | awk '{print $1}' > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsd_ip.txt"
   #end
 
-
-  #capture private IP of KCSD server
+  # capture private IP of KCSDB server and save it into kcsdb_private_ip.txt
   private
-  def capturePrivateIPOfKCSDServer
-    system "curl http://169.254.169.254/latest/meta-data/local-ipv4 > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsd_ip.txt"
+  def capture_private_ip_of_kcsdb_server
+    # TODO: curl has to be installed
+    logger.debug "::: Capturing the private IP of KCSDB Server..."
+    system "curl http://169.254.169.254/latest/meta-data/local-ipv4 > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsdb_private_ip.txt"
   end
 
-  #capture public IP of KCSD server
+  #capture public IP of KCSDB server and save it into kcsdb_public_ip.txt
   private
-  def capturePublicIPOfKCSDServer
-    system "curl http://169.254.169.254/latest/meta-data/public-ipv4 > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsd_public_ip.txt"
+  def capture_public_ip_of_kcsdb_server  
+    # TODO: curl has to be installed
+    logger.debug "::: Capturing the public IP of KCSDB Server..."
+    system "curl http://169.254.169.254/latest/meta-data/public-ipv4 > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsdb_public_ip.txt"
   end
-
-
-
-
-
-
-
 
   #edit Capfile for using Capistrano
   private
-  def editCapfile(version)
-    stateKnife = getStateKnife()
+  def edit_capfile version
+    logger.debug "::: Editing Capfile for using Capistrano..."
+    
+    state = get_state
+    ssh_user = state['chef_client_ssh_user']
+    identity_file = state['chef_client_identity_file']
+    # user = stateKnife['knife[:ssh_user]']
+    # keys = stateKnife['knife[:identify_file]']
 
-    user = stateKnife['knife[:ssh_user]']
-    keys = stateKnife['knife[:identify_file]']
-
-
-    cas_ver = ""
-    cas_source = ""
-    if(version=="7")
-      cas_ver = "0.7.10"
-      cas_source = 'http://archive.apache.org/dist/cassandra/0.7.10/apache-cassandra-0.7.10-bin.tar.gz'
-    elsif(version=="8")
-      cas_ver = "0.8.10"
-      cas_source = 'http://archive.apache.org/dist/cassandra/0.8.10/apache-cassandra-0.8.10-bin.tar.gz'
+    cassandra_version = ""
+    cassandra_source = ""
+    if version == "7"
+      cassandra_version = "0.7.10"
+      cassandra_source = 'http://archive.apache.org/dist/cassandra/0.7.10/apache-cassandra-0.7.10-bin.tar.gz'
+    elsif version == "8"
+      cassandra_version = "0.8.10"
+      cassandra_source = 'http://archive.apache.org/dist/cassandra/0.8.10/apache-cassandra-0.8.10-bin.tar.gz'
     else
-      cas_ver = "1.0.x"
-      #cas_source = 'http://archive.apache.org/dist/cassandra/1.0.8/apache-cassandra-1.0.8-bin.tar.gz'
-      
-      #TEST
-      cas_source = 'http://archive.apache.org/dist/cassandra/1.0.8/apache-cassandra-1.0.8-bin.tar.gz'
+      cassandra_version = "1.0.x"
+      cassandra_source = 'http://archive.apache.org/dist/cassandra/1.1.1/apache-cassandra-1.1.1-bin.tar.gz'
     end
 
     f_source = File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/Capfile_template","r")
     f_dest = File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/Capfile","w")
-
     str = ""
     f_source.each do |line|
-      if (line.start_with?("set :cassandra_version, 'dummy'"))
-        str += line.gsub("set :cassandra_version, 'dummy'","set :cassandra_version, \"#{cas_ver}\"")
-        str += "\n"
-      elsif (line.start_with?("set :source_files_path, 'dummy'"))
-        str += line.gsub("set :source_files_path, 'dummy'","set :source_files_path, \"#{cas_source}\"")
-        str += "\n"
-      elsif (line.start_with?("set :user, 'dummy'"))
-        str += line.gsub("set :user, 'dummy'","set :user, \"#{user}\"")
-        str += "\n"
-      elsif (line.start_with?("ssh_options[:keys] = 'dummy'"))
-        str += line.gsub("ssh_options[:keys] = 'dummy'","ssh_options[:keys] = \"#{keys}\"")
-        str += "\n"
-
-
+      if line.start_with? "set :cassandra_version, 'dummy'"
+        str << line.gsub("set :cassandra_version, 'dummy'","set :cassandra_version, \"#{cassandra_version}\"")
+        str << "\n"
+      elsif line.start_with? "set :source_files_path, 'dummy'"
+        str << line.gsub("set :source_files_path, 'dummy'","set :source_files_path, \"#{cassandra_source}\"")
+        str << "\n"
+      elsif line.start_with? "set :user, 'dummy'"
+        str << line.gsub("set :user, 'dummy'","set :user, \"#{ssh_user}\"")
+        str << "\n"
+      elsif line.start_with? "ssh_options[:keys] = 'dummy'"
+        str << line.gsub("ssh_options[:keys] = 'dummy'","ssh_options[:keys] = \"#{identity_file}\"")
+        str << "\n"
       else
-        str += line.to_s
-        str += "\n"
+        str << line.to_s
+        str << "\n"
       end
     end
-    f_dest.write(str)
+    f_dest.write str
     f_source.close
     f_dest.close
-
   end
 
-
-
-
-  # return the machines that KCSD manages in an array
-  private
-  def getMachineArray
-    machine_array = []
-    state = getState()
-    key_pair_name = state["key_pair_name"]
-    ec2 = init()
-    ec2.instances.each do |instance|
-      # show all the instances that KCSD manages
-      if (instance.key_name == key_pair_name)
-        # chef server is not including
-        if (instance.id != state["chef_server_instance_id"])
-          # the machine is not terminated
-          if (instance.status != :terminated)
-            machine_array << instance
-          end
-        end
-      end
-    end
-
-    @number_of_running_machines = machine_array.size
-
-    return machine_array
-  end
-
+  # # return the machines that KCSDB manages in an array
+  # private
+  # def get_machine_array
+    # logger.debug "::: Getting all machines that KCSDB manages..."
+    # machine_array = []
+    # ec2 = create_ec2
+    # state = get_state
+    # key_pair_name = state['key_pair_name']
+    # chef_server_id = state['chef_server_id']
+#     
+    # ec2.servers.each do |server|
+      # # show all the instances that KCSD manages
+      # if server.key_name == key_pair_name
+        # # chef server is not including
+        # if server.id != chef_server_id
+          # # the machine is not terminated
+          # if server.state.to_s != "terminated"
+            # machine_array << server
+          # end
+        # end
+      # end
+    # end
+    # machine_array
+  # end
 end

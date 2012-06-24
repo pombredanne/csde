@@ -81,4 +81,28 @@ module Helper
   ensure
     tcp_socket && tcp_socket.close
   end
+  
+  # return the machines that KCSDB manages in an array
+  def get_machine_array
+    logger.debug "::: Getting all machines that KCSDB manages..."
+    machine_array = []
+    ec2 = create_ec2
+    state = get_state
+    key_pair_name = state['key_pair_name']
+    chef_server_id = state['chef_server_id']
+    
+    ec2.servers.each do |server|
+      # show all the instances that KCSD manages
+      if server.key_name == key_pair_name
+        # chef server is not including
+        if server.id != chef_server_id
+          # the machine is not terminated
+          if server.state.to_s != "terminated"
+            machine_array << server
+          end
+        end
+      end
+    end
+    machine_array
+  end
 end
