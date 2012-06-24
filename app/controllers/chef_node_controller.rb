@@ -191,7 +191,19 @@ class ChefNodeController < ApplicationController
     
     # parallel bootstrap
     threads.each {|t| t.join}
-    logger.debug "::: END"
+    logger.debug "::: Knife Bootstrapping END [OK]"
+    
+    # logger.debug "::: Stopping all machines..."
+    # machine_array = get_machine_array
+    # threads = []
+    # machine_array.each do |machine|
+      # thread = Thread.new {
+        # machine.stop
+      # }
+      # threads << thread
+    # end
+    # threads.each { |t| t.join }
+    
   end
 
   # return the machines that KCSDB manages in an array

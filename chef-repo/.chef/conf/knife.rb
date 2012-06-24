@@ -1,4 +1,4 @@
-chef_server_url 'http://50.17.231.187:4000'
+chef_server_url 'http://50.17.229.253:4000'
 node_name 'chef-webui'
 client_key '/home/lha/Dev/git/kcsd/chef-repo/.chef/pem/webui.pem'
 validation_client_name 'chef-validator'

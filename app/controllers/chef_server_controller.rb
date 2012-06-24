@@ -14,6 +14,7 @@ class ChefServerController < ApplicationController
     chef_server_ami = state['chef_server_ami']
     chef_server_flavor = state['chef_server_flavor']
     chef_server_ssh_user = state['chef_server_ssh_user']
+    kcsdb_sudo_password = state['kcsdb_sudo_password']
 
     logger.debug "============================"
     logger.debug "Setting up a new Chef Server"
@@ -183,7 +184,7 @@ class ChefServerController < ApplicationController
 
     logger.debug "::: Uploading all cookbooks to Chef Server..."
     knife_cookbook_upload_string = ""
-    knife_cookbook_upload_string << "rvmsudo knife cookbook upload " #TODO: ruby installed via rvm
+    knife_cookbook_upload_string << "echo #{kcsdb_sudo_password} | rvmsudo -S knife cookbook upload " #TODO: ruby installed via rvm
     knife_cookbook_upload_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     knife_cookbook_upload_string << "--all "
     system knife_cookbook_upload_string

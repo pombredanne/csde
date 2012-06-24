@@ -523,10 +523,14 @@
 	    </script>
 	</div>
 
-	<!-- Configuration Accordion takes EC2 AWS Credentials and Name for Key Pair and Security Group -->
+	<!-- 
+		Configuration Accordion takes EC2 AWS Credentials and Name for Key Pair and Security Group 
+		Furthermore, the sudo password for the linux machine is needed
+		KCSDB needs the password to invoke knife command in KCSDB Server
+	-->
 	<div id="tabs-3">
 	  <div id="configuration_accordion">
-	      <h2><a href="#">AWS Credentials</a></h2>
+	      <h2><a href="#">Info Credentials</a></h2>
 	      <div id="contentPanel_5">
 	        <%= form_tag('/configuration/edit_aws', :remote => true) do %>
 	            <div id="aws_info" style="color: #ff0000;">
@@ -535,6 +539,10 @@
 	              </li>
 	              <li>
 	                Input the name you want for <strong>key pair</strong> and <strong>security group</strong> in AWS. Make sure that there is <strong>NO CONFLICT!</strong>
+	              </li>
+	              <li>
+	              	Input your Linux User password in KCSDB Server. This user must have an <strong>admin</strong> priviledge.
+	              	KCSDB needs the password to send meta info to Chef Server via Knife Command 
 	              </li>
 	            </div>
 	            <table>
@@ -550,10 +558,14 @@
 	                <td><%= label_tag "AWS Key Pair and Security Group", "AWS Key Pair and Security Group" %></td>
 	                <td><%= text_field_tag "key_pair_and_group", @state['key_pair_name'], :size => 60 %></td>
 	              </tr>
+	              <tr>
+	              	<td><%= label_tag "Linux User Password", "Linux User Password" %></td>
+	              	<td><%= password_field_tag 'linux_password', 'Your Linux User password here', :size => 60 %></td>
+	              </tr>
 	            </table>
 	            <button id="submitAWS" type="submit">Submit</button>
 	        <% end %>
-	        <div id="awsCredentialsDialog"></div>
+		      <div id="awsCredentialsDialog"></div>
 	      </div>
 	  </div>
 	

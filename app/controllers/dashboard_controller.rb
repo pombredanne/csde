@@ -11,8 +11,8 @@ class DashboardController < ApplicationController
     if @state['chef_server_state'] == 'not_setup'
       @status << ":::::: Chef Server is <strong>not setup</strong> ::::::\n\n"
       @status << "This is the first time you use KCSDB, please click on tab <strong>About</strong> to get more information\n\n"
-      @status << "After reading, do as follows\n"
-      @status << "<em>First</em>, click on tab <strong>Configuration</strong>, input your <strong>AWS Credentials</strong>\n\n"
+      @status << "After reading, do as follows\n\n"
+      @status << "<em>First</em>, click on tab <strong>Configuration</strong>, input your <strong>Info Credentials</strong>\n\n"
       @status << "<em>Second</em>, click on tab <strong>Infrastructure</strong>, create a <strong>fresh Chef Server</strong>"
     else
       @status += ":::::: Chef Server is now <strong>ready</strong> ::::::\n\n"
@@ -60,6 +60,7 @@ class DashboardController < ApplicationController
     state['chef_client_aws_ssh_key_id'] = 'dummy'
     state['chef_client_identity_file'] = 'dummy'  
     state['chef_client_template_file'] = 'dummy'
+    state['kcsdb_sudo_password'] = 'dummy'
     update_state state
     
     logger.debug "::: Resetting knife.rb..."
