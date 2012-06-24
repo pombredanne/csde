@@ -71,6 +71,9 @@ class ChefNodeController < ApplicationController
   # start some selected machines
   def start
     machine_array = get_machine_array
+    state = get_state
+    identity_file = state['chef_client_identity_file']
+    ssh_user = state['chef_client_ssh_user']
 
     # get params
     logger.debug "::: Getting parameter from user..."
@@ -111,12 +114,42 @@ class ChefNodeController < ApplicationController
         end
       end
 
-      # start number machines
+      # multi threaded
+      # 1. start a machine
+      # 2. wait until sshd ready
+      # 3. invoke chef-client
+      threads = []
       delta = number - 1
       for i in 0..delta
-        logger.debug "::: Starting machine: #{tmp_array[i].id}..."
-        tmp_array[i].start
+        thread = Thread.new {
+          logger.debug "::: Starting machine: #{tmp_array[i].id}..."
+          tmp_array[i].start
+          logger.debug "::: Starting machine: #{tmp_array[i].id}... [OK]"
+          
+          # meta data for each server is automatically updated, cool :)!
+          logger.debug "::: Waiting for machine: #{tmp_array[i].id}..."
+          tmp_array[i].wait_for { print "."; ready? }
+          puts "\n"
+          logger.debug "::: Waiting for machine: #{tmp_array[i].id}... [OK]"
+          
+          print "." until tcp_test_ssh(tmp_array[i].public_ip_address) { sleep 1 }
+          
+          # invoking chef-client process by every starting to update the meta info in each chef node
+          logger.debug "::: Invoking chef-client process..."
+          ssh_command = "ssh "
+          ssh_command << "-i #{identity_file} "
+          ssh_command << "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no "
+          ssh_command << "#{ssh_user}@#{tmp_array[i].public_ip_address} "
+          ssh_command << "'sudo chef-client'"
+          puts ssh_command
+          system ssh_command
+          logger.debug "::: Invoking chef-client process... [OK]"
+        }
+        threads << thread
       end
+      
+      threads.each { |t| t.join }        
+      logger.debug "::: END"
 
       @status = "Start <strong>#{number}</strong> machines with flavor <strong>#{flavor}</strong>\n\n"
       @status << "Click the <strong>back</strong> button below to come back dashboard"
@@ -205,6 +238,7 @@ class ChefNodeController < ApplicationController
     chef_client_flavor = flavor
     chef_client_ssh_user = state['chef_client_ssh_user']
     chef_client_bootstrap_version = state['chef_client_bootstrap_version']
+    chef_client_role = state['chef_client_role']
     chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
     chef_client_template_file = state['chef_client_template_file']
    
@@ -221,6 +255,7 @@ class ChefNodeController < ApplicationController
     knife_ec2_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
     knife_ec2_bootstrap_string << "--ssh-key #{chef_client_aws_ssh_key_id} "
     knife_ec2_bootstrap_string << "--template-file #{chef_client_template_file} "
+    knife_ec2_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
     knife_ec2_bootstrap_string << "--yes "
     knife_ec2_bootstrap_string << "--no-host-key-verify "
     # knife_ec2_bootstrap_string << "-VV "

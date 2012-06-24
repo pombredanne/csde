@@ -76,7 +76,6 @@ untar_bootstrap_cookbooks() {
 }
 
 install_chef() {
-  # gem install ohai --no-ri --no-rdoc
   gem install chef --no-ri --no-rdoc
 }
 

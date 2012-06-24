@@ -172,7 +172,23 @@ class ChefServerController < ApplicationController
       file << "cookbook_path \'#{Rails.root}/chef-repo/cookbooks\'"   
     end
     logger.debug "::: Updating knife.rb... [OK]"
+    
+    logger.debug "::: Uploading all roles to Chef Server..."
+    knife_role_string = ""
+    knife_role_string << "knife role "
+    knife_role_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    knife_role_string << "from file #{Rails.root}/chef-repo/roles/*rb "
+    system knife_role_string
+    logger.debug "::: Uploading all roles to Chef Server... [OK]"
 
+    logger.debug "::: Uploading all cookbooks to Chef Server..."
+    knife_cookbook_upload_string = ""
+    knife_cookbook_upload_string << "rvmsudo knife cookbook upload " #TODO: ruby installed via rvm
+    knife_cookbook_upload_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    knife_cookbook_upload_string << "--all "
+    system knife_cookbook_upload_string
+    logger.debug "::: Uploading all cookbooks to Chef Server... [OK]"
+    
     @status << "Thank you for waiting :)\n\n"
     @status << "Your Chef Server is already <strong>set up</strong>\n\n"
     @status << "Please <strong>refresh</strong> the page\n\n"
