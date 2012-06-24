@@ -100,9 +100,9 @@ class DeploymentController < ApplicationController
   def clean
     #invoke editCapfile with a dummy version
     #in order to create a Capfile
-    editCapfile("10")
+    edit_capfile "10"
 
-    puts "::: CLEANING UP..."
+    logger.debug "::: CLEANING UP..."
 
     @status = ""
 
@@ -113,7 +113,6 @@ class DeploymentController < ApplicationController
     capture_private_ips_of_running_machines
 
     capfile = "#{Rails.root}/chef-repo/.chef/capistrano-kcsd/Capfile"
-
 
     #START
     system "cap -f #{capfile} kcsd:stop_opscenter"
