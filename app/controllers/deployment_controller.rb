@@ -71,22 +71,22 @@ class DeploymentController < ApplicationController
     system "cap -f #{capfile} kcsd:get_source_files_for_the_seeder"
     system "cap -f #{capfile} kcsd:create_torrent_in_the_seeder"
 
-    beginning = Time.now
+    # beginning = Time.now
 
     system "cap -f #{capfile} kcsd:start_seeding"
     system "cap -f #{capfile} kcsd:start_peering"
     system "cap -f #{capfile} kcsd:clean_temp_files"
     system "cap -f #{capfile} kcsd:stop_all"
 
-    puts "Time elapsed for #{@number_of_running_machines} machines: #{Time.now - beginning} seconds"
+    # puts "Time elapsed for #{@number_of_running_machines} machines: #{Time.now - beginning} seconds"
 
 	#TEST
 	
-    #system "cap -f #{capfile} kcsd:configure_cassandra"
-    #system "cap -f #{capfile} kcsd:start_cassandra"
+    system "cap -f #{capfile} kcsd:configure_cassandra"
+    system "cap -f #{capfile} kcsd:start_cassandra"
 
-    #@status += "Cassandra cluster is now <strong>ready</strong>\n"
-    @status += "Binaries code are already distributed!\n"
+    @status += "Cassandra cluster is now <strong>ready</strong>\n"
+    # @status += "Binaries code are already distributed!\n"
 
     return @status
   end
