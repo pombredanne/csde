@@ -23,4 +23,6 @@ chef_client_identity_file: dummy # Full path to SSH Private Key File
 chef_client_template_file: dummy # Full path to template file for Knife Bootstrap
 
 # KCSDB Server
-kcsdb_sudo_password: dummy # Sudo password is used to invoke knife command in KCSDB Server
+# Sudo password is used to invoke knife command in KCSDB Server
+# If you use AMIs of Canonical in Ubuntu, you do not need it
+kcsdb_sudo_password: dummy 

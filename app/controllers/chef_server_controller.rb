@@ -184,7 +184,8 @@ class ChefServerController < ApplicationController
 
     logger.debug "::: Uploading all cookbooks to Chef Server..."
     knife_cookbook_upload_string = ""
-    knife_cookbook_upload_string << "echo #{kcsdb_sudo_password} | rvmsudo -S knife cookbook upload " #TODO: ruby installed via rvm
+    # knife_cookbook_upload_string << "echo #{kcsdb_sudo_password} | rvmsudo -S knife cookbook upload " #TODO: ruby installed via rvm
+    knife_cookbook_upload_string << "rvmsudo knife cookbook upload " #TODO: ruby installed via rvm
     knife_cookbook_upload_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     knife_cookbook_upload_string << "--all "
     system knife_cookbook_upload_string

@@ -1,9 +1,5 @@
-# require "State"
-# require "Ec2"
 require 'helper'
 class DeploymentController < ApplicationController
-  # include State
-  # include Ec2
   include Helper
 
   def opscenter
@@ -34,10 +30,7 @@ class DeploymentController < ApplicationController
     system "cap -f #{capfile} kcsd:install_opscenter"
     system "cap -f #{capfile} kcsd:start_opscenter"
 
-    @status += "OpsCenter is now <strong>ready</strong>\n"
-    @status += "\n"
-
-    return @status
+    @status << "OpsCenter is now <strong>ready</strong>\n\n"
   end
 
 

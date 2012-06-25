@@ -60,7 +60,7 @@ class DashboardController < ApplicationController
     state['chef_client_aws_ssh_key_id'] = 'dummy'
     state['chef_client_identity_file'] = 'dummy'  
     state['chef_client_template_file'] = 'dummy'
-    state['kcsdb_sudo_password'] = 'dummy'
+    # state['kcsdb_sudo_password'] = 'dummy'
     update_state state
     
     logger.debug "::: Resetting knife.rb..."
