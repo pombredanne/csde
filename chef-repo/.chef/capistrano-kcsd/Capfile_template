@@ -336,12 +336,37 @@ namespace :kcsd do
 		# ====================================================================================== #
 		# INSTALL OPSCENTER IN MURDER SERVER
 
-
+=begin
 		if (FileTest.exist?("#{opscenter_path}"))
 			system "rm -rf #{opscenter_path}"		
 		end
+=end
 
+    puts "::: Installing DataStax OpsCenter..."
+    
+    puts "::: Updating source list for apt..."
+    bash_command = "echo 'deb http://debian.datastax.com/community stable main' | sudo tee -a /etc/apt/sources.list"
+    system bash_command
+    puts "::: Updating source list for apt... [OK]"
+    
+    puts "::: Adding the DataStax repository key to your aptitude trusted keys..."
+    bash_command = 'curl -L http://debian.datastax.com/debian/repo_key | sudo apt-key add -'
+    system bash_command
+    puts "::: Adding the DataStax repository key to your aptitude trusted keys... [OK]"
+    
+    puts "::: Installing OpsCenter..."
+    bash_command = "sudo apt-get update -qq"
+    system bash_command
+    bash_command = "sudo apt-get install libssl0.9.8 opscenter-free -qq"
+    system bash_command    
+    puts "::: Installing OpsCenter... [OK]"
+    
+    puts "::: Configuring OpsCenter..."
+    system "sudo sed -i \"s/interface = .*/interface = #{server[0]}/g\" /etc/opscenter/opscenterd.conf"
+    puts "::: Configuring OpsCenter... [OK]"
+    
 
+=begin
 		#if !(FileTest.exist?("#{ENV['HOME']}/opscenter"))
 			# INFO
 			puts ":::::::::::::::::: DataStax OpsCenter is not installed!!!"
@@ -439,7 +464,7 @@ namespace :kcsd do
 		# setup agent
 		puts ":::::::::::::::::: Setting up agent for this Cassandra node"
 		run "#{agent_path}/bin/./setup #{server[0]} $CAPISTRANO:HOST$"
-
+=end
 	end
 
 
@@ -450,7 +475,13 @@ namespace :kcsd do
 	# ====================================================================================== #
 	desc 'Start OpsCenter on KCSD Server and OpsCenter Agent in Cassandra Nodes'
 	task :start_opscenter, :roles => :peer do
-	
+    
+    puts "::: Starting OpsCenter..."
+    bash_command = "sudo service opscenterd start"
+    system bash_command
+    puts "::: Starting OpsCenter... [OK]"
+
+=begin	
 		# start OpsCenter
 		puts ":::::::::::::::::: Starting OpsCenter"
 		#system "#{opscenter_path}/bin/./opscenter -f" # foreground
@@ -460,7 +491,7 @@ namespace :kcsd do
 		puts ":::::::::::::::::: Running Agent"
 		#run "#{agent_path}/bin/./opscenter-agent -f" # foreground
 		run "#{agent_path}/bin/./opscenter-agent" # background
-
+=end
 	end
 
 
@@ -471,7 +502,13 @@ namespace :kcsd do
 	# ====================================================================================== #
 	desc 'Stop OpsCenter in KCSD Server and OpsCenter Agents in Cassandra Nodes'
 	task :stop_opscenter, :roles => :peer do
-	
+	   
+	  puts "::: Stopping OpsCenter..."
+    bash_command = "sudo service opscenterd stop"
+    system bash_command
+    puts "::: Stopping OpsCenter... [OK]"
+		
+=begin
 		# stop OpsCenter
 		puts ":::::::::::::::::: Stopping OpsCenter"
 		system "pkill -9 -f './bin/twistd'"
@@ -479,7 +516,7 @@ namespace :kcsd do
 		# stop Agents
 		puts ":::::::::::::::::: Stopping Agent"
 		run "pkill -9 -f 'opscenter'" # background
-
+=end
 	end
 
 end
