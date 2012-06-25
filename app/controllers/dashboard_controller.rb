@@ -90,6 +90,9 @@ class DashboardController < ApplicationController
     logger.debug "::: Deleting ssh stuff... [OK]"
 
     logger.debug "::: Deleting monitoring folder in KCSDB Server..."
+    if File.exist? "#{ENV['HOME']}/opscenter"
+      File.delete "#{ENV['HOME']}/opscenter"
+    end
     logger.debug "::: Deleting monitoring folder in KCSDB Server... [OK]"
     
     logger.debug "::: Reset done [OK]"
