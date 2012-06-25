@@ -33,12 +33,10 @@ class DeploymentController < ApplicationController
     @status << "OpsCenter is now <strong>ready</strong>\n\n"
   end
 
-
-
   # deploy a Cassandra cluster
   def deploy
     cassandra_version = params[:cassandra_version]
-    @status = "Cassandra version: #{cassandra_version} is selected"
+    @status = "Cassandra version: #{cassandra_version} is selected\n\n"
 
     logger.debug "::: Deploying pre defined Cassandra Version: #{cassandra_version}..."
 
@@ -53,41 +51,24 @@ class DeploymentController < ApplicationController
 
     capfile = "#{Rails.root}/chef-repo/.chef/capistrano-kcsd/Capfile"
 
-
     #START
     system "cap -f #{capfile} -T"
-
 
     system "cap -f #{capfile} kcsd:prepare_distribution"
     system "cap -f #{capfile} kcsd:start_tracker"
     system "cap -f #{capfile} kcsd:get_source_files_for_the_seeder"
     system "cap -f #{capfile} kcsd:create_torrent_in_the_seeder"
 
-    # beginning = Time.now
-
     system "cap -f #{capfile} kcsd:start_seeding"
     system "cap -f #{capfile} kcsd:start_peering"
     system "cap -f #{capfile} kcsd:clean_temp_files"
     system "cap -f #{capfile} kcsd:stop_all"
 
-    # puts "Time elapsed for #{@number_of_running_machines} machines: #{Time.now - beginning} seconds"
-
-	#TEST
-	
     system "cap -f #{capfile} kcsd:configure_cassandra"
     system "cap -f #{capfile} kcsd:start_cassandra"
 
     @status += "Cassandra cluster is now <strong>ready</strong>\n"
-    # @status += "Binaries code are already distributed!\n"
-
-    return @status
   end
-
-
-
-
-
-
 
   def clean
     #invoke editCapfile with a dummy version
@@ -95,8 +76,6 @@ class DeploymentController < ApplicationController
     edit_capfile "10"
 
     logger.debug "::: CLEANING UP..."
-
-    @status = ""
 
     # capture private IP of KCSDB Server
     capture_private_ip_of_kcsdb_server
@@ -111,9 +90,7 @@ class DeploymentController < ApplicationController
     system "cap -f #{capfile} kcsd:stop_cassandra"
     system "cap -f #{capfile} kcsd:clean_everything"
 
-    @status += "Everything from the last distribution is <strong>cleaned</strong>!"
-
-    return @status
+    @status = "Everything from the last distribution is <strong>cleaned</strong>!"
   end
 
   #capture private IPs of all selected running machines in EC2
@@ -142,14 +119,6 @@ class DeploymentController < ApplicationController
         file << ip << "\n"
       end
     end
-    # f = File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/n_ips.txt","w")
-    # line = ""
-    # tmp_private_ips_of_running_instances.each do |ip|
-      # line += ip
-      # line += "\n"
-    # end
-    # f.write(line)
-    # f.close()
   end
 
   # capture private IP of KCSD server
@@ -186,8 +155,6 @@ class DeploymentController < ApplicationController
     state = get_state
     ssh_user = state['chef_client_ssh_user']
     identity_file = state['chef_client_identity_file']
-    # user = stateKnife['knife[:ssh_user]']
-    # keys = stateKnife['knife[:identify_file]']
 
     cassandra_version = ""
     cassandra_source = ""
@@ -227,29 +194,4 @@ class DeploymentController < ApplicationController
     f_source.close
     f_dest.close
   end
-
-  # # return the machines that KCSDB manages in an array
-  # private
-  # def get_machine_array
-    # logger.debug "::: Getting all machines that KCSDB manages..."
-    # machine_array = []
-    # ec2 = create_ec2
-    # state = get_state
-    # key_pair_name = state['key_pair_name']
-    # chef_server_id = state['chef_server_id']
-#     
-    # ec2.servers.each do |server|
-      # # show all the instances that KCSD manages
-      # if server.key_name == key_pair_name
-        # # chef server is not including
-        # if server.id != chef_server_id
-          # # the machine is not terminated
-          # if server.state.to_s != "terminated"
-            # machine_array << server
-          # end
-        # end
-      # end
-    # end
-    # machine_array
-  # end
 end
