@@ -50,7 +50,7 @@ install_ruby_packages() {
 	apt-get install ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
-#build_rubygems() {
+build_rubygems() {
   #if gem --version | grep -q "${default_rubygems_version}" >/dev/null ; then
     #log "RubyGems ${default_rubygems_version} is installed, so skipping..."
     #return
@@ -66,9 +66,9 @@ install_ruby_packages() {
   # Clean up the source artifacts
   #rm -rf /tmp/rubygems-${default_rubygems_version}*
   
-  #(cd $HOME && tar xf $HOME/rubygems-1.8.24.tar.gz)
-  #(cd $HOME/rubygems-1.8.24 && ruby setup.rb --no-format-executable)
-#}
+  (cd $HOME && tar xf $HOME/rubygems-1.8.24.tar.gz)
+  (cd $HOME/rubygems-1.8.24 && ruby setup.rb --no-format-executable)
+}
 
 untar_bootstrap_cookbooks() {
 	(cd $HOME && tar xf $HOME/bootstrap-10.12.0.tar.gz)
@@ -76,9 +76,9 @@ untar_bootstrap_cookbooks() {
 	mv $HOME/cookbooks /tmp/chef-solo
 }
 
-#install_chef() {
-  #gem install chef --no-ri --no-rdoc
-#}
+install_chef() {
+  gem install chef --no-ri --no-rdoc
+}
 
 build_chef_solo_config() {
   mkdir -p /etc/chef
@@ -114,11 +114,11 @@ run_chef_solo() {
 
 install_ruby_packages
 
-#build_rubygems
+build_rubygems
 
 untar_bootstrap_cookbooks
 
-#install_chef
+install_chef
 
 build_chef_solo_config
 
