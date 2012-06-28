@@ -28,7 +28,7 @@ class ChefServerController < ApplicationController
     logger.debug "::: Copying the tar balls to home folder... [OK]"
     
     logger.debug "::: Executing the bootstrap script..."
-    system "sudo bash #{Rails.root}/chef-repo/.chef/sh/bootstrap.sh"
+    system "rvmsudo bash #{Rails.root}/chef-repo/.chef/sh/bootstrap.sh"
     logger.debug "::: Executing the bootstrap script... [OK]"    
   end
   
