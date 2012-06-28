@@ -65,12 +65,12 @@ build_rubygems() {
   # Clean up the source artifacts
   #rm -rf /tmp/rubygems-${default_rubygems_version}*
   
-  tar xf $HOME/rubygems-1.8.24.tar.gz
+  (cd $HOME && tar xf $HOME/rubygems-1.8.24.tar.gz)
   (cd $HOME/rubygems-1.8.24 && ruby setup.rb --no-format-executable)
 }
 
 untar_bootstrap_cookbooks() {
-	tar xf $HOME/bootstrap-10.12.0.tar.gz
+	(cd $HOME && tar xf $HOME/bootstrap-10.12.0.tar.gz)
 	mkdir -p /tmp/chef-solo
 	mv $HOME/cookbooks /tmp/chef-solo
 }
