@@ -105,4 +105,45 @@ module Helper
     end
     machine_array
   end
+  
+  #capture private IPs of all selected running machines in EC2
+  def capture_private_ips_of_running_machines
+    logger.debug "::: Capturing private IPs of running machines..."
+
+    # machines that KCSDB manages
+    machine_array = get_machine_array
+    
+    #contain all running machines
+    tmp_private_ips_of_running_machines = []
+
+    #iterate all instances in EC2 environment
+    #and get only the running instances
+    #and add the private IPs of them to private_ips_of_running_instances array
+    machine_array.each do |machine|
+      if machine.state.to_s == "running"
+        tmp_private_ips_of_running_machines << machine.private_ip_address
+      end
+    end
+
+    #write to a temp file
+    File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/n_ips.txt","w") do |file|
+      tmp_private_ips_of_running_machines.each do |ip|
+        file << ip << "\n"
+      end
+    end
+  end
+
+  # capture private IP of KCSDB server and save it into kcsdb_private_ip.txt
+  def capture_private_ip_of_kcsdb_server
+    # TODO: curl has to be installed
+    logger.debug "::: Capturing the private IP of KCSDB Server..."
+    system "curl http://169.254.169.254/latest/meta-data/local-ipv4 > #{Rails.root}/chef-repo/.chef/tmp/kcsdb_private_ip.txt"
+  end
+
+  #capture public IP of KCSDB server and save it into kcsdb_public_ip.txt
+  def capture_public_ip_of_kcsdb_server  
+    # TODO: curl has to be installed
+    logger.debug "::: Capturing the public IP of KCSDB Server..."
+    system "curl http://169.254.169.254/latest/meta-data/public-ipv4 > #{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt"
+  end
 end

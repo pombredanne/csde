@@ -93,60 +93,6 @@ class DeploymentController < ApplicationController
     @status = "Everything from the last distribution is <strong>cleaned</strong>!"
   end
 
-  #capture private IPs of all selected running machines in EC2
-  private
-  def capture_private_ips_of_running_machines
-    logger.debug "::: Capturing private IPs of running machines..."
-
-    # machines that KCSDB manages
-    machine_array = get_machine_array
-    
-    #contain all running machines
-    tmp_private_ips_of_running_machines = []
-
-    #iterate all instances in EC2 environment
-    #and get only the running instances
-    #and add the private IPs of them to private_ips_of_running_instances array
-    machine_array.each do |machine|
-      if machine.state.to_s == "running"
-        tmp_private_ips_of_running_machines << machine.private_ip_address
-      end
-    end
-
-    #write to a temp file
-    File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/n_ips.txt","w") do |file|
-      tmp_private_ips_of_running_machines.each do |ip|
-        file << ip << "\n"
-      end
-    end
-  end
-
-  # capture private IP of KCSD server
-  #private
-  #def capturePrivateIPOfKCSDServer
-  #  # TODO: have to find another solution to capture the private IP of running KCSD Server
-  #  # addr: 10 => private IP of AWS
-  #  system "/sbin/ifconfig $1 | grep 'inet addr:10' | awk -F: '{print $2}' | awk '{print $1}' > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsd_ip.txt"
-  #
-  #  #system "/sbin/ifconfig $1 | grep 'inet addr:' | awk -F: '{print $2}' | awk '{print $1}' > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsd_ip.txt"
-  #end
-
-  # capture private IP of KCSDB server and save it into kcsdb_private_ip.txt
-  private
-  def capture_private_ip_of_kcsdb_server
-    # TODO: curl has to be installed
-    logger.debug "::: Capturing the private IP of KCSDB Server..."
-    system "curl http://169.254.169.254/latest/meta-data/local-ipv4 > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsdb_private_ip.txt"
-  end
-
-  #capture public IP of KCSDB server and save it into kcsdb_public_ip.txt
-  private
-  def capture_public_ip_of_kcsdb_server  
-    # TODO: curl has to be installed
-    logger.debug "::: Capturing the public IP of KCSDB Server..."
-    system "curl http://169.254.169.254/latest/meta-data/public-ipv4 > #{Rails.root}/chef-repo/.chef/capistrano-kcsd/kcsdb_public_ip.txt"
-  end
-
   #edit Capfile for using Capistrano
   private
   def edit_capfile version

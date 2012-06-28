@@ -2,8 +2,40 @@ require 'helper'
 class ChefServerController < ApplicationController
   include Helper
 
-  # set up a fresh Chef Server
+  # go to Chef Server WebUI
+  # which is running on the same machine as KCSDB Server
+  def go_to
+    capture_public_ip_of_kcsdb_server
+    
+    kcsdb_public_ip = ""
+    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt","r").each do |line|
+      kcsdb_public_ip = line.to_s.strip    
+    end    
+    
+    redirect_to "http://#{kcsdb_public_ip}:4040"
+  end
+  
   def setup
+    @status = ""
+    state = get_state
+    
+    logger.debug "============================"
+    logger.debug "Setting up a new Chef Server"
+    logger.debug "============================"
+
+    logger.debug "::: Copying the tar balls to home folder..."
+    system "cp #{Rails.root}/chef-repo/.chef/tar/*.tar.gz #{ENV['HOME']}"    
+    logger.debug "::: Copying the tar balls to home folder... [OK]"
+    
+    logger.debug "::: Executing the bootstrap script..."
+    system "sudo bash #{Rails.root}/chef-repo/.chef/sh/bootstrap.sh"
+    logger.debug "::: Executing the bootstrap script... [OK]"    
+  end
+  
+
+  # set up a fresh Chef Server
+  # DEPRECATED
+  def setup_dep
     # INITIALIZE
     beginning = Time.now
     @status = ""
@@ -283,9 +315,5 @@ class ChefServerController < ApplicationController
     end
   end
 
-  # go to Chef Server WebUI
-  def go_to
-    state = get_state
-    redirect_to "http://#{state['chef_server_elastic_ip']}:4040"
-  end
+  
 end

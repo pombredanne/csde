@@ -4,20 +4,22 @@ class DashboardController < ApplicationController
 
   # KCSDB starts from here
   def show
-    # check if Chef Server is set up or not
-    @state = get_state
-    @status = ""
+    state = get_state
+    @chef_server_state = state['chef_server_state']
+    @aws_access_key_id = state['aws_access_key_id']
+    @aws_secret_access_key = state['aws_secret_access_key']
+    @key_pair_name = state['key_pair_name']
+    @status = "KCSDB welcomes you :).\n"
     
-    if @state['chef_server_state'] == 'not_setup'
-      @status << ":::::: Chef Server is <strong>not setup</strong> ::::::\n\n"
-      @status << "This is the first time you use KCSDB, please click on tab <strong>About</strong> to get more information\n\n"
-      @status << "After reading, do as follows\n\n"
-      @status << "<em>First</em>, click on tab <strong>Configuration</strong>, input your <strong>Info Credentials</strong>\n\n"
-      @status << "<em>Second</em>, click on tab <strong>Infrastructure</strong>, create a <strong>fresh Chef Server</strong>"
+    if @chef_server_state == 'not_setup'
+      @status << "This is the first time you use KCSDB. Please do as follows:\n\n"
+      @status << "<em>1.</em> click on tab <strong>About</strong> to get <strong>more information</strong>\n"
+      @status << "<em>2.</em> click on tab <strong>Credentials</strong> to input your <strong>AWS Credentials</strong>\n"
+      @status << "<em>3.</em> click on tab <strong>Configuration</strong> to create a <strong>fresh Chef Server</strong>\n"
+      @status << "<em>4.</em> click on tab <strong>Infrastructure</strong> to provision <strong>machines</strong>\n"
+      @status << "<em>5.</em> click on tab <strong>Benchmark</strong> to define your <strong>benchmark profiles</strong>"
     else
-      @status += ":::::: Chef Server is now <strong>ready</strong> ::::::\n\n"
-      @status += "Click on tab <strong>Infrastructure</strong>, then <strong>Check | Start | Stop | Go to Chef Server</strong>\n\n"
-      @status += "Please ensure that all <strong>AWS credentials</strong> are correct!"
+      @status << "Have a great day !!!"
     end
   end
 

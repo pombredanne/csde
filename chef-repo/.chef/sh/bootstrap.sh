@@ -40,12 +40,12 @@ set -x
 
 #default_rubygems_version="1.8.24"
 #bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
-#the two tar balls are uploaded from KCSDB Server to Chef Server
+
+#the two tar balls are assumed to be in $HOME folder
 #not downloaded from rubygems.org and s3.amazonaws.com anymore
 
 install_ruby_packages() {
     apt-get update -qq # only relevant info in stdout
-    #apt-get upgrade -qq
   	apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
@@ -103,11 +103,11 @@ run_chef_solo() {
   chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json
 }
 
-get_stuff() {
-    mkdir -p $HOME/.chef
-    sudo cp /etc/chef/*.pem $HOME/.chef
-    sudo chown -R ubuntu $HOME/.chef
-}
+#get_stuff() {
+    #mkdir -p $HOME/.chef
+    #sudo cp /etc/chef/*.pem $HOME/.chef
+    #sudo chown -R ubuntu $HOME/.chef
+#}
 
 # Perform the actual bootstrap
 
@@ -123,4 +123,4 @@ build_chef_solo_config
 
 run_chef_solo
 
-get_stuff
+#get_stuff
