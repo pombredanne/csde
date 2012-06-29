@@ -6,14 +6,14 @@ source 'https://rubygems.org'
 # ======================================================================
 # gems for KCSD
 
-gem 'extlib', '0.9.15'
-gem 'merb-core', '1.1.3'
-gem 'eventmachine', '0.12.10'
-gem 'daemons', '1.1.8'
-gem 'merb-assets', '1.1.3'
-gem 'merb-helpers', '1.1.3'
-gem 'merb-param-protection', '1.1.3'
-gem 'dep_selector', '0.0.8'
+# gem 'extlib', '0.9.15'
+# gem 'merb-core', '1.1.3'
+# gem 'eventmachine', '0.12.10'
+# gem 'daemons', '1.1.8'
+# gem 'merb-assets', '1.1.3'
+# gem 'merb-helpers', '1.1.3'
+# gem 'merb-param-protection', '1.1.3'
+# gem 'dep_selector', '0.0.8'
 
 
 
@@ -34,6 +34,7 @@ gem 'fog', '1.3.1'
 
 # Chef
 gem 'chef', '10.12.0'
+gem 'chef-server', '10.12.0'
 
 # gem 'knife-ec2', :git => 'https://github.com/opscode/knife-ec2.git'
 # Knife Commands on EC2
