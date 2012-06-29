@@ -6,6 +6,10 @@ source 'https://rubygems.org'
 # ======================================================================
 # gems for KCSD
 
+gem 'extlib', '0.9.15'
+
+
+
 # logger
 gem 'logger', '1.2.8'
 
@@ -39,6 +43,7 @@ gem 'net-ssh', '>= 2.2.2'
 # ======================================================================
 
 gem 'rails', '3.2.6'
+
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'

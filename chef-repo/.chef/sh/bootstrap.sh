@@ -46,7 +46,7 @@ bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
-	apt-get install ruby ruby-dev nodejs openjdk-6-jdk libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
+	apt-get install nodejs openjdk-6-jdk libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
 build_rubygems() {
@@ -98,11 +98,11 @@ run_chef_solo() {
 
 install_ruby_packages
 
-build_rubygems
+#build_rubygems
 
-untar_bootstrap_cookbooks
+#untar_bootstrap_cookbooks
 
-install_chef
+#install_chef
 
 build_chef_solo_config
 
