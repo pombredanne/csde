@@ -43,13 +43,17 @@ set -x
 
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
-	apt-get install nodejs libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
+	apt-get install nodejs openjdk-6-jdk libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
 untar_bootstrap_cookbooks() {
 	(cd $HOME && tar xf $HOME/bootstrap-10.12.0.tar.gz)
 	mkdir -p /tmp/chef-solo
 	mv $HOME/cookbooks /tmp/chef-solo
+}
+
+install_chef() {
+  gem install chef --no-ri --no-rdoc
 }
 
 build_chef_solo_config() {
@@ -80,6 +84,8 @@ run_chef_solo() {
 install_ruby_packages
 
 untar_bootstrap_cookbooks
+
+install_chef
 
 build_chef_solo_config
 
