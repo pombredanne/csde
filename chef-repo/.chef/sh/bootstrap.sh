@@ -43,7 +43,7 @@ set -x
 
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
-	apt-get install openjdk-6-jdk libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
+	apt-get install nodejs libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
 untar_bootstrap_cookbooks() {
