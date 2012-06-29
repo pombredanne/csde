@@ -9,6 +9,7 @@ source 'https://rubygems.org'
 gem 'extlib', '0.9.15'
 gem 'merb-core', '1.1.3'
 gem 'eventmachine', '0.12.10'
+gem 'daemons', '1.1.8'
 
 
 
