@@ -7,6 +7,7 @@ source 'https://rubygems.org'
 # gems for KCSD
 
 gem 'extlib', '0.9.15'
+gem 'merb-core', '1.1.3'
 
 
 
