@@ -51,10 +51,10 @@ install_ruby_packages() {
 }
 
 build_rubygems() {
-  #if gem --version | grep -q "${default_rubygems_version}" >/dev/null ; then
-    #log "RubyGems ${default_rubygems_version} is installed, so skipping..."
-    #return
-  #fi
+  if gem --version | grep -q "${default_rubygems_version}" >/dev/null ; then
+    log "RubyGems ${default_rubygems_version} is installed, so skipping..."
+    return
+  fi
 
   # Download and extract the source
   #(cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-${default_rubygems_version}.tgz)
