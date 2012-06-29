@@ -38,46 +38,18 @@ set -x
 #
 # 3. Change the dummy password. Now!
 
-#default_rubygems_version="1.8.24"
-#bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
-
-#the two tar balls are assumed to be in $HOME folder
+# the two tar balls are assumed to be in $HOME folder
 #not downloaded from rubygems.org and s3.amazonaws.com anymore
 
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
-  #apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
-	apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
-}
-
-build_rubygems() {
-  if gem --version | grep -q "${default_rubygems_version}" >/dev/null ; then
-    log "RubyGems ${default_rubygems_version} is installed, so skipping..."
-    return
-  fi
-
-  # Download and extract the source
-  #(cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-${default_rubygems_version}.tgz)
-  #(cd /tmp && tar xfz rubygems-${default_rubygems_version}.tgz)
-
-  # Setup and install
-  #(cd /tmp/rubygems-${default_rubygems_version} && ruby setup.rb --no-format-executable)
-
-  # Clean up the source artifacts
-  #rm -rf /tmp/rubygems-${default_rubygems_version}*
-  
-  (cd $HOME && tar xf $HOME/rubygems-1.8.24.tar.gz)
-  (cd $HOME/rubygems-1.8.24 && ruby setup.rb --no-format-executable)
+	apt-get install libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
 untar_bootstrap_cookbooks() {
 	(cd $HOME && tar xf $HOME/bootstrap-10.12.0.tar.gz)
 	mkdir -p /tmp/chef-solo
 	mv $HOME/cookbooks /tmp/chef-solo
-}
-
-install_chef() {
-  gem install chef --no-ri --no-rdoc
 }
 
 build_chef_solo_config() {
@@ -100,28 +72,15 @@ BOOTSTRAP_JSON
 }
 
 run_chef_solo() {
-  #chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
   chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json
 }
-
-#get_stuff() {
-    #mkdir -p $HOME/.chef
-    #sudo cp /etc/chef/*.pem $HOME/.chef
-    #sudo chown -R ubuntu $HOME/.chef
-#}
 
 # Perform the actual bootstrap
 
 install_ruby_packages
 
-#build_rubygems
-
 untar_bootstrap_cookbooks
-
-#install_chef
 
 build_chef_solo_config
 
 run_chef_solo
-
-#get_stuff

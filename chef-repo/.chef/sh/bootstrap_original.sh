@@ -11,13 +11,13 @@ set -x
 # --- USING ---
 # 1. Transfer this script into the machine you want to set up chef-server
 # 2. Login to the machine via ssh
-# 3. Execute
+# 3. Execute with sudo right
 # sudo bash bootstrap.sh
 #
 # --- COPYRIGHT ---
 #
 # Originally from https://github.com/fnichol/wiki-notes/wiki/Deploying-Chef-Server-On-Amazon-EC2
-# Some parameters and configurations are modified to use with KCSD
+# Some parameters and configurations are modified to use with KCSDB
 #
 # Another sources
 # http://wiki.opscode.com/display/ChefCN/Bootstrap+Chef+RubyGems+Installation
@@ -27,7 +27,7 @@ set -x
 # --- SPECIFICATIONS ---
 # Ubuntu 11.10. x64 (e.g. ami-4dad7424 from alestic.com). Only x64 works for Chef Server, x86 NOT
 # Rubygems 1.8.24
-# Chef 10.12.0
+# Chef latest
 # 
 # --- ATTENTION ---
 # 1. If you change configurations and parameters below, the script may NOT work. 
@@ -38,42 +38,27 @@ set -x
 #
 # 3. Change the dummy password. Now!
 
-#default_rubygems_version="1.8.24"
-#bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
+default_rubygems_version="1.8.24"
+bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 
 #the two tar balls are assumed to be in $HOME folder
 #not downloaded from rubygems.org and s3.amazonaws.com anymore
 
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
-  #apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
-	apt-get install ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
+  apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
 build_rubygems() {
-  #if gem --version | grep -q "${default_rubygems_version}" >/dev/null ; then
-    #log "RubyGems ${default_rubygems_version} is installed, so skipping..."
-    #return
-  #fi
-
   # Download and extract the source
-  #(cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-${default_rubygems_version}.tgz)
-  #(cd /tmp && tar xfz rubygems-${default_rubygems_version}.tgz)
+  (cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-${default_rubygems_version}.tgz)
+  (cd /tmp && tar xfz rubygems-${default_rubygems_version}.tgz)
 
   # Setup and install
-  #(cd /tmp/rubygems-${default_rubygems_version} && ruby setup.rb --no-format-executable)
+  (cd /tmp/rubygems-${default_rubygems_version} && ruby setup.rb --no-format-executable)
 
   # Clean up the source artifacts
-  #rm -rf /tmp/rubygems-${default_rubygems_version}*
-  
-  (cd $HOME && tar xf $HOME/rubygems-1.8.24.tar.gz)
-  (cd $HOME/rubygems-1.8.24 && ruby setup.rb --no-format-executable)
-}
-
-untar_bootstrap_cookbooks() {
-	(cd $HOME && tar xf $HOME/bootstrap-10.12.0.tar.gz)
-	mkdir -p /tmp/chef-solo
-	mv $HOME/cookbooks /tmp/chef-solo
+  rm -rf /tmp/rubygems-${default_rubygems_version}*
 }
 
 install_chef() {
@@ -100,28 +85,25 @@ BOOTSTRAP_JSON
 }
 
 run_chef_solo() {
-  #chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
-  chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json
+  chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
-#get_stuff() {
-    #mkdir -p $HOME/.chef
-    #sudo cp /etc/chef/*.pem $HOME/.chef
-    #sudo chown -R ubuntu $HOME/.chef
-#}
+get_stuff() {
+    mkdir -p $HOME/.chef
+    sudo cp /etc/chef/*.pem $HOME/.chef
+    sudo chown -R ubuntu $HOME/.chef
+}
 
 # Perform the actual bootstrap
 
 install_ruby_packages
 
-#build_rubygems
+build_rubygems
 
-untar_bootstrap_cookbooks
-
-#install_chef
+install_chef
 
 build_chef_solo_config
 
 run_chef_solo
 
-#get_stuff
+get_stuff
