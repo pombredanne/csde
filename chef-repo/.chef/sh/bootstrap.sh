@@ -38,12 +38,27 @@ set -x
 #
 # 3. Change the dummy password. Now!
 
+default_rubygems_version="1.8.24"
+bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
+
 # the two tar balls are assumed to be in $HOME folder
 #not downloaded from rubygems.org and s3.amazonaws.com anymore
 
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
-	apt-get install nodejs openjdk-6-jdk libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
+	apt-get install ruby ruby-dev nodejs openjdk-6-jdk libopenssl-ruby build-essential wget ssl-cert -qq # only relevant info in stdout
+}
+
+build_rubygems() {
+  # Download and extract the source
+  (cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-${default_rubygems_version}.tgz)
+  (cd /tmp && tar xfz rubygems-${default_rubygems_version}.tgz)
+
+  # Setup and install
+  (cd /tmp/rubygems-${default_rubygems_version} && ruby setup.rb --no-format-executable)
+
+  # Clean up the source artifacts
+  rm -rf /tmp/rubygems-${default_rubygems_version}*
 }
 
 untar_bootstrap_cookbooks() {
@@ -76,12 +91,14 @@ BOOTSTRAP_JSON
 }
 
 run_chef_solo() {
-  chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json
+	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
 # Perform the actual bootstrap
 
 install_ruby_packages
+
+build_rubygems()
 
 untar_bootstrap_cookbooks
 
