@@ -98,7 +98,7 @@ run_chef_solo() {
 
 install_ruby_packages
 
-build_rubygems()
+build_rubygems
 
 untar_bootstrap_cookbooks
 
