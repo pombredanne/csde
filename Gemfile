@@ -34,7 +34,7 @@ gem 'fog', '1.3.1'
 
 # Chef
 gem 'chef', '10.12.0'
-gem 'chef-server', '10.12.0'
+# gem 'chef-server', '10.12.0'
 
 # gem 'knife-ec2', :git => 'https://github.com/opscode/knife-ec2.git'
 # Knife Commands on EC2
