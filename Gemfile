@@ -11,7 +11,7 @@ gem 'logger', '1.2.8'
 
 # extlib
 # used for bootstraping chef sever
-gem 'extlib', '0.9.15'
+# gem 'extlib', '0.9.15'
 
 # AWS SDK for Ruby
 # gem 'aws-sdk', '1.5.4'
