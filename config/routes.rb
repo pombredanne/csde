@@ -22,10 +22,10 @@ KCSD1::Application.routes.draw do
 
 
 
-  get "chef_server/setup"
-  get "chef_server/check"
-  get "chef_server/start"
-  get "chef_server/stop"
+  # get "chef_server/setup"
+  # get "chef_server/check"
+  # get "chef_server/start"
+  # get "chef_server/stop"
   get "chef_server/go_to"
 
 

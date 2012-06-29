@@ -5,22 +5,25 @@ class DashboardController < ApplicationController
   # KCSDB starts from here
   def show
     state = get_state
-    @chef_server_state = state['chef_server_state']
+    
+    # @chef_server_state = state['chef_server_state']
     @aws_access_key_id = state['aws_access_key_id']
     @aws_secret_access_key = state['aws_secret_access_key']
     @key_pair_name = state['key_pair_name']
+
     @status = "KCSDB welcomes you :).\n"
+    @status << "Have a great day !!!\n\n"
     
-    if @chef_server_state == 'not_setup'
-      @status << "This is the first time you use KCSDB. Please do as follows:\n\n"
-      @status << "<em>1.</em> click on tab <strong>About</strong> to get <strong>more information</strong>\n"
-      @status << "<em>2.</em> click on tab <strong>Credentials</strong> to input your <strong>AWS Credentials</strong>\n"
-      @status << "<em>3.</em> click on tab <strong>Configuration</strong> to create a <strong>fresh Chef Server</strong>\n"
-      @status << "<em>4.</em> click on tab <strong>Infrastructure</strong> to provision <strong>machines</strong>\n"
-      @status << "<em>5.</em> click on tab <strong>Benchmark</strong> to define your <strong>benchmark profiles</strong>"
-    else
-      @status << "Have a great day !!!"
-    end
+    # if @chef_server_state == 'not_setup'
+      # @status << "This is the first time you use KCSDB. Please do as follows:\n\n"
+      @status << "Click on tab <strong>About</strong> to get <strong>more information</strong>\n"
+      @status << "Click on tab <strong>Credentials</strong> to input your <strong>AWS Credentials</strong>\n"
+      @status << "Click on tab <strong>Configuration</strong> to go to <strong>Chef Server</strong>\n"
+      @status << "Click on tab <strong>Monitoring</strong> to go to <strong>Ganglia Server</strong>\n"
+      @status << "Click on tab <strong>Benchmark</strong> to define your <strong>benchmark profiles</strong>"
+    # else
+      
+    # end
   end
 
   # reset KCSDB

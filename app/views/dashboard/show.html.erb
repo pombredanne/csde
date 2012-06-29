@@ -127,7 +127,7 @@
 				
 				<!-- Configuration Management -->
 				<div id="tabs-1">
-					<% if @chef_server_state == 'not_setup'%>
+					<!-- <% if @chef_server_state == 'not_setup'%>
 						<div id="chef_server_status_dialog"></div>
 	          <div style="color: red;">
 		          <p>
@@ -155,7 +155,7 @@
 				        });
 		          </script>
 	      		</div>
-					<% else %>
+					<% else %> -->
 						<div style="color: green;">
 		          <p>Chef Server is now <strong>ready</strong>. Click the button below to go to Chef Server.</p>
 		          <button id="go_to_chef_server">Go to Chef Server</button>
@@ -171,29 +171,29 @@
 				        });
 		          </script>
 	      		</div>
-					<% end %>
+					<!-- <% end %> -->
 				</div>
 				
 				<!-- Central Monitoring -->
 				<div id="tabs-2">
-					<% if @chef_server_state == 'not_setup'%>
+					<!-- <% if @chef_server_state == 'not_setup'%>
 						<div style="color: red;">
 	          	Please, click on tab <strong>Configuration</strong> to create a <strong>fresh Chef Server</strong> at first. 
 	      		</div>
-					<% else %>
+					<% else %> -->
 						You can go to Ganglia Server here.
-					<% end %>
+					<!-- <% end %> -->
 				</div>
 				
 				<!-- Automated Benchmark -->
 				<div id="tabs-3">
-					<% if @chef_server_state == 'not_setup'%>
+					<!-- <% if @chef_server_state == 'not_setup'%>
 						<div style="color: red;">
 	          	Please, click on tab <strong>Configuration</strong> to create a <strong>fresh Chef Server</strong> at first. 
 	      		</div>
-					<% else %>
+					<% else %> -->
 						You can define your benchmark profiles here
-					<% end %>
+					<!-- <% end %> -->
 				</div>
 				
 				<!-- Credentials -->
@@ -256,8 +256,7 @@
 		      $("#tabs").tabs();
 		  	</script>
 		  	
-		  	<!-- KCSDB Status -->
-			  <% if @chef_server_state == 'not_setup' %>
+			  <!-- <% if @chef_server_state == 'not_setup' %>
 			      <div id="state_status_dialog">
 			        <div style="color: red;"><%= simple_format @status %></div>
 			      </div>
@@ -268,7 +267,7 @@
 			              hide:"puff"
 			          });
 			      </script>
-			  <% else %>
+			  <% else %> -->
 			      <div id="state_status_dialog">
 			        <div style="color: green;"><%= simple_format @status %></div>
 			      </div>
@@ -276,10 +275,12 @@
 			          $("#state_status_dialog").dialog({
 			              title:"KCSDB Status",
 			              show:"slide",
-			              hide:"puff"
+			              width: "30em",
+			              hide:"puff",
+			              resizable: false
 			          });
 			      </script>
-			  <% end %>
+			  <!-- <% end %> -->
 			</div>
 		</div>
 		<div id="footer">

@@ -15,27 +15,9 @@ class ChefServerController < ApplicationController
     redirect_to "http://#{kcsdb_public_ip}:4040"
   end
   
-  def setup
-    @status = ""
-    state = get_state
-    
-    logger.debug "============================"
-    logger.debug "Setting up a new Chef Server"
-    logger.debug "============================"
-
-    logger.debug "::: Copying the tar balls to home folder..."
-    system "cp #{Rails.root}/chef-repo/.chef/tar/*.tar.gz #{ENV['HOME']}"    
-    logger.debug "::: Copying the tar balls to home folder... [OK]"
-    
-    logger.debug "::: Executing the bootstrap script..."
-    system "rvmsudo bash #{Rails.root}/chef-repo/.chef/sh/bootstrap.sh"
-    logger.debug "::: Executing the bootstrap script... [OK]"    
-  end
-  
-
   # set up a fresh Chef Server
   # DEPRECATED
-  def setup_dep
+  def setup
     # INITIALIZE
     beginning = Time.now
     @status = ""
@@ -232,6 +214,7 @@ class ChefServerController < ApplicationController
   end
 
   # check the chef server's state
+  # DEPRECATED
   def check
     # initialize
     ec2 = create_ec2
@@ -242,6 +225,7 @@ class ChefServerController < ApplicationController
   end
 
   # start chef server
+  # DEPRECATED
   def start
     # initialize
     ec2 = create_ec2
@@ -286,6 +270,7 @@ class ChefServerController < ApplicationController
   end
 
   # stop chef server
+  # DEPRECATED
   def stop
     # initialize
     ec2 = create_ec2
@@ -314,6 +299,4 @@ class ChefServerController < ApplicationController
       @status << "Chef Server is now <strong>stopped</strong>!"
     end
   end
-
-  
 end

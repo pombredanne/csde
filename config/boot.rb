@@ -1,6 +1,6 @@
 # load all needed gems by booting
 
-require 'rubygems'
+# require 'rubygems'
 require 'yaml'
 require 'fog'
 #require 'chef'
