@@ -2,7 +2,6 @@
 set -e
 set -x
 
-
 bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 
 welcome(){
@@ -57,6 +56,11 @@ run_chef_solo(){
 make_state_file(){
 	cp chef-repo/.chef/conf/state.tmpl.yml chef-repo/.chef/conf/state.yml
 }
+bye(){
+	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+	echo "::: KCSDB installed successfully!!! Please run 'rails server' in 'kcsdb' home folder to start KCSDB Server :::"
+	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+}
 welcome
 pause 'Press [Enter] key to install KCSDB...'
 update_apt_get
@@ -65,3 +69,4 @@ install_needed_gems
 build_chef_solo_config
 run_chef_solo
 make_state_file
+bye
