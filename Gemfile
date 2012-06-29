@@ -13,6 +13,7 @@ gem 'daemons', '1.1.8'
 gem 'merb-assets', '1.1.3'
 gem 'merb-helpers', '1.1.3'
 gem 'merb-param-protection', '1.1.3'
+gem 'dep_selector', '0.0.8'
 
 
 
