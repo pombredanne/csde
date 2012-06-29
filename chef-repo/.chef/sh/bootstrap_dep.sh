@@ -46,7 +46,8 @@ set -x
 
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
-  apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
+  #apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
+	apt-get install ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
 build_rubygems() {
@@ -113,11 +114,11 @@ run_chef_solo() {
 
 install_ruby_packages
 
-build_rubygems
+#build_rubygems
 
 untar_bootstrap_cookbooks
 
-install_chef
+#install_chef
 
 build_chef_solo_config
 
