@@ -10,7 +10,7 @@ init() {
   gem install rubygems-update
   update_rubygems
   
-  gem install bundler -v '1.14'
+  gem install bundler -v '1.1.4'
 }
 
 init
