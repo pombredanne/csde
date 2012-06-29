@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-set -e
-set -x
+#set -e
+#set -x
 
 bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 
