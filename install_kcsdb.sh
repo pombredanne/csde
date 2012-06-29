@@ -5,6 +5,16 @@ set -x
 
 bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 
+welcome(){
+	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+	echo "::: KIT Cloud Serving Deployment and Benchmark welcomes you :) :::"
+	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+}
+
+pause(){
+   read -p "$*"
+}
+
 update_apt_get(){
 	apt-get update -qq # only relevant info in stdout
   apt-get upgrade -qq
@@ -47,6 +57,8 @@ run_chef_solo(){
 make_state_file(){
 	cp chef-repo/.chef/conf/state.tmpl.yml chef-repo/.chef/conf/state.yml
 }
+welcome
+pause 'Press [Enter] key to install KCSDB...'
 update_apt_get
 install_packages_via_apt_get
 install_needed_gems
