@@ -37,10 +37,10 @@ module Helper
 
     logger.debug "::: Creating an EC2 object..."
     ec2 = Fog::Compute.new(
-      provider: 'AWS',
-      aws_access_key_id: state['aws_access_key_id'],
-      aws_secret_access_key: state['aws_secret_access_key'],
-      region: state['region']
+      :provider => 'AWS',
+      :aws_access_key_id => state['aws_access_key_id'],
+      :aws_secret_access_key => state['aws_secret_access_key'],
+      :region => state['region']
     )
     logger.debug "::: Creating an EC2 object... [OK]"
     ec2
