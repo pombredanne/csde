@@ -43,8 +43,13 @@ BOOTSTRAP_JSON
 run_chef_solo(){
 	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
+
+make_state_file(){
+	cp chef-repo/.chef/conf/state.tmpl.yml chef-repo/.chef/conf/state.yml
+}
 update_apt_get
 install_packages_via_apt_get
 install_needed_gems
 build_chef_solo_config
 run_chef_solo
+make_state_file
