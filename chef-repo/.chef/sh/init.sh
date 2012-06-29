@@ -7,10 +7,10 @@ init() {
   apt-get upgrade -qq
   apt-get install nodejs wget ssl-cert openjdk-6-jdk ruby1.9.1-full libsqlite3-dev libopenssl-ruby libxslt-dev libxml2-dev -qq
   
-  gem install rubygems-update
+  gem install rubygems-update --no-ri --no-rdoc
   update_rubygems
   
-  gem install bundler -v '1.1.4'
+  gem install bundler -v '1.1.4' --no-ri --no-rdoc
 }
 
 init
