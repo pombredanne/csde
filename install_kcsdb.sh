@@ -15,22 +15,26 @@ pause(){
 }
 
 update_apt_get(){
+	echo "::: Updating apt-get..."
 	apt-get update -qq # only relevant info in stdout
   apt-get upgrade -qq
 }
 
 install_packages_via_apt_get(){
+	echo "::: Installing needed packages..."
   apt-get install nodejs wget ssl-cert openjdk-6-jdk rubygems ruby1.9.1-full libsqlite3-dev libopenssl-ruby libxslt-dev libxml2-dev -qq
   gem install rubygems-update --no-ri --no-rdoc
   update_rubygems
 }
 
 install_needed_gems(){
+	echo "::: Installing needed gems..."
 	gem install bundler -v '1.1.4' --no-ri --no-rdoc
 	bundle update
 }
 
 build_chef_solo_config() {
+	echo "::: Building configurations for chef-solo..."
   mkdir -p /etc/chef
 
   cat > /etc/chef/solo.rb <<SOLO_RB
@@ -50,6 +54,7 @@ BOOTSTRAP_JSON
 }
 
 run_chef_solo(){
+	echo "::: Running chef-solo to install chef-server..."
 	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
