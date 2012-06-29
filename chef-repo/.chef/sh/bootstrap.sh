@@ -47,7 +47,7 @@ set -x
 install_ruby_packages() {
   apt-get update -qq # only relevant info in stdout
   #apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
-	apt-get install ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
+	apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert -qq # only relevant info in stdout
 }
 
 build_rubygems() {
