@@ -97,7 +97,7 @@ run_chef_solo() {
 
 # Perform the actual bootstrap
 
-install_ruby_packages
+#install_ruby_packages
 
 #build_rubygems
 
