@@ -1,10 +1,8 @@
 # load all needed gems by booting
 
-# require 'rubygems'
+require 'rubygems'
 require 'yaml'
 require 'fog'
-#require 'chef'
-#require 'chef-server'
 
 # Set up gems listed in the Gemfile.
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)

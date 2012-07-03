@@ -6,26 +6,8 @@ source 'https://rubygems.org'
 # ======================================================================
 # gems for KCSD
 
-# gem 'extlib', '0.9.15'
-# gem 'merb-core', '1.1.3'
-# gem 'eventmachine', '0.12.10'
-# gem 'daemons', '1.1.8'
-# gem 'merb-assets', '1.1.3'
-# gem 'merb-helpers', '1.1.3'
-# gem 'merb-param-protection', '1.1.3'
-# gem 'dep_selector', '0.0.8'
-
-
-
 # logger
 gem 'logger', '1.2.8'
-
-# extlib
-# used for bootstraping chef sever
-# gem 'extlib', '0.9.15'
-
-# AWS SDK for Ruby
-# gem 'aws-sdk', '1.5.4'
 
 # Fog
 # Universal API for many infrastructure cloud provider
