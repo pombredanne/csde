@@ -146,4 +146,25 @@ module Helper
     logger.debug "::: Capturing the public IP of KCSDB Server..."
     system "curl http://169.254.169.254/latest/meta-data/public-ipv4 > #{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt"
   end
+
+  # update knife.rb depends on the KCSDB Server's IP  
+  def udpate_knife_rb
+    capture_public_ip_of_kcsdb_server
+    
+    kcsdb_public_ip_address = ""
+    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt","r").each do |line|
+      kcsdb_public_ip_address = line.to_s.strip
+    end
+    
+    logger.debug "::: Updating knife.rb..."
+    File.open("#{Rails.root}/chef-repo/.chef/conf/knife.rb",'w') do |file|
+      file << "chef_server_url \'http://#{kcsdb_public_ip_address}:4000\'" << "\n"
+      file << "node_name \'chef-webui\'" << "\n"
+      file << "client_key \'/etc/chef/webui.pem\'" << "\n"
+      file << "validation_client_name \'chef-validator\'" << "\n"
+      file << "validation_key \'/etc/chef/validation.pem\'" << "\n"
+      file << "cookbook_path \'#{Rails.root}/chef-repo/cookbooks\'"   
+    end
+    logger.debug "::: Updating knife.rb... [OK]"
+  end
 end
