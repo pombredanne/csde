@@ -2,11 +2,8 @@
 <html xmlns="http://www.w3.org/1999/html">
 
 <head>
-
 	<title>KIT Cloud Serving Deployment and Benchmark</title>
-	
 	<style type="text/css" media="screen">
-    
     body {
         margin: 0;
         margin-bottom: 25px;
@@ -16,30 +13,24 @@
         font-size: 13px;
         color: #333;
     }
-    
     h1 {
         font-size: 28px;
         color: #000;
     }
-    
     a {
         color: #03c
     }
-    
     a:hover {
         background-color: #03c;
         color: white;
         text-decoration: none;
     }
-    
     .filename {
         font-style: italic;
     }
-
     label {
         font-weight: bold;
     }
-    
     #page {
         background-color: #f0f0f0;
         width: 750px;
@@ -47,7 +38,6 @@
         margin-left: auto;
         margin-right: auto;
     }
-    
     #content {
         float: left;
         background-color: white;
@@ -56,7 +46,6 @@
         padding: 25px;
         width: 700px;
     }
-    
     #header {
  		   	padding-left: 200px;
         padding-right: 100px;
@@ -65,23 +54,19 @@
         background-position: top left, top right;
         height: 99px;
     }
-
     #header h1, #header h2 {
         margin: 0
     }
-
     #header h2 {
         color: #888;
         font-weight: normal;
         font-size: 16px;
     }
-    
     #separator {
         border-top: 1px solid #ccc;
         margin-top: 25px;
         padding-top: 15px;
     }
-    
     #footer {
         clear:left;
         margin-top:1em;
@@ -90,10 +75,8 @@
         padding:10px;
         font-weight: bold;
     }
-    
 	</style>
-
-	<!-- <script>
+	<!-- <script type="text/javascript">
 		$(document).ready(function() {
 	   if ($('textarea').length > 0) {      
 	     var data = $('textarea');
@@ -102,8 +85,17 @@
 	     });    
 	   } 
 		});
+		$(function(){
+							var config = {
+								skin:'v2'
+							};
+							$('.ckeditor').ckeditor(config);
+		});
 	</script> -->
-
+	
+	<!-- <script type="text/javascript" src="/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript" src="/ckeditor/adapters/jquery.js"></script>
+	 -->
 </head>
 
 
@@ -116,6 +108,7 @@
 			  <h2>You&rsquo;re building the cloud. With KCSDB.</h2>
 			</div>
 			<div id="separator"></div>
+			
 			<div id="tabs">
 				<ul>
 			  	<li><a href="#tabs-1">Configuration</a></li>
@@ -187,13 +180,7 @@
 				
 				<!-- Automated Benchmark -->
 				<div id="tabs-3">
-					<!-- <% if @chef_server_state == 'not_setup'%>
-						<div style="color: red;">
-	          	Please, click on tab <strong>Configuration</strong> to create a <strong>fresh Chef Server</strong> at first. 
-	      		</div>
-					<% else %> -->
-						You can define your benchmark profiles here
-					<!-- <% end %> -->
+
 				</div>
 				
 				<!-- Credentials -->
