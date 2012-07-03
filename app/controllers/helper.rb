@@ -148,7 +148,7 @@ module Helper
   end
 
   # update knife.rb depends on the KCSDB Server's IP  
-  def udpate_knife_rb
+  def update_knife_rb
     capture_public_ip_of_kcsdb_server
     
     kcsdb_public_ip_address = ""
