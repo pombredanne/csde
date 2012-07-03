@@ -2,6 +2,7 @@
 #set -e
 #set -x
 
+default_rubygems_version="1.8.24"
 bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 
 welcome(){
@@ -22,9 +23,21 @@ update_apt_get(){
 
 install_packages_via_apt_get(){
 	echo "::: Installing needed packages..."
-  apt-get install nodejs wget ssl-cert openjdk-6-jdk rubygems ruby1.9.1-full libsqlite3-dev libopenssl-ruby libxslt-dev libxml2-dev -qq
-  gem install rubygems-update --no-ri --no-rdoc
-  update_rubygems
+  apt-get install nodejs wget ssl-cert openjdk-6-jdk ruby1.9.1-full libsqlite3-dev libopenssl-ruby libxslt-dev libxml2-dev -qq
+  #gem install rubygems-update --no-ri --no-rdoc
+  #update_rubygems
+}
+
+build_rubygems() {
+  # Download and extract the source
+  (cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-${default_rubygems_version}.tgz)
+  (cd /tmp && tar xfz rubygems-${default_rubygems_version}.tgz)
+
+  # Setup and install
+  (cd /tmp/rubygems-${default_rubygems_version} && ruby setup.rb --no-format-executable)
+
+  # Clean up the source artifacts
+  rm -rf /tmp/rubygems-${default_rubygems_version}*
 }
 
 install_needed_gems(){
@@ -70,6 +83,7 @@ welcome
 pause 'Press [Enter] key to install KCSDB...'
 update_apt_get
 install_packages_via_apt_get
+build_rubygems
 install_needed_gems
 build_chef_solo_config
 run_chef_solo
