@@ -12,6 +12,13 @@ pause(){
    read -p "$*"
 }
 
+install_kcsdb(){
+	echo "::: Installing KCSDB..."
+	git clone https://github.com/lehoanganh/kcsdb.git
+	(cd $HOME/kcsdb && bundle update)
+	cp $HOME/kcsdb/chef-repo/.chef/conf/state.tmpl.yml $HOME/kcsdb/chef-repo/.chef/conf/state.yml
+}
+
 build_chef_solo_config() {
 	echo "::: Building configurations for chef-solo..."
   mkdir -p /etc/chef
@@ -37,13 +44,6 @@ run_chef_solo(){
 	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
-install_kcsdb(){
-	echo "::: Installing KCSDB..."
-	git clone https://github.com/lehoanganh/kcsdb.git
-	(cd $HOME/kcsdb && bundle update)
-	cp $HOME/kcsdb/chef-repo/.chef/conf/state.tmpl.yml $HOME/kcsdb/chef-repo/.chef/conf/state.yml
-}
-
 bye(){
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: KCSDB installed successfully!!! Please run 'rails server' in 'kcsdb' home folder to start KCSDB Server :::"
@@ -52,7 +52,7 @@ bye(){
 
 welcome
 pause 'Press [Enter] key to install KCSDB...'
+install_kcsdb
 build_chef_solo_config
 run_chef_solo
-install_kcsdb
 bye
