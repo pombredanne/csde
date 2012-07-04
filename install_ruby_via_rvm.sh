@@ -13,10 +13,10 @@ curl -L https://get.rvm.io | bash -s stable
 	
 # update rvm variables
 echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >> $HOME/.bashrc
-source $HOME/.bashrc
+#source $HOME/.bashrc
 
 # prevent that rvm is loaded as a FUNCTION
-command rvm install 1.9.3
+rvm install 1.9.3
 
 # set ruby 1.9.3 as default use
-command rvm --default use 1.9.3
+rvm --default use 1.9.3
