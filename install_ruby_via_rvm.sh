@@ -12,11 +12,8 @@ sudo apt-get install nodejs openjdk-6-jdk build-essential openssl libreadline6 l
 curl -L https://get.rvm.io | bash -s stable
 	
 # update rvm variables
-echo "source '$HOME/.rvm/scripts/rvm'" >> $HOME/.bashrc
-source $HOME/.bashrc
+source $HOME/.rvm/scripts/rvm
 	
 # prevent that rvm is loaded as a FUNCTION
-command rvm install 1.9.3
-
 # set ruby 1.9.3 as default use
-rvm --default use 1.9.3
+command rvm install 1.9.3 && rvm --default use 1.9.3
