@@ -8,7 +8,7 @@ update_apt_get(){
 install_rvm(){
 	curl -L https://get.rvm.io | bash -s stable
 	source "$HOME/.rvm/scripts/rvm"
-	echo q | rvm install 1.9.3
+	command rvm install 1.9.3
 	rvm --default use 1.9.3
 }
 
