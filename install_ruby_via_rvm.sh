@@ -19,4 +19,4 @@ source $HOME/.bashrc
 command rvm install 1.9.3
 
 # set ruby 1.9.3 as default use
-rvm --default use 1.9.3)
+rvm --default use 1.9.3
