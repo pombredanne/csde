@@ -17,6 +17,7 @@ source "$HOME/.rvm/scripts/rvm"
 # prevent that rvm is loaded as a FUNCTION
 command rvm install 1.9.3
 
+# RVM is a function
 type rvm | head -n 1
 
 # set ruby 1.9.3 as default use
