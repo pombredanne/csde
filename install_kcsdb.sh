@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-#set -e
-#set -x
 
 default_rubygems_version="1.8.24"
 bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
@@ -13,37 +11,6 @@ welcome(){
 
 pause(){
    read -p "$*"
-}
-
-update_apt_get(){
-	echo "::: Updating apt-get..."
-	apt-get update -qq # only relevant info in stdout
-  apt-get upgrade -qq
-}
-
-install_packages_via_apt_get(){
-	echo "::: Installing needed packages..."
-  apt-get install nodejs wget ssl-cert openjdk-6-jdk ruby1.9.1-full libsqlite3-dev libopenssl-ruby libxslt-dev libxml2-dev -qq
-  #gem install rubygems-update --no-ri --no-rdoc
-  #update_rubygems
-}
-
-build_rubygems() {
-  # Download and extract the source
-  (cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-${default_rubygems_version}.tgz)
-  (cd /tmp && tar xfz rubygems-${default_rubygems_version}.tgz)
-
-  # Setup and install
-  (cd /tmp/rubygems-${default_rubygems_version} && ruby setup.rb --no-format-executable)
-
-  # Clean up the source artifacts
-  rm -rf /tmp/rubygems-${default_rubygems_version}*
-}
-
-install_needed_gems(){
-	echo "::: Installing needed gems..."
-	gem install bundler -v '1.1.4' --no-ri --no-rdoc
-	bundle update
 }
 
 build_chef_solo_config() {
@@ -71,8 +38,11 @@ run_chef_solo(){
 	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
-make_state_file(){
-	cp chef-repo/.chef/conf/state.tmpl.yml chef-repo/.chef/conf/state.yml
+install_kcsdb(){
+	echo "::: Installing KCSDB..."
+	git clone https://github.com/lehoanganh/kcsdb.git
+	(cd $HOME/kcsdb && bundle update)
+	cp $HOME/kcsdb/chef-repo/.chef/conf/state.tmpl.yml $HOME/kcsdb/chef-repo/.chef/conf/state.yml
 }
 
 bye(){
@@ -83,11 +53,7 @@ bye(){
 
 welcome
 pause 'Press [Enter] key to install KCSDB...'
-#update_apt_get
-#install_packages_via_apt_get
-#build_rubygems
-#install_needed_gems
 build_chef_solo_config
 run_chef_solo
-#make_state_file
-#bye
+install_kcsdb
+bye
