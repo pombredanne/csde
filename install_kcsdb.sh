@@ -89,5 +89,5 @@ pause 'Press [Enter] key to install KCSDB...'
 #install_needed_gems
 build_chef_solo_config
 run_chef_solo
-make_state_file
-bye
+#make_state_file
+#bye
