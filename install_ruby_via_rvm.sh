@@ -18,7 +18,7 @@ curl -L https://get.rvm.io | bash -s stable
 . "$HOME/.bashrc"
 
 # prevent that rvm is loaded as a FUNCTION
-rvm install 1.9.3
+command rvm install 1.9.3
 
 # set ruby 1.9.3 as default use
-rvm --default use 1.9.3
+command rvm --default use 1.9.3
