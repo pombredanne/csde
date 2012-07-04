@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-default_rubygems_version="1.8.24"
 bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 
 welcome(){
