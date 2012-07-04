@@ -13,7 +13,7 @@ curl -L https://get.rvm.io | bash -s stable
 	
 # update rvm variables
 echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >> $HOME/.bashrc
-#source $HOME/.bashrc
+source $HOME/.bashrc
 
 # prevent that rvm is loaded as a FUNCTION
 rvm install 1.9.3
