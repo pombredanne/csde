@@ -62,7 +62,7 @@ start_chef_server(){
 
 bye(){
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	echo "::: KCSDB installed successfully!!! Please run 'rails server' in 'kcsdb' home folder to start KCSDB Server :::"
+	echo "::: KCSDB installed successfully!!! Please run 'rvmsudo rails server' in 'kcsdb' home folder to start KCSDB Server :::"
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 }
 
