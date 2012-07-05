@@ -9,8 +9,12 @@ set -x
 # by starting process. This script will add a new user "chef" in vhost "/chef"
 # in RabbitMQ
 
-echo "::: Starting Chef Solr..."
 # -d: detach from console
+
+echo "::: Starting Chef Expander..."
+chef-expander -d -n1
+
+echo "::: Starting Chef Solr..."
 chef-solr -d
 
 echo "::: Starting Chef Server..."
