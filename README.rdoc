@@ -29,6 +29,8 @@ OS: Ubuntu 11.10 x64
  $ . $HOME/.bashrc
 * Set ruby 1.9.3 as default
  $ rvm --default use 1.9.3
+* Install KCSDB
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh | rvmsudo bash
 
 = LICENSE:
 
