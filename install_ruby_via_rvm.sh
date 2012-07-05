@@ -14,7 +14,6 @@ curl -L https://get.rvm.io | bash -s stable
 # update rvm variables
 . "$HOME/.rvm/scripts/rvm"
 echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >> $HOME/.bashrc
-. "$HOME/.bashrc"
 
 # rvm is loaded into shell as a function
 # thus, press 'q' to continue the installation process
