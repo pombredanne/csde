@@ -1,9 +1,10 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name::       cassandra
+# Description::         Bintools
+# Recipe::              bintools
+# Author::              Benjamin Black
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2011, Benjamin Black
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +19,8 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+template "/etc/profile.d/cassandra_tools.sh" do
+  source "cassandra_tools.sh.erb"
+  owner "root"
+  mode 0644
+end

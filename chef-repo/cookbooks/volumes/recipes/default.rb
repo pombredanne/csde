@@ -1,9 +1,10 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name::       volumes
+# Description::         Placeholder -- see other recipes in ec2 cookbook
+# Recipe::              default
+# Author::              Philip (flip) Kromer - Infochimps, Inc
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2011, Philip (flip) Kromer, infochimps.com
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +19,6 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+include_recipe 'metachef'
+
+dashpot_dashboard('volumes') if defined?(dashpot_dashboard)

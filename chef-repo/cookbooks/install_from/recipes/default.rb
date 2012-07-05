@@ -1,9 +1,10 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name::       install_from
+# Description::         Base configuration for install_from
+# Recipe::              default
+# Author::              Philip (flip) Kromer - Infochimps, Inc
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2011, Philip (flip) Kromer, infochimps.com
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +19,8 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+# FIXME -- these need to be done immediately
+
+package "unzip"
+
+package "tar"

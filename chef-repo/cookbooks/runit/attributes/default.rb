@@ -1,9 +1,8 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name:: runit
+# Attribute File:: sv_bin
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2008-2009, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +17,15 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+case platform
+when "ubuntu","debian"
+  set[:runit][:sv_bin] = "/usr/bin/sv"
+  set[:runit][:chpst_bin] = "/usr/bin/chpst"
+  set[:runit][:service_dir] = "/etc/service"
+  set[:runit][:sv_dir] = "/etc/sv"
+when "gentoo"
+  set[:runit][:sv_bin] = "/usr/bin/sv"
+  set[:runit][:chpst_bin] = "/usr/bin/chpst"
+  set[:runit][:service_dir] = "/etc/service"
+  set[:runit][:sv_dir] = "/var/service"
+end

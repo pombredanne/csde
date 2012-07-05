@@ -1,9 +1,10 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name::       cassandra
+# Description::         Automatically configure iptables rules for cassandra.
+# Recipe::              iptables
+# Author::              Benjamin Black (<b@b3k.us>)
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2010, Benjamin Black
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +19,8 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+include_recipe "iptables"
+
+iptables_rule "10cassandra" do
+  source "iptables.erb"
+end

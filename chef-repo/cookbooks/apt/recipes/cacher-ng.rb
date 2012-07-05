@@ -1,9 +1,8 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name:: apt
+# Recipe:: cacher-ng
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2008-2012, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +17,14 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+package "apt-cacher-ng" do
+  action :install
+end
+
+service "apt-cacher-ng" do
+  supports :restart => true, :status => false
+  action [ :enable, :start ]
+end
+
+#this will help seed the proxy
+include_recipe "apt::cacher-client"

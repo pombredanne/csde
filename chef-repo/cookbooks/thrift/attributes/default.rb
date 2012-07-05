@@ -1,9 +1,8 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name:: thrift
+# Attributes:: default
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2011, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +17,7 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+default['thrift']['version']  = '0.8.0'
+default['thrift']['mirror']   = 'http://apache.mirrors.tds.net'
+default['thrift']['checksum'] = '5e280097d88400f5e2db75595a04e1981538e48869cd6915bb9c4831605f0793'
+default['thrift']['configure_options'] = []

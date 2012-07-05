@@ -1,9 +1,10 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name::       metachef
+# Description::         Base configuration for metachef
+# Recipe::              default
+# Author::              Philip (flip) Kromer
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2011, Philip (flip) Kromer
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +19,4 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+

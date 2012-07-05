@@ -1,9 +1,8 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: java
-# Recipe:: default
+# Cookbook Name:: apt
+# Resource:: preference
 #
-# Copyright 2008-2011, Opscode, Inc.
+# Copyright 2010-2011, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +17,13 @@
 # limitations under the License.
 #
 
-include_recipe "java::#{node['java']['install_flavor']}"
+actions :add, :remove
+
+def initialize(*args)
+  super
+  @action = :add
+end
+
+attribute :package_name, :kind_of => String, :name_attribute => true
+attribute :pin, :kind_of => String
+attribute :pin_priority, :kind_of => String
