@@ -12,8 +12,8 @@ sudo apt-get install nodejs openjdk-6-jdk build-essential openssl libreadline6 l
 curl -L https://get.rvm.io | bash -s stable
 	
 # update rvm variables
+. "$HOME/.rvm/scripts/rvm"
 echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >> $HOME/.bashrc
-#. "$HOME/.rvm/scripts/rvm"
 . "$HOME/.bashrc"
 
 # prevent that rvm is loaded as a FUNCTION
