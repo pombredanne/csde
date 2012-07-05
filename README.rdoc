@@ -31,7 +31,7 @@ OS: Ubuntu 11.10 x64
  $ rvm --default use 1.9.3
 * Load KCSDB script
  $ wget https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh
-* Set execution permisson
+* Set execution permission
  $ chmod +x install_kcsdb.sh
 * Execution with root right
  $ rvmsudo bash install_kcsdb.sh
