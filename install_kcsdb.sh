@@ -44,6 +44,18 @@ run_chef_solo(){
 	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
+start_chef_server(){
+	echo "::: Starting Chef Solr..."
+	# -d: detach from console
+	chef-solr -d
+
+	echo "::: Starting Chef Server..."
+	chef-server -d
+
+	echo "::: Starting Chef Server WebUI..."
+	chef-server-webui -d
+}
+
 bye(){
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: KCSDB installed successfully!!! Please run 'rails server' in 'kcsdb' home folder to start KCSDB Server :::"
@@ -55,4 +67,5 @@ pause 'Press [Enter] key to install KCSDB...'
 install_kcsdb
 build_chef_solo_config
 run_chef_solo
+start_chef_server
 bye
