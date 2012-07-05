@@ -23,7 +23,7 @@ build_chef_solo_config() {
 	echo "::: Building configurations for chef-solo..."
   mkdir -p /etc/chef
 
-  cat > /etc/chef/solo.rb <<SOLO_RB| grep 
+  cat > /etc/chef/solo.rb <<SOLO_RB
 file_cache_path "/tmp/chef-solo"
 cookbook_path   "/tmp/chef-solo/cookbooks"
 SOLO_RB
@@ -47,8 +47,8 @@ run_chef_solo(){
 start_chef_server(){
 	# -d: detach from console
 	
-	echo "::: Starting Chef Expander..."
-	chef-expander -d -n1
+	#echo "::: Starting Chef Expander..."
+	#chef-expander -d -n1
 
 	echo "::: Starting Chef Solr..."
 	chef-solr -d
