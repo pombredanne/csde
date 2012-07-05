@@ -20,6 +20,11 @@ class DashboardController < ApplicationController
     @status << "Click on tab <strong>Configuration</strong> to go to <strong>Chef Server</strong>\n"
     @status << "Click on tab <strong>Monitoring</strong> to go to <strong>Ganglia Server</strong>\n"
     @status << "Click on tab <strong>Benchmark</strong> to define your <strong>benchmark profiles</strong>"
+    
+    state['chef_client_identity_file'] = "#{Rails.root}/chef-repo/.chef/pem/#{@key_pair_name}.pem"
+    state['chef_client_template_file'] = "#{Rails.root}/chef-repo/bootstrap/ubuntu12.04-gems.erb"
+    
+    update_state state
   end
   
   
