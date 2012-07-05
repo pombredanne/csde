@@ -10,7 +10,8 @@ set -x
 # in RabbitMQ
 
 echo "::: Starting Chef Solr..."
-chef-solr
+# -d: detach from console
+chef-solr -d
 
 echo "::: Starting Chef Server..."
 chef-server -d
