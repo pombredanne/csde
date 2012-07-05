@@ -254,7 +254,7 @@ class ChefNodeController < ApplicationController
     chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
     chef_client_template_file = state['chef_client_template_file']
    
-    knife_ec2_bootstrap_string << "knife ec2 server create "
+    knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
     knife_ec2_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     knife_ec2_bootstrap_string << "--aws-access-key-id #{aws_access_key_id} "
     knife_ec2_bootstrap_string << "--aws-secret-access-key #{aws_secret_access_key} "
