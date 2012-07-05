@@ -12,13 +12,11 @@ sudo apt-get install nodejs openjdk-6-jdk build-essential openssl libreadline6 l
 curl -L https://get.rvm.io | bash -s stable
 	
 # update rvm variables
-source "$HOME/.rvm/scripts/rvm"
-	
-# prevent that rvm is loaded as a FUNCTION
+echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >> $HOME/.bashrc
+. "$HOME/.rvm/scripts/rvm"
+
+# rvm is NOT loaded into shell as a function
 command rvm install 1.9.3
 
-# RVM is a function
-type rvm | head -n 1
-
-# set ruby 1.9.3 as default use
-rvm --default use 1.9.3
+# do NOT forget to set ruby 1.9.3 as default use
+# rvm --default use 1.9.3
