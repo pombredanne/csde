@@ -17,7 +17,7 @@ echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loa
 
 # rvm is loaded into shell as a function
 # thus, press 'q' to continue the installation process
-rvm install 1.9.3
+command rvm install 1.9.3
 
 # set ruby 1.9.3 as default use
 rvm --default use 1.9.3
