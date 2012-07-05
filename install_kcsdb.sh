@@ -23,7 +23,7 @@ build_chef_solo_config() {
 	echo "::: Building configurations for chef-solo..."
   mkdir -p /etc/chef
 
-  cat > /etc/chef/solo.rb <<SOLO_RB
+  cat > /etc/chef/solo.rb <<SOLO_RB| grep 
 file_cache_path "/tmp/chef-solo"
 cookbook_path   "/tmp/chef-solo/cookbooks"
 SOLO_RB
