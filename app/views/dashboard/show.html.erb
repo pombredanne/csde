@@ -180,7 +180,18 @@
 				
 				<!-- Automated Benchmark -->
 				<div id="tabs-3">
-
+		 			<%= form_tag('/chef_node/create') do %>
+				  	<%= label_tag "Flavor Create", "Choose a machine type" %>
+				    <input type="radio" name="flavor_create" id="small_create" value="small_create"><label for="small_create">Small</label></input>
+				    <input type="radio" name="flavor_create" id="medium_create" value="medium_create"><label for="medium_create">Medium</label></input>
+				    <input type="radio" name="flavor_create" id="large_create" value="large_create"><label for="large_create">Large</label></input>
+				    </br>
+				
+				    <%= label_tag "Number", "How many machines" %>
+				    <td><%= text_field_tag "number_create", "dummy" %></td>
+				
+					  <button id="createChefNodes" type="submit">Create</button>
+				 	<% end %>
 				</div>
 				
 				<!-- Credentials -->
