@@ -22,15 +22,13 @@ OS: Ubuntu 12.04 x64
 AMI: ami-4dad7424
 OS: Ubuntu 11.10 x64
 
-* Lauching a virtual machine
-* Install git
- sudo apt-get install git -qq
-* Clone KCSDB project
- $ git clone https://github.com/lehoanganh/kcsdb.git
-* Go to KCSDB top level folder
- cd kcsdb
-* Execute installation script with sudo right
- kcsdb $ sudo bash install_script.sh
+* Lauch a virtual machine
+* Download the install_ruby_via_rvm.sh script to install ruby
+ $ wget https://raw.github.com/lehoanganh/kcsdb/master/install_ruby_via_rvm.sh
+* Make the script executable
+ $ chmod +x install_ruby_via_rvm.sh
+* Execution
+ $ ./install_ruby_via_rvm.sh
 
 = LICENSE:
 
