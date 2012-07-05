@@ -23,12 +23,12 @@ AMI: ami-4dad7424
 OS: Ubuntu 11.10 x64
 
 * Lauch a virtual machine
-* Download the install_ruby_via_rvm.sh script to install ruby
- $ wget https://raw.github.com/lehoanganh/kcsdb/master/install_ruby_via_rvm.sh
-* Make the script executable
- $ chmod +x install_ruby_via_rvm.sh
-* Execution
- $ ./install_ruby_via_rvm.sh
+* Download and execute install_ruby_via_rvm.sh script to install ruby 1.9.3
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_ruby_via_rvm.sh | bash
+* Load rvm into shell
+ $ . $HOME/.bashrc
+* Set ruby 1.9.3 as default
+ $ rvm --default use 1.9.3
 
 = LICENSE:
 
