@@ -67,7 +67,7 @@ bye(){
 }
 
 welcome
-pause 'Press [Enter] key to install KCSDB...'
+#pause 'Press [Enter] key to install KCSDB...'
 install_kcsdb
 build_chef_solo_config
 run_chef_solo
