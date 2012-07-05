@@ -9,7 +9,16 @@ set -x
 # by starting process. This script will add a new user "chef" in vhost "/chef"
 # in RabbitMQ
 
-/etc/init.d/chef-server start
+echo "::: Starting Chef Solr..."
+chef-solr
+
+echo "::: Starting Chef Server..."
+chef-server -d
+
+echo "::: Starting Chef Server WebUI..."
+chef-server-webui -d
+
+echo "::: Setting up the RabbitMQ queue..."
 rabbitmqctl add_vhost /chef
 rabbitmqctl add_user chef testing
-rabbitmqctl set_permissions -p /chef chef '.*' '.*' '.*'
+rabbitmqctl set_permissions -p /chef chef ".*" ".*" ".*"
