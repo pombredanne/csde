@@ -23,7 +23,8 @@ chef-server -d
 echo "::: Starting Chef Server WebUI..."
 chef-server-webui -d
 
-echo "::: Setting up the RabbitMQ queue..."
-rabbitmqctl add_vhost /chef
-rabbitmqctl add_user chef testing
-rabbitmqctl set_permissions -p /chef chef ".*" ".*" ".*"
+# fixed already in chef 10.12.0??
+#echo "::: Setting up the RabbitMQ queue..."
+#rabbitmqctl add_vhost /chef
+#rabbitmqctl add_user chef testing
+#rabbitmqctl set_permissions -p /chef chef ".*" ".*" ".*"
