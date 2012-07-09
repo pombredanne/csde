@@ -1,7 +1,7 @@
 bash -c '
 <%= "export http_proxy=\"#{knife_config[:bootstrap_proxy]}\"" if knife_config[:bootstrap_proxy] -%>
 
-if [ ! -f /usr/bin/chef-client ]; then
+<!-- if [ ! -f /usr/bin/chef-client ]; then
   apt-get update -y
   apt-get install -y ruby1.9.1-full ruby1.9.1-dev build-essential wget libruby1.9.1
   (cd /tmp && wget http://production.cf.rubygems.org/rubygems/rubygems-1.8.24.tgz)
@@ -12,8 +12,7 @@ fi
 
 gem update --no-rdoc --no-ri
 gem install ohai --no-rdoc --no-ri --verbose
-gem install chef --no-rdoc --no-ri --verbose <%= bootstrap_version_string %>
-
+gem install chef --no-rdoc --no-ri --verbose <%= bootstrap_version_string %> -->
 mkdir -p /etc/chef
 
 (
