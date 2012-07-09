@@ -61,7 +61,7 @@ default[:cassandra][:mx4j_port]  = "8081"
 #
 
 # install_from_release
-default[:cassandra][:version]           = "0.7.10"
+default[:cassandra][:version]           = "1.1.2"
 # install_from_release: tarball url
 default[:cassandra][:release_url]       = ":apache_mirror:/cassandra/:version:/apache-cassandra-:version:-bin.tar.gz"
 
