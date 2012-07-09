@@ -82,4 +82,6 @@ install_kcsdb
 build_chef_solo_config
 run_chef_solo
 start_chef_server
+upload_cookbooks
+upload_roles
 bye
