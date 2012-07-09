@@ -5,13 +5,13 @@ class ConfigurationController < ApplicationController
   # update state.yml
   def edit_aws
     state = get_state
-    state[:aws_access_key_id] = params[:aws_access_key_id]
-    state[:aws_secret_access_key] = params[:aws_secret_access_key]
-    state[:key_pair_name] = params[:key_pair_and_group]
-    state[:security_group_name] = params[:key_pair_and_group]
-    state[:chef_client_aws_ssh_key_id] = params[:key_pair_and_group]
-    state[:chef_client_identity_file] = "#{Rails.root}/chef-repo/.chef/pem/#{params[:key_pair_and_group]}.pem"
-    state[:chef_client_template_file] = "#{Rails.root}/chef-repo/bootstrap/ubuntu12.04-gems.erb"
+    state['aws_access_key_id'] = params[:aws_access_key_id]
+    state['aws_secret_access_key'] = params[:aws_secret_access_key]
+    state['key_pair_name'] = params[:key_pair_and_group]
+    state['security_group_name'] = params[:key_pair_and_group]
+    state['chef_client_aws_ssh_key_id'] = params[:key_pair_and_group]
+    state['chef_client_identity_file'] = "#{Rails.root}/chef-repo/.chef/pem/#{params[:key_pair_and_group]}.pem"
+    state['chef_client_template_file'] = "#{Rails.root}/chef-repo/bootstrap/ubuntu12.04-gems.erb"
     update_state state    
     
     ec2 = create_ec2
