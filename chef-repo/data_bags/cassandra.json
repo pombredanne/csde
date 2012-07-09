@@ -1,4 +1,4 @@
-{:id : "clusters",
+{"id" : "clusters",
      {'Test Cluster' =>
        {:keyspaces =>
          {'usertable' => {
