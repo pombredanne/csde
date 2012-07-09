@@ -4,7 +4,7 @@ class DashboardController < ApplicationController
 
   # KCSDB starts from here
   def show
-    # update_knife_rb
+    update_knife_rb
     
     state = get_state
     
