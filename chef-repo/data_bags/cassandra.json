@@ -1,0 +1,9 @@
+{:id : "clusters",
+     {'Test Cluster' =>
+       {:keyspaces =>
+         {'usertable' => {
+           
+         }}
+       }
+     }
+}
