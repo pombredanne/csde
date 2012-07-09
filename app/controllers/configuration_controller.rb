@@ -17,8 +17,8 @@ class ConfigurationController < ApplicationController
     logger.debug "Checking the key pair"
     logger.debug "====================="
 
-    key_pair_name = state['key_pair_name']
-    security_group_name = state['security_group_name']
+    key_pair_name = params[:key_pair_and_group]
+    security_group_name = params[:key_pair_and_group]
 
     private_key_path = File.expand_path "#{Rails.root}/chef-repo/.chef/pem/#{key_pair_name}.pem"    
     
