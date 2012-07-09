@@ -67,7 +67,7 @@ upload_cookbooks(){
 
 upload_roles(){
 	echo "::: Uploading roles to chef-server..."
-	knife role from file /home/ubuntu/kcsdb/chef-repo/roles/init.rb --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb	
+	knife role from file /home/ubuntu/kcsdb/chef-repo/roles/cassandra.json --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb	
 }
 
 bye(){
