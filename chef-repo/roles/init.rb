@@ -1,10 +1,5 @@
 name "init"
 description "standard package"
-override_attributes(
-  "java" => {
-    "install_flavor" => "openjdk"
-  }
-)
 run_list (
-    "recipe[java]"
+    "recipe[cassandra::install_from_release]"
 )

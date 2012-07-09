@@ -60,6 +60,16 @@ start_chef_server(){
 	chef-server-webui -d
 }
 
+upload_cookbooks(){
+	echo "::: Uploading cookbooks to chef-server..."
+	knife cookbook upload --all --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb
+}
+
+upload_roles(){
+	echo "::: Uploading roles to chef-server..."
+	knife role from file /home/ubuntu/kcsdb/chef-repo/roles/init.rb --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb	
+}
+
 bye(){
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: KCSDB installed successfully!!! Please run 'rvmsudo rails server' in 'kcsdb' home folder to start KCSDB Server :::"
