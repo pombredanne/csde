@@ -37,8 +37,8 @@ include_recipe "cassandra::setup_repos"
 # instead user java recipe.
 
 #node["java"]["install_flavor"] = "oracle"
-node["java"]["install_flavor"] = "openjdk"
-include_recipe "java" 
+#node["java"]["install_flavor"] = "openjdk"
+#include_recipe "java" 
 
 if OPTIONAL_INSTALL
   include_recipe "cassandra::optional_packages"
