@@ -15,19 +15,28 @@
 
 # Stop Cassandra if it is running.
 # Different for Debian due to service package.
-if node[:platform] == "debian"
-  service "cassandra" do
-    action :stop
-    ignore_failure true
-  end
-else
-  service "cassandra" do
-    action :stop
-  end
-end
+
+# LHA
+# from a fresh AMI, there is no cassandra
+
+# if node[:platform] == "debian"
+  # service "cassandra" do
+    # action :stop
+    # ignore_failure true
+  # end
+# else
+  # service "cassandra" do
+    # action :stop
+  # end
+# end
 
 # Only for debug purposes
-OPTIONAL_INSTALL = true
+# OPTIONAL_INSTALL = true
+
+# LHA
+# no debug
+OPTIONAL_INSTALL = false
+
 
 
 
