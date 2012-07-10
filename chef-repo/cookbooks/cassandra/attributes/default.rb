@@ -4,7 +4,7 @@
 # Here is the first place to start
 
 default[:setup][:deployment] = "11x"    # Choices are "07x", or "08x"
-default[:setup][:cluster_size] = 2
+default[:setup][:cluster_size] = 1
 default[:setup][:current_role] = "cassandra"
 
 # A unique name is preferred to stop the risk of different clusters joining each other
