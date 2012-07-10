@@ -28,6 +28,8 @@ package "cassandra" do
 end
 
 service "cassandra" do 
-  supports :status => true, :restart => true, :reload => true
-  action [ :enable, :start ]
+  # supports :status => true, :restart => true, :reload => true
+  supports :status => true, :restart => true, :reload => true, :stop => true, :start => true
+  # action [ :enable, :start ]
+  action [ :enable, :stop ]
 end
