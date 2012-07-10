@@ -6,7 +6,7 @@ key_pair_name: dummy # Key Pair in AWS EC2
 security_group_name: dummy # Security Group in AWS EC2
 
 # Chef Client
-# chef_client_ami: ami-6fc46b06 # Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 OpenJDK, Ohai, Chef 10.12.0
+# chef_client_ami: ami-07b6196e # Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
 chef_client_ami: ami-82fa58eb # Canonical AMI pure 12.04 x64 US-EAST-1
 chef_client_ssh_user: ubuntu # SSH Login User
 chef_client_bootstrap_version: 10.12.0
