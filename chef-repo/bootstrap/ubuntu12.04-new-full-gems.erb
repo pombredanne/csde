@@ -10,7 +10,6 @@ if [ ! -f /usr/bin/chef-client ]; then
   rm -rf /tmp/rubygems-1.8.24
 fi
 
-gem update --no-rdoc --no-ri
 gem install ohai --no-rdoc --no-ri --verbose
 gem install chef --no-rdoc --no-ri --verbose <%= bootstrap_version_string %>
 
