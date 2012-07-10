@@ -40,24 +40,13 @@ include_recipe "cassandra::setup_repos"
 #node["java"]["install_flavor"] = "openjdk"
 #include_recipe "java" 
 
+# LHA
+# java recipe is not needed anymore
+# in order to save time, an ready AMI (Java and co.) is used to bootstrap
+
 if OPTIONAL_INSTALL
   include_recipe "cassandra::optional_packages"
 end
 
 include_recipe "cassandra::additional_settings"
 include_recipe "cassandra::install"
-
-
-# include_recipe "cassandra::raid"
-#include_recipe "cassandra::token_generation"
-#include_recipe "cassandra::create_seed_list"
-#include_recipe "cassandra::write_configs"
-#include_recipe "cassandra::restart_service"
-#
-#start service if not running
-
-#service "cassandra" do
-#    action :enable
-#    supports :status => true, :restart => true, :reload => true
-#    #action :start
-#end

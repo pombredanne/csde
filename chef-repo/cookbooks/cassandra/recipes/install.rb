@@ -12,9 +12,6 @@
 # Install Cassandra
 # 
 ###################################################
-#
-#
-
 
 execute "set-java" do
    command "update-alternatives --auto java" 

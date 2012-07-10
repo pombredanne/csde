@@ -14,6 +14,10 @@
 ###################################################
 
 case node[:platform]
+  
+  # LHA
+  # KCSDB uses only Ubuntu AMIs
+  
   when "ubuntu", "debian"
     include_recipe "apt"
 
@@ -31,42 +35,19 @@ case node[:platform]
     # Adds the Cassandra repo:
     # deb http://www.apache.org/dist/cassandra/debian <07x|08x> main
     #if node[:setup][:deployment] == "08x" or node[:setup][:deployment] == "07x"
+    
+    # LHA
+    # node[:setup][:deployment] is read from attributes/default.rb
+    
     if node[:setup][:deployment] == "08x" or node[:setup][:deployment] == "07x" or node[:setup][:deployment] == "10x"  or node[:setup][:deployment] == "11x"   
       apt_repository "cassandra-repo" do
         uri "http://www.apache.org/dist/cassandra/debian"
         components [node[:setup][:deployment], "main"]
-        #keyserver "pgp.mit.edu"
         keyserver "keys.gnupg.net"
         key "2B5C1B00"
-	#key "F758CE318D77295D"
-	#F758CE318D77295D
         action :add
       end
     end
-
-    # Adds the DataStax repo:
-    # deb http://debian.riptano.com/<codename> <codename> main
-    #apt_repository "datastax-repo" do
-    #  uri "http://debian.datastax.com/" << node[:internal][:codename]
-    #  distribution node[:internal][:codename]
-    #  components ["main"]
-    #  key "http://debian.datastax.com/debian/repo_key"
-    #  #key "350200F2B999A372"
-    #  action :add
-    #end
-    # fix for add_app 
-    ##execute "add_repository_key" do
-    #	command "wget -O - http://debian.datastax.com/debian/repo_key | apt-key add -"
-    #end
-
-  # Adds the Sun Java repo: --- now added using java  
-  # deb http://archive.canonical.com lucid partner
-  #apt_repository "sun-java6-jdk" do
-  #  uri "http://archive.canonical.com"
-  #  distribution "lucid"
-  #  components ["partner"]
-  #  action :add
-  #end
 
   when "centos", "redhat", "fedora"
     if node[:platform] == "fedora"

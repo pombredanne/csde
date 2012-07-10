@@ -1,4 +1,8 @@
 # Needed for the Chef script to function properly
+
+# LHA
+# Here is the first place to start
+
 default[:setup][:deployment] = "11x"    # Choices are "07x", or "08x"
 default[:setup][:cluster_size] = 2
 default[:setup][:current_role] = "cassandra"
@@ -10,7 +14,6 @@ default[:cassandra][:cluster_name] = "KCSDB Cluster"
 # directory on two seperate drives
 default[:cassandra][:commitlog_dir] = "/var/lib"
 default[:cassandra][:data_dir] = "/var/lib"
-
 
 # Advanced Cassandra settings
 default[:cassandra][:token_position] = false
