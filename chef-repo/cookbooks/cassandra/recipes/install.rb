@@ -50,32 +50,32 @@ service "cassandra" do
   supports :status => true, :restart => true, :reload => true
   action [ :enable, :start ]
 end
-
-# Drop the config.
-template "/etc/cassandra/cassandra-env.sh" do
-   owner "cassandra"
-   group "cassandra"
-   mode "0755"
-   source "cassandra-env.sh.erb"
-   notifies :restart , resources(:service => "cassandra")
-end
-
-template "/etc/cassandra/cassandra.yaml" do
-   owner "cassandra"
-   group "cassandra"
-   mode "0644"
-   source "cassandra.yaml.erb"
-   notifies :restart , resources(:service => "cassandra")
-end
-
-template "/etc/cassandra/cassandra-topology.properties" do
-	owner "cassandra"
-	group "cassandra"
-	mode "0644"
-	source "cassandra-topology.properties.erb"
-	# Pass the topology array as 't' to the template.
-	#variables(
-	#	:t => t
-	#)
-   notifies :restart , resources(:service => "cassandra")
-end
+# 
+# # Drop the config.
+# template "/etc/cassandra/cassandra-env.sh" do
+   # owner "cassandra"
+   # group "cassandra"
+   # mode "0755"
+   # source "cassandra-env.sh.erb"
+   # notifies :restart , resources(:service => "cassandra")
+# end
+# 
+# template "/etc/cassandra/cassandra.yaml" do
+   # owner "cassandra"
+   # group "cassandra"
+   # mode "0644"
+   # source "cassandra.yaml.erb"
+   # notifies :restart , resources(:service => "cassandra")
+# end
+# 
+# template "/etc/cassandra/cassandra-topology.properties" do
+	# owner "cassandra"
+	# group "cassandra"
+	# mode "0644"
+	# source "cassandra-topology.properties.erb"
+	# # Pass the topology array as 't' to the template.
+	# #variables(
+	# #	:t => t
+	# #)
+   # notifies :restart , resources(:service => "cassandra")
+# end

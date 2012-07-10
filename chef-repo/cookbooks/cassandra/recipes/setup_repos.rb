@@ -43,8 +43,10 @@ case node[:platform]
       apt_repository "cassandra-repo" do
         uri "http://www.apache.org/dist/cassandra/debian"
         components [node[:setup][:deployment], "main"]
-        keyserver "keys.gnupg.net"
-        key "2B5C1B00"
+        # keyserver "keys.gnupg.net"
+        # key "2B5C1B00"
+        keyserver "pgp.mit.edu"
+        key "4BD736A82B5C1B00"
         action :add
       end
     end
