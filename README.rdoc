@@ -32,6 +32,13 @@ OS: Ubuntu 11.10 x64
 * Install KCSDB
  $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh | rvmsudo bash
 
+= USEFUL
+Oracle does not support direct download of JDK from the officical site any more. You have to read and agree Oracle's rules.
+Thus, use another way to install Sun JDK
+ $ curl -L https://github.com/flexiondotorg/oab-java6/raw/0.2.4/oab-java.sh | sudo bash
+ $ sudo apt-get install sun-java6-jdk
+ $ export JAVA_HOME=/usr/lib/jvm/java-6-sun
+
 = LICENSE:
 
 Author:: Hoang Anh Le (<me@lehoanganh.de>) | Markus Klems (<Markus.Klems@aifb.uni-karlsruhe.de>)
