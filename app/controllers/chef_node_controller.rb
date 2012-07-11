@@ -23,7 +23,7 @@ class ChefNodeController < ApplicationController
     
     threads = []
     number.times do
-      thread = Thread.new { system(knife_ec2_bootstrap flavor token)}
+      thread = Thread.new { system(knife_ec2_bootstrap flavor,token)}
       threads << thread
     end
     
