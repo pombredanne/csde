@@ -1,4 +1,4 @@
-chef_server_url 'http://:4000'
+chef_server_url 'http://localhost:4000'
 node_name 'chef-webui'
 client_key '/etc/chef/webui.pem'
 validation_client_name 'chef-validator'
