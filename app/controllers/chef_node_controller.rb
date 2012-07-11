@@ -74,7 +74,7 @@ class ChefNodeController < ApplicationController
     knife_ec2_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
     knife_ec2_bootstrap_string << "--yes "
     knife_ec2_bootstrap_string << "--no-host-key-verify "
-    knife_ec2_bootstrap_string << "--json-attributes #{chef_client_token_position} "
+    knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
     # knife_ec2_bootstrap_string << "-VV "
     
     logger.debug "::: The knife bootstrap command: #{knife_ec2_bootstrap_string}"
