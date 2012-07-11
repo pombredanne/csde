@@ -25,7 +25,7 @@ class ChefNodeController < ApplicationController
     
     threads = []
     number.times do
-      thread = Thread.new { system(knife_ec2_bootstrap flavor,tags)}
+      thread = Thread.new { system(knife_ec2_bootstrap flavor,token)}
       threads << thread
     end
     
@@ -38,7 +38,7 @@ class ChefNodeController < ApplicationController
   # flavor: m1.small | m1.medium | m1.large
   # token: which token position should the node have, the token is passed by KCSDB Server
   private
-  def knife_ec2_bootstrap flavor,tags
+  def knife_ec2_bootstrap flavor,token
     
     $stdout.sync = true
     
@@ -58,7 +58,7 @@ class ChefNodeController < ApplicationController
     chef_client_role = state['chef_client_role']
     chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
     chef_client_template_file = state['chef_client_template_file']
-    chef_client_token_position = tags
+    chef_client_token_position = token
    
     knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
     knife_ec2_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
@@ -76,7 +76,7 @@ class ChefNodeController < ApplicationController
     knife_ec2_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
     knife_ec2_bootstrap_string << "--yes "
     knife_ec2_bootstrap_string << "--no-host-key-verify "
-    knife_ec2_bootstrap_string << "--tags \'#{chef_client_token_position}\' "
+    knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
     # knife_ec2_bootstrap_string << "-VV "
     
     logger.debug "::: The knife bootstrap command: #{knife_ec2_bootstrap_string}"
