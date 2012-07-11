@@ -35,7 +35,9 @@ service "cassandra" do
 end
 
 # Test
-execute "token" do
-  command "echo #{node[:token_dummy]} > $HOME/token.txt"
-  action :nothing
-end
+# execute "token" do
+  # command "echo #{node[:token_dummy]} > $HOME/token.txt"
+  # action :nothing
+# end
+
+execute "echo #{node[:token_dummy]} > $HOME/token.txt"
