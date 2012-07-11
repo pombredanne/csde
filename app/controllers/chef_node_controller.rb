@@ -18,7 +18,7 @@ class ChefNodeController < ApplicationController
     end
     logger.debug "::: Flavor: #{flavor} selected..."
     
-    token = '{ "token_dummy" : "0000"}'
+    token = '{"lha" : "0000"}'
     puts token
     
     tags = 'tokendummy=0000000'
