@@ -18,12 +18,12 @@ gem 'fog', '1.3.1'
 gem 'chef', '10.12.0'
 # gem 'chef-server', '10.12.0'
 
+# support --json-attributes, which is not supported
 gem 'knife-ec2', :git => 'https://github.com/johntdyer/knife-ec2.git'
-# Knife Commands on EC2
 # gem 'knife-ec2', '0.5.12'
 
 # Capistrano
-gem 'capistrano', '2.12.0'
+# gem 'capistrano', '2.12.0'
 
 # upload bootstrap script to Chef Server
 # gem 'net-ssh', '2.5.2'
