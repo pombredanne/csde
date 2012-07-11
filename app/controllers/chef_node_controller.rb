@@ -36,7 +36,7 @@ class ChefNodeController < ApplicationController
   # flavor: m1.small | m1.medium | m1.large
   # token: which token position should the node have, the token is passed by KCSDB Server
   private
-  def knife_ec2_bootstrap flavor, token
+  def knife_ec2_bootstrap flavor,token
     
     $stdout.sync = true
     
