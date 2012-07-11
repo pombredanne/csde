@@ -1,6 +1,6 @@
-chef_server_url 'http://localhost:4000'
+chef_server_url 'http://:4000'
 node_name 'chef-webui'
 client_key '/etc/chef/webui.pem'
 validation_client_name 'chef-validator'
 validation_key '/etc/chef/validation.pem'
-cookbook_path '/home/ubuntu/kcsdb/chef-repo/cookbooks'
+cookbook_path '/home/lha/Dev/git/kcsd/chef-repo/cookbooks'

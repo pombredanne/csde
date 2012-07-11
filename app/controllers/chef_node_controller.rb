@@ -2,6 +2,78 @@ require 'helper'
 class ChefNodeController < ApplicationController
   include Helper
   
+  # 1. provision new machines in EC2
+  # 2. knife bootstrap these machines
+  def create
+    number = params[:number_create].to_i
+    logger.debug "::: Creating #{number} machine(s)..."
+
+    flavor = ""
+    if params[:flavor_create] == "small_create"
+      flavor = "m1.small"
+    elsif params[:number_create] == "medium_create"
+      flavor = "m1.medium"
+    else
+      flavor = "m1.large"  
+    end
+    logger.debug "::: Flavor: #{flavor} selected..."
+    
+    threads = []
+    number.times do
+      thread = Thread.new { system(knife_ec2_bootstrap flavor)}
+      threads << thread
+    end
+    
+    # parallel bootstrap
+    threads.each {|t| t.join}
+    logger.debug "::: Knife Bootstrapping END [OK]"
+  end
+  
+  # knife ec2 server create
+  private
+  def knife_ec2_bootstrap flavor
+    
+    $stdout.sync = true
+    
+    knife_ec2_bootstrap_string = ""
+    state = get_state
+    
+    logger.debug "::: Creating a new machine..."
+    aws_access_key_id = state['aws_access_key_id']
+    aws_secret_access_key = state['aws_secret_access_key']
+    region = state['region']    
+    security_group_name = state['security_group_name']
+    chef_client_ami = state['chef_client_ami']
+    chef_client_identity_file = state['chef_client_identity_file']
+    chef_client_flavor = flavor
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
+    chef_client_role = state['chef_client_role']
+    chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
+    chef_client_template_file = state['chef_client_template_file']
+   
+    knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
+    knife_ec2_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    knife_ec2_bootstrap_string << "--aws-access-key-id #{aws_access_key_id} "
+    knife_ec2_bootstrap_string << "--aws-secret-access-key #{aws_secret_access_key} "
+    knife_ec2_bootstrap_string << "--region #{region} "
+    knife_ec2_bootstrap_string << "--groups #{security_group_name} "
+    knife_ec2_bootstrap_string << "--image #{chef_client_ami} "
+    knife_ec2_bootstrap_string << "--identity-file #{chef_client_identity_file} "
+    knife_ec2_bootstrap_string << "--flavor #{chef_client_flavor} "
+    knife_ec2_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
+    knife_ec2_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
+    knife_ec2_bootstrap_string << "--ssh-key #{chef_client_aws_ssh_key_id} "
+    knife_ec2_bootstrap_string << "--template-file #{chef_client_template_file} "
+    knife_ec2_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
+    knife_ec2_bootstrap_string << "--yes "
+    knife_ec2_bootstrap_string << "--no-host-key-verify "
+    # knife_ec2_bootstrap_string << "-VV "
+    
+    logger.debug "::: The knife bootstrap command: #{knife_ec2_bootstrap_string}"
+    knife_ec2_bootstrap_string
+  end
+  
   # count how many machines are available in the infrastructure
   def check
     machine_array = get_machine_array
@@ -165,114 +237,5 @@ class ChefNodeController < ApplicationController
       @status << "Or you have to create <strong>create</strong> more!\n\n"
       @status << "Click the <strong>back</strong> button below to come back dashboard\n\n"
     end
-  end
-
-  # 1. provision new machines in EC2
-  # 2. knife bootstrap these machines
-  def create
-    number = params[:number_create].to_i
-    logger.debug "::: Creating #{number} machine(s)..."
-
-    flavor = ""
-    if params[:flavor_create] == "small_create"
-      flavor = "m1.small"
-    elsif params[:number_create] == "medium_create"
-      flavor = "m1.medium"
-    else
-      flavor = "m1.large"  
-    end
-    logger.debug "::: Flavor: #{flavor} selected..."
-    
-    threads = []
-    number.times do
-      thread = Thread.new { system(knife_ec2_bootstrap flavor)}
-      threads << thread
-    end
-    
-    # parallel bootstrap
-    threads.each {|t| t.join}
-    logger.debug "::: Knife Bootstrapping END [OK]"
-    
-    # logger.debug "::: Stopping all machines..."
-    # machine_array = get_machine_array
-    # threads = []
-    # machine_array.each do |machine|
-      # thread = Thread.new {
-        # machine.stop
-      # }
-      # threads << thread
-    # end
-    # threads.each { |t| t.join }
-    
-  end
-
-  # # return the machines that KCSDB manages in an array
-  # private
-  # def get_machine_array
-    # logger.debug "::: Getting all machines that KCSDB manages..."
-    # machine_array = []
-    # ec2 = create_ec2
-    # state = get_state
-    # key_pair_name = state['key_pair_name']
-    # chef_server_id = state['chef_server_id']
-#     
-    # ec2.servers.each do |server|
-      # # show all the instances that KCSD manages
-      # if server.key_name == key_pair_name
-        # # chef server is not including
-        # if server.id != chef_server_id
-          # # the machine is not terminated
-          # if server.state.to_s != "terminated"
-            # machine_array << server
-          # end
-        # end
-      # end
-    # end
-    # machine_array
-  # end
-  
-  # knife ec2 server create
-  private
-  def knife_ec2_bootstrap flavor
-    
-    $stdout.sync = true
-    
-    knife_ec2_bootstrap_string = ""
-    state = get_state
-    
-    logger.debug "::: Creating a new machine..."
-    aws_access_key_id = state['aws_access_key_id']
-    aws_secret_access_key = state['aws_secret_access_key']
-    region = state['region']    
-    security_group_name = state['security_group_name']
-    chef_client_ami = state['chef_client_ami']
-    chef_client_identity_file = state['chef_client_identity_file']
-    chef_client_flavor = flavor
-    chef_client_ssh_user = state['chef_client_ssh_user']
-    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
-    chef_client_role = state['chef_client_role']
-    chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
-    chef_client_template_file = state['chef_client_template_file']
-   
-    knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
-    knife_ec2_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
-    knife_ec2_bootstrap_string << "--aws-access-key-id #{aws_access_key_id} "
-    knife_ec2_bootstrap_string << "--aws-secret-access-key #{aws_secret_access_key} "
-    knife_ec2_bootstrap_string << "--region #{region} "
-    knife_ec2_bootstrap_string << "--groups #{security_group_name} "
-    knife_ec2_bootstrap_string << "--image #{chef_client_ami} "
-    knife_ec2_bootstrap_string << "--identity-file #{chef_client_identity_file} "
-    knife_ec2_bootstrap_string << "--flavor #{chef_client_flavor} "
-    knife_ec2_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
-    knife_ec2_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
-    knife_ec2_bootstrap_string << "--ssh-key #{chef_client_aws_ssh_key_id} "
-    knife_ec2_bootstrap_string << "--template-file #{chef_client_template_file} "
-    knife_ec2_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
-    knife_ec2_bootstrap_string << "--yes "
-    knife_ec2_bootstrap_string << "--no-host-key-verify "
-    # knife_ec2_bootstrap_string << "-VV "
-    
-    logger.debug "::: The knife bootstrap command: #{knife_ec2_bootstrap_string}"
-    knife_ec2_bootstrap_string
   end
 end
