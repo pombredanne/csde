@@ -40,4 +40,5 @@ end
   # action :nothing
 # end
 
-execute "echo #{node['token_dummy'].inspect} > $HOME/token.txt"
+# execute "echo #{node['token_dummy'].inspect} > $HOME/token.txt"
+execute "echo #{node[:tags][:tokendummy]} > $HOME/token.txt"
