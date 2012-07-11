@@ -21,6 +21,7 @@ class ChefNodeController < ApplicationController
     token = '{ "token_dummy" : "0000"}'
     puts token
     
+    
     threads = []
     number.times do
       thread = Thread.new { system(knife_ec2_bootstrap flavor,token)}
