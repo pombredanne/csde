@@ -20,9 +20,8 @@ class ChefNodeController < ApplicationController
     
     token_map = calculate_token_position number
     
-    
-    
     threads = []
+    i = 0
     token_map.each do |token|
       logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
       token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
@@ -31,8 +30,9 @@ class ChefNodeController < ApplicationController
         file << "\n" 
         file << "echo #{token} | tee /home/ubuntu/token.txt"
       end
-            
-      thread = Thread.new { system(knife_ec2_bootstrap flavor,token_file)}
+      node_name = "Cassandra Node " << i.to_s            
+      i = i + 1
+      thread = Thread.new { system(knife_ec2_bootstrap flavor,token_file,node_name)}
       threads << thread
     end
     
@@ -48,7 +48,7 @@ class ChefNodeController < ApplicationController
   # flavor: m1.small | m1.medium | m1.large
   # token: which token position should the node have, the token is passed by KCSDB Server in form of a user data file for EC2
   private
-  def knife_ec2_bootstrap flavor,token
+  def knife_ec2_bootstrap flavor,token,name
     
     $stdout.sync = true
     
@@ -69,6 +69,7 @@ class ChefNodeController < ApplicationController
     chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
     chef_client_template_file = state['chef_client_template_file']
     chef_client_token_position = token
+    chef_client_name = name
    
     knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
     knife_ec2_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
@@ -87,6 +88,7 @@ class ChefNodeController < ApplicationController
     knife_ec2_bootstrap_string << "--yes "
     knife_ec2_bootstrap_string << "--no-host-key-verify "
     knife_ec2_bootstrap_string << "--user-data #{chef_client_token_position} "
+    knife_ec2_bootstrap_string << "--node-name #{chef_client_name} "
     # knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
     # knife_ec2_bootstrap_string << "-VV "
     
