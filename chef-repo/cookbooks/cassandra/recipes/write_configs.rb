@@ -18,6 +18,22 @@ execute "sudo mkdir -p #{node[:cassandra][:commitlog_dir]}"
 execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:data_dir]}"
 execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:commitlog_dir]}"
 
+# LHA
+ruby_block "read_token_and_seeds" do
+  block do
+    system "bash /home/ubuntu/token.sh"
+    
+    File.open("/home/ubuntu/token.txt","r").each do |line| 
+      node[:cassandra][:initial_token] = line.to_s.strip
+    end
+    
+    File.open("/home/ubuntu/seeds.txt","r").each do |line| 
+      node[:cassandra][:seed] = line.to_s.strip
+    end
+  end
+  action :create
+end
+
 ruby_block "buildCassandraEnv" do
   block do
     filename = node[:cassandra][:confPath] + "cassandra-env.sh"

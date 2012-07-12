@@ -16,5 +16,5 @@
 # Restart the service
 service "cassandra" do
     # action :restart
-    action :stop
+    action :start
 end

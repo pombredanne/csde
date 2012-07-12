@@ -34,6 +34,6 @@ include_recipe "cassandra::additional_settings"
 
 # include_recipe "cassandra::create_seed_list"
 
-# include_recipe "cassandra::write_configs"
+include_recipe "cassandra::write_configs"
 
-# include_recipe "cassandra::restart_service"
+include_recipe "cassandra::restart_service"

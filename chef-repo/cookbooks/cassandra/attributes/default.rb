@@ -20,3 +20,6 @@ default[:cassandra][:rpc_address] = false
 default[:cassandra][:confPath] = "/etc/cassandra/"
 
 default[:internal][:prime] = true
+
+
+
