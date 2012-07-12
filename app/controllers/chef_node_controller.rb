@@ -62,6 +62,10 @@ class ChefNodeController < ApplicationController
       
       node = @nodes[i].public_ip_address # for which node
       puts "Node IP: #{node}"
+      
+      node_name = "Cassandra Node " << k.to_s
+      puts "Node Name: #{node_name}"
+      k = k + 1 # next step
 
       logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
       token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
@@ -71,16 +75,11 @@ class ChefNodeController < ApplicationController
         file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
       end
       
-      node_name = "Cassandra Node " << k.to_s
-      puts "Node Name: #{node_name}"
-      k = k + 1 # next step
-      
-      
-      # thread = Thread.new { system(knife_bootstrap node, token, node_name) }
-      # threads << thread
+      thread = Thread.new { system(knife_bootstrap node, token, node_name) }
+      threads << thread
     end
     
-    # threads.each {|t| t.join}
+    threads.each {|t| t.join}
     logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
     
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."
