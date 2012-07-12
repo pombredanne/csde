@@ -82,30 +82,6 @@ module Helper
     tcp_socket && tcp_socket.close
   end
   
-  # return the machines that KCSDB manages in an array
-  def get_machine_array
-    logger.debug "::: Getting all machines that KCSDB manages..."
-    machine_array = []
-    ec2 = create_ec2
-    state = get_state
-    key_pair_name = state['key_pair_name']
-    # chef_server_id = state['chef_server_id']
-    
-    ec2.servers.each do |server|
-      # show all the instances that KCSD manages
-      if server.key_name == key_pair_name
-        # chef server is not including
-        # if server.id != chef_server_id
-          # the machine is not terminated
-          if server.state.to_s != "terminated"
-            machine_array << server
-          end
-        # end
-      end
-    end
-    machine_array
-  end
-  
   #capture private IPs of all selected running machines in EC2
   def capture_private_ips_of_running_machines
     logger.debug "::: Capturing private IPs of running machines..."
@@ -135,14 +111,12 @@ module Helper
 
   # capture private IP of KCSDB server and save it into kcsdb_private_ip.txt
   def capture_private_ip_of_kcsdb_server
-    # TODO: curl has to be installed
     logger.debug "::: Capturing the private IP of KCSDB Server..."
     system "curl http://169.254.169.254/latest/meta-data/local-ipv4 > #{Rails.root}/chef-repo/.chef/tmp/kcsdb_private_ip.txt"
   end
 
   #capture public IP of KCSDB server and save it into kcsdb_public_ip.txt
   def capture_public_ip_of_kcsdb_server  
-    # TODO: curl has to be installed
     logger.debug "::: Capturing the public IP of KCSDB Server..."
     system "curl http://169.254.169.254/latest/meta-data/public-ipv4 > #{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt"
   end
@@ -167,4 +141,30 @@ module Helper
     end
     logger.debug "::: Updating knife.rb... [OK]"
   end
+
+=begin  
+  # return the machines that KCSDB manages in an array
+  def get_machine_array
+    logger.debug "::: Getting all machines that KCSDB manages..."
+    machine_array = []
+    ec2 = create_ec2
+    state = get_state
+    key_pair_name = state['key_pair_name']
+    # chef_server_id = state['chef_server_id']
+    
+    ec2.servers.each do |server|
+      # show all the instances that KCSD manages
+      if server.key_name == key_pair_name
+        # chef server is not including
+        # if server.id != chef_server_id
+          # the machine is not terminated
+          if server.state.to_s != "terminated"
+            machine_array << server
+          end
+        # end
+      end
+    end
+    machine_array
+  end
+=end
 end

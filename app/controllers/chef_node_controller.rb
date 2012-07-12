@@ -29,10 +29,9 @@ class ChefNodeController < ApplicationController
     security_group = state['security_group_name']
 
     threads = []
-    i = 1
-    number.times do
+    for i in 1..number do
       name = "Cassandra Node " << i.to_s
-      i = i + 1
+      i = i + 1 # next step
       thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
       threads << thread
     end
@@ -47,31 +46,31 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Seeds: "
     puts seeds
     
-    # logger.debug "::: Knife Bootstrap #{number} machines..."    
-#     
-    # threads = []
-    # for i in 0..(@nodes.size - 1) do
-      # token = token_map[i] # which token position
-      # node = @nodes[i].public_ip_address # for which node
-# 
-      # logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
-      # token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-      # File.open(token_file,"w") do |file|
-        # file << "#!/usr/bin/env bash" << "\n"
-        # file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
-        # file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
-      # end
-# 
-      # i = i + 1 # used for node name
-      # node_name = "Cassandra Node " << i.to_s
-      # i = i + 1 # next step
-#       
-      # thread = Thread.new { system(knife_bootstrap node, token_file, node_name)}
-      # threads << thread
-    # end
-#     
-    # threads.each {|t| t.join}
-    # logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
+    logger.debug "::: Knife Bootstrap #{number} machines..."    
+    
+    threads = []
+    for i in 0..(@nodes.size - 1) do
+      token = token_map[i] # which token position
+      node = @nodes[i].public_ip_address # for which node
+
+      logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
+      token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+      File.open(token_file,"w") do |file|
+        file << "#!/usr/bin/env bash" << "\n"
+        file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+        file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+      end
+
+      i = i + 1 # used for node name
+      node_name = "Cassandra Node " << i.to_s
+      i = i + 1 # next step
+      
+      thread = Thread.new { system(knife_bootstrap node, token_file, node_name)}
+      threads << thread
+    end
+    
+    threads.each {|t| t.join}
+    logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
     
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
