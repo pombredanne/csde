@@ -15,3 +15,6 @@
 /tmp
 
 /.idea/*
+
+# No python project
+.pydevproject

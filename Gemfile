@@ -20,8 +20,9 @@ gem 'chef', '10.12.0'
 
 # support --json-attributes, which is not supported by offical knife-ec2 plugin from opscode
 # these attributes will be merged into the first_boot variable by bootstrapping
-gem 'knife-ec2', :git => 'https://github.com/johntdyer/knife-ec2.git'
-# gem 'knife-ec2', '0.5.12'
+# gem 'knife-ec2', :git => 'https://github.com/johntdyer/knife-ec2.git'
+
+gem 'knife-ec2', '0.5.12'
 
 # Capistrano
 # gem 'capistrano', '2.12.0'

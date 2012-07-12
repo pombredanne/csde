@@ -18,25 +18,36 @@ class ChefNodeController < ApplicationController
     end
     logger.debug "::: Flavor: #{flavor} selected..."
     
-    token = '{"lha" : "0000"}'
-    puts token
+    token_map = calculate_token_position number
     
-    tags = 'tokendummy=0000000'
+    
     
     threads = []
     number.times do
-      thread = Thread.new { system(knife_ec2_bootstrap flavor,token)}
+    token_map.each do |token|
+      logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
+      token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+      File.open(token_file,"w") do |file|
+        file << "#!/usr/bin/env bash"
+        file << "\n" 
+        file << "echo #{token} | tee /home/ubuntu/token.txt"
+      end
+            
+      thread = Thread.new { system(knife_ec2_bootstrap flavor,token_file)}
       threads << thread
     end
     
     # parallel bootstrap
     threads.each {|t| t.join}
     logger.debug "::: Knife Bootstrapping END [OK]"
+    
+    # logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+    # system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
   end
   
   # knife ec2 server create
   # flavor: m1.small | m1.medium | m1.large
-  # token: which token position should the node have, the token is passed by KCSDB Server
+  # token: which token position should the node have, the token is passed by KCSDB Server in form of a user data file for EC2
   private
   def knife_ec2_bootstrap flavor,token
     
@@ -76,11 +87,24 @@ class ChefNodeController < ApplicationController
     knife_ec2_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
     knife_ec2_bootstrap_string << "--yes "
     knife_ec2_bootstrap_string << "--no-host-key-verify "
-    knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
+    knife_ec2_bootstrap_string << "--user-data #{chef_client_token_position} "
+    # knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
     # knife_ec2_bootstrap_string << "-VV "
     
     logger.debug "::: The knife bootstrap command: #{knife_ec2_bootstrap_string}"
     knife_ec2_bootstrap_string
+  end
+  
+  # token positions for all nodes in cassandra cluster
+  private
+  def calculate_token_position node_number
+    logger.debug "::: Calculating tokens for #{node_number} nodes..."
+    system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{node_number} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
+    json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
+    parser = Yajl::Parser.new
+    hash = parser.parse json
+    token_map = hash["0"].values
+    token_map    
   end
   
   # count how many machines are available in the infrastructure
