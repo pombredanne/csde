@@ -18,30 +18,85 @@ class ChefNodeController < ApplicationController
     end
     logger.debug "::: Flavor: #{flavor} selected..."
     
-    token_map = calculate_token_position number
+    state = get_state
+    ami = state['chef_client_ami']
+    key_pair = state['key_pair_name']
+    security_group = state['security_group_name']
     
+    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
     threads = []
-    i = 1
-    token_map.each do |token|
-      logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
-      token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-      File.open(token_file,"w") do |file|
-        file << "#!/usr/bin/env bash"
-        file << "\n" 
-        file << "echo #{token} | tee /home/ubuntu/token.txt"
-      end
-      node_name = "Cassandra Node " << i.to_s            
+    i = 0
+    number.times do
+      name = "Cassandra Node " << i.to_s
       i = i + 1
-      thread = Thread.new { system(knife_ec2_bootstrap flavor,token_file,node_name)}
+      thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
       threads << thread
     end
     
-    # parallel bootstrap
-    threads.each {|t| t.join}
-    logger.debug "::: Knife Bootstrapping END [OK]"
+    threads.each { |t| t.join }
+    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
     
+    
+    # token_map = calculate_token_position number
+#     
+    # threads = []
+    # i = 1
+    # token_map.each do |token|
+      # logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
+      # token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+      # File.open(token_file,"w") do |file|
+        # file << "#!/usr/bin/env bash"
+        # file << "\n" 
+        # file << "echo #{token} | tee /home/ubuntu/token.txt"
+      # end
+      # node_name = "Cassandra Node " << i.to_s            
+      # i = i + 1
+      # thread = Thread.new { system(knife_ec2_bootstrap flavor,token_file,node_name)}
+      # threads << thread
+    # end
+#     
+    # # parallel bootstrap
+    # threads.each {|t| t.join}
+    # logger.debug "::: Knife Bootstrapping END [OK]"
+#     
     # logger.debug "::: Deleting all token temporary files in KCSDB Server..."
     # system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+  end
+  
+  # provision a new EC2 machine
+  private
+  def provision_ec2_machine ami, flavor, key_pair, security_group, name
+    ec2 = create_ec2
+    
+    logger.debug "=================================="
+    logger.debug "Launching a new machine in AWS EC2"
+    logger.debug "=================================="
+    
+    logger.debug "::: Now, launching a new machine with following configurations..."
+    logger.debug "::: AMI: #{ami}"
+    logger.debug "::: Flavor: #{flavor}"
+    logger.debug "::: Key Pair: #{key_pair}"
+    logger.debug "::: Security Group: #{security_group}"
+    logger.debug "::: Name: #{name}"
+    
+    server_def = {
+      image_id: ami,
+      flavor_id: flavor,
+      key_name: key_pair,
+      groups: security_group
+    }
+    
+    server = ec2.servers.create server_def
+    logger.debug "::: Adding tag..."
+    ec2.tags.create key: 'Name', value: name, resource_id: server.id
+
+    logger.debug "::: Waiting for machine: #{server.id}..."
+    server.wait_for { print "."; ready? }
+    # the machine is updated with public IP address
+    puts "\n"
+    logger.debug "::: Waiting for machine: #{server.id}... [OK]"
+
+    print "." until tcp_test_ssh server.public_ip_address { sleep 1 }
   end
   
   # knife ec2 server create
@@ -107,6 +162,8 @@ class ChefNodeController < ApplicationController
     token_map = hash["0"].values
     token_map    
   end
+  
+  
   
   # count how many machines are available in the infrastructure
   def check

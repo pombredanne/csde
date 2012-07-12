@@ -37,10 +37,10 @@ module Helper
 
     logger.debug "::: Creating an EC2 object..."
     ec2 = Fog::Compute.new(
-      :provider => 'AWS',
-      :aws_access_key_id => state['aws_access_key_id'],
-      :aws_secret_access_key => state['aws_secret_access_key'],
-      :region => state['region']
+      provider: 'AWS',
+      aws_access_key_id: state['aws_access_key_id'],
+      aws_secret_access_key: state['aws_secret_access_key'],
+      region: state['region']
     )
     logger.debug "::: Creating an EC2 object... [OK]"
     ec2
@@ -89,18 +89,18 @@ module Helper
     ec2 = create_ec2
     state = get_state
     key_pair_name = state['key_pair_name']
-    chef_server_id = state['chef_server_id']
+    # chef_server_id = state['chef_server_id']
     
     ec2.servers.each do |server|
       # show all the instances that KCSD manages
       if server.key_name == key_pair_name
         # chef server is not including
-        if server.id != chef_server_id
+        # if server.id != chef_server_id
           # the machine is not terminated
           if server.state.to_s != "terminated"
             machine_array << server
           end
-        end
+        # end
       end
     end
     machine_array
