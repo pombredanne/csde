@@ -49,7 +49,7 @@ class ChefNodeController < ApplicationController
 
     logger.debug "::: Nodes: "    
     for l in 0..(@nodes.size - 1) do
-      puts @nodes[i].public_ip_address
+      puts @nodes[l].public_ip_address
     end
     
     # logger.debug "::: Knife Bootstrap #{number} machines..."    
