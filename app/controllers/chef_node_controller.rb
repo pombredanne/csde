@@ -145,12 +145,12 @@ class ChefNodeController < ApplicationController
 
     logger.debug "::: Uploading the token file to the node: #{node}... "
     token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-    system "scp -i #{chef_client_identity_file} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
+    system "rvmsudo scp -i #{chef_client_identity_file} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
     logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
     
     logger.debug "::: Executing the token file in the node: #{node}... "
     no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no" # do not ask to accept the finger print
-    system "ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
+    system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
     logger.debug "::: Executing the token file in the node: #{node}... [OK]"
 
     logger.debug "::: Knife bootstrapping a new machine..."
