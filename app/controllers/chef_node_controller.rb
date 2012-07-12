@@ -5,8 +5,12 @@ class ChefNodeController < ApplicationController
   # 1. provision new machines in EC2
   # 2. knife bootstrap these machines
   def create
+    @nodes = [] # shared variable, used to contain all fog node object
+    @mutex = Mutex.new # lock
+    
     number = params[:number_create].to_i
     logger.debug "::: Creating #{number} machine(s)..."
+    
     flavor = ""
     if params[:flavor_create] == "small_create"
       flavor = "m1.small"
@@ -16,12 +20,14 @@ class ChefNodeController < ApplicationController
       flavor = "m1.large"  
     end
     logger.debug "::: Flavor: #{flavor} selected..."
+    
+    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
+    
     state = get_state
     ami = state['chef_client_ami']
     key_pair = state['key_pair_name']
     security_group = state['security_group_name']
-    
-    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
+
     threads = []
     i = 1
     number.times do
@@ -41,27 +47,31 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Seeds: "
     puts seeds
     
-    
-    
+    # logger.debug "::: Knife Bootstrap #{number} machines..."    
+#     
     # threads = []
-    # i = 1
-    # token_map.each do |token|
+    # for i in 0..(@nodes.size - 1) do
+      # token = token_map[i] # which token position
+      # node = @nodes[i].public_ip_address # for which node
+# 
       # logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
       # token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
       # File.open(token_file,"w") do |file|
-        # file << "#!/usr/bin/env bash"
-        # file << "\n" 
-        # file << "echo #{token} | tee /home/ubuntu/token.txt"
+        # file << "#!/usr/bin/env bash" << "\n"
+        # file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+        # file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
       # end
-      # node_name = "Cassandra Node " << i.to_s            
-      # i = i + 1
-      # thread = Thread.new { system(knife_ec2_bootstrap flavor,token_file,node_name)}
+# 
+      # i = i + 1 # used for node name
+      # node_name = "Cassandra Node " << i.to_s
+      # i = i + 1 # next step
+#       
+      # thread = Thread.new { system(knife_bootstrap node, token_file, node_name)}
       # threads << thread
     # end
 #     
-    # # parallel bootstrap
     # threads.each {|t| t.join}
-    # logger.debug "::: Knife Bootstrapping END [OK]"
+    # logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
     
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
@@ -103,58 +113,65 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Waiting for machine: #{server.id}... [OK]"
 
     print "." until tcp_test_ssh(server.public_ip_address) { sleep 1 }
+
+    # Adding a newly created server to the nodes list
+    # lock    
+    @mutex.synchronize do
+      @nodes << server
+    end
   end
   
-  # knife ec2 server create
-  # flavor: m1.small | m1.medium | m1.large
+  # knife bootstrap
+  # node: the IP address of the machine to be bootstraped
   # token: which token position should the node have, the token is passed by KCSDB Server in form of a user data file for EC2
+  # name: name of the node in Chef Server
   private
-  def knife_ec2_bootstrap flavor,token,name
-    
+  def knife_bootstrap node, token, name
     $stdout.sync = true
     
-    knife_ec2_bootstrap_string = ""
-    state = get_state
-    
     logger.debug "::: Creating a new machine..."
-    aws_access_key_id = state['aws_access_key_id']
-    aws_secret_access_key = state['aws_secret_access_key']
-    region = state['region']    
-    security_group_name = state['security_group_name']
-    chef_client_ami = state['chef_client_ami']
+    state = get_state
+    # aws_access_key_id = state['aws_access_key_id']
+    # aws_secret_access_key = state['aws_secret_access_key']
+    # region = state['region']    
+    # security_group_name = state['security_group_name']
+    # chef_client_ami = state['chef_client_ami']
+    # chef_client_flavor = flavor
+    # chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
     chef_client_identity_file = state['chef_client_identity_file']
-    chef_client_flavor = flavor
     chef_client_ssh_user = state['chef_client_ssh_user']
     chef_client_bootstrap_version = state['chef_client_bootstrap_version']
-    chef_client_role = state['chef_client_role']
-    chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
     chef_client_template_file = state['chef_client_template_file']
-    chef_client_token_position = token
-    chef_client_name = name
-   
-    knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
-    knife_ec2_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
-    knife_ec2_bootstrap_string << "--aws-access-key-id #{aws_access_key_id} "
-    knife_ec2_bootstrap_string << "--aws-secret-access-key #{aws_secret_access_key} "
-    knife_ec2_bootstrap_string << "--region #{region} "
-    knife_ec2_bootstrap_string << "--groups #{security_group_name} "
-    knife_ec2_bootstrap_string << "--image #{chef_client_ami} "
-    knife_ec2_bootstrap_string << "--identity-file #{chef_client_identity_file} "
-    knife_ec2_bootstrap_string << "--flavor #{chef_client_flavor} "
-    knife_ec2_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
-    knife_ec2_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
-    knife_ec2_bootstrap_string << "--ssh-key #{chef_client_aws_ssh_key_id} "
-    knife_ec2_bootstrap_string << "--template-file #{chef_client_template_file} "
-    knife_ec2_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
-    knife_ec2_bootstrap_string << "--yes "
-    knife_ec2_bootstrap_string << "--no-host-key-verify "
-    knife_ec2_bootstrap_string << "--user-data #{chef_client_token_position} "
-    knife_ec2_bootstrap_string << "--node-name \'#{chef_client_name}\' "
+    chef_client_role = state['chef_client_role']
+
+    # knife_ec2_bootstrap_string = ""
+    knife_bootstrap_string = ""
+       
+    # knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
+    knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
+    knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    # knife_ec2_bootstrap_string << "--aws-access-key-id #{aws_access_key_id} "
+    # knife_ec2_bootstrap_string << "--aws-secret-access-key #{aws_secret_access_key} "
+    # knife_ec2_bootstrap_string << "--region #{region} "
+    # knife_ec2_bootstrap_string << "--groups #{security_group_name} "
+    # knife_ec2_bootstrap_string << "--image #{chef_client_ami} "
+    # knife_ec2_bootstrap_string << "--flavor #{chef_client_flavor} "
+    # knife_ec2_bootstrap_string << "--ssh-key #{chef_client_aws_ssh_key_id} "
     # knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
     # knife_ec2_bootstrap_string << "-VV "
+    knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
+    knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
+    knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
+    knife_bootstrap_string << "--template-file #{chef_client_template_file} "
+    knife_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
+    knife_bootstrap_string << "--user-data #{token} "
+    knife_bootstrap_string << "--node-name \'#{name}\' "
+    knife_bootstrap_string << "--yes "
+    knife_bootstrap_string << "--no-host-key-verify "
+    knife_bootstrap_string << "--sudo "
     
-    logger.debug "::: The knife bootstrap command: #{knife_ec2_bootstrap_string}"
-    knife_ec2_bootstrap_string
+    logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
+    knife_bootstrap_string
   end
   
   # token positions for all nodes in cassandra cluster
@@ -173,16 +190,16 @@ class ChefNodeController < ApplicationController
   private
   def calculate_seed_list fraction, node_number
     logger.debug "::: Calculating seeds for #{node_number} nodes..."
-    nodes = get_machine_array
     seeds = ""
-    number_of_seeds = nodes.size * fraction # a given fraction of all nodes in the cluster are seeds 
+    number_of_seeds = @nodes.size * fraction # a given fraction of all nodes in the cluster are seeds 
     for i in 0..number_of_seeds-1 do
-      seeds << nodes[i].private_ip_address << ","
+      seeds << @nodes[i].private_ip_address << ","
     end
     seeds = seeds[0..-2] # delete the last comma
     seeds
   end
   
+=begin
   # count how many machines are available in the infrastructure
   def check
     machine_array = get_machine_array
@@ -347,4 +364,5 @@ class ChefNodeController < ApplicationController
       @status << "Click the <strong>back</strong> button below to come back dashboard\n\n"
     end
   end
+=end
 end
