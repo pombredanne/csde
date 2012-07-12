@@ -46,32 +46,35 @@ class ChefNodeController < ApplicationController
     seeds = calculate_seed_list 0.5, number
     logger.debug "::: Seeds: "
     puts seeds
+
+    logger.debug "::: Nodes: "    
+    puts @nodes
     
     logger.debug "::: Knife Bootstrap #{number} machines..."    
     
-    threads = []
-    k = 1
-    for i in 0..(@nodes.size - 1) do
-      token = token_map[i] # which token position
-      node = @nodes[i].public_ip_address # for which node
-
-      logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
-      token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-      File.open(token_file,"w") do |file|
-        file << "#!/usr/bin/env bash" << "\n"
-        file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
-        file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
-      end
-      
-      node_name = "Cassandra Node " << k.to_s
-      k = k + 1 # next step
-      
-      thread = Thread.new { system(knife_bootstrap node, token, node_name) }
-      threads << thread
-    end
-    
-    threads.each {|t| t.join}
-    logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
+    # threads = []
+    # k = 1
+    # for i in 0..(@nodes.size - 1) do
+      # token = token_map[i] # which token position
+      # node = @nodes[i].public_ip_address # for which node
+# 
+      # logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
+      # token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+      # File.open(token_file,"w") do |file|
+        # file << "#!/usr/bin/env bash" << "\n"
+        # file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+        # file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+      # end
+#       
+      # node_name = "Cassandra Node " << k.to_s
+      # k = k + 1 # next step
+#       
+      # thread = Thread.new { system(knife_bootstrap node, token, node_name) }
+      # threads << thread
+    # end
+#     
+    # threads.each {|t| t.join}
+    # logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
     
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
