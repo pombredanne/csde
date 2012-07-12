@@ -21,7 +21,7 @@ class ChefNodeController < ApplicationController
     token_map = calculate_token_position number
     
     threads = []
-    i = 0
+    i = 1
     token_map.each do |token|
       logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
       token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
@@ -88,7 +88,7 @@ class ChefNodeController < ApplicationController
     knife_ec2_bootstrap_string << "--yes "
     knife_ec2_bootstrap_string << "--no-host-key-verify "
     knife_ec2_bootstrap_string << "--user-data #{chef_client_token_position} "
-    knife_ec2_bootstrap_string << "--node-name #{chef_client_name} "
+    knife_ec2_bootstrap_string << "--node-name \'#{chef_client_name}\' "
     # knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
     # knife_ec2_bootstrap_string << "-VV "
     
