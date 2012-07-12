@@ -21,7 +21,7 @@ execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:pack
 # LHA
 ruby_block "read_token_and_seeds" do
   block do
-    system "bash /home/ubuntu/token.sh"
+    # system "bash /home/ubuntu/token.sh"
     
     File.open("/home/ubuntu/token.txt","r").each do |line| 
       node[:cassandra][:initial_token] = line.to_s.strip
