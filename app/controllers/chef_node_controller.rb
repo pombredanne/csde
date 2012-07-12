@@ -48,9 +48,11 @@ class ChefNodeController < ApplicationController
     puts seeds
 
     logger.debug "::: Nodes: "    
-    puts @nodes
+    for l in 0..(@nodes.size - 1) do
+      puts @nodes[i].public_ip_address
+    end
     
-    logger.debug "::: Knife Bootstrap #{number} machines..."    
+    # logger.debug "::: Knife Bootstrap #{number} machines..."    
     
     # threads = []
     # k = 1
