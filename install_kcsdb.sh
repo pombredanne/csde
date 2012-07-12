@@ -72,7 +72,8 @@ upload_roles(){
 
 no_strict_host_key_checking(){
 	echo "::: No strict host key checking in ssh connections..."
-	echo -e "Host *\n\tStrictHostKeyChecking no"
+	mkdir -p /home/ubuntu/.ssh
+	echo -e "Host *\n\tStrictHostKeyChecking no" > /home/ubuntu/.ssh/config
 }
 
 bye(){
