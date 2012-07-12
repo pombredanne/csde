@@ -66,6 +66,8 @@ class ChefNodeController < ApplicationController
   # provision a new EC2 machine
   private
   def provision_ec2_machine ami, flavor, key_pair, security_group, name
+    $stdout.sync = true
+    
     ec2 = create_ec2
     
     logger.debug "=================================="
