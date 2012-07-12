@@ -23,7 +23,6 @@ class ChefNodeController < ApplicationController
     
     
     threads = []
-    number.times do
     token_map.each do |token|
       logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
       token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
