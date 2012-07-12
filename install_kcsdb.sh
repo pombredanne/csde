@@ -70,6 +70,11 @@ upload_roles(){
 	knife role from file /home/ubuntu/kcsdb/chef-repo/roles/cassandra.json --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb	
 }
 
+no_strict_host_key_checking(){
+	echo "::: No strict host key checking in ssh connections..."
+	echo -e "Host *\n\tStrictHostKeyChecking no"
+}
+
 bye(){
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: KCSDB installed successfully!!! Please run 'rvmsudo rails server' in 'kcsdb' home folder to start KCSDB Server :::"
@@ -84,4 +89,5 @@ run_chef_solo
 start_chef_server
 upload_cookbooks
 upload_roles
+no_strict_host_key_checking
 bye
