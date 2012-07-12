@@ -7,17 +7,15 @@ class ChefNodeController < ApplicationController
   def create
     number = params[:number_create].to_i
     logger.debug "::: Creating #{number} machine(s)..."
-
     flavor = ""
     if params[:flavor_create] == "small_create"
       flavor = "m1.small"
-    elsif params[:number_create] == "medium_create"
+    elsif params[:flavor_create] == "medium_create"
       flavor = "m1.medium"
     else
       flavor = "m1.large"  
     end
     logger.debug "::: Flavor: #{flavor} selected..."
-    
     state = get_state
     ami = state['chef_client_ami']
     key_pair = state['key_pair_name']
@@ -25,20 +23,26 @@ class ChefNodeController < ApplicationController
     
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
     threads = []
-    i = 0
+    i = 1
     number.times do
       name = "Cassandra Node " << i.to_s
       i = i + 1
       thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
       threads << thread
     end
-    
     threads.each { |t| t.join }
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
     
+    token_map = calculate_token_position number
+    logger.debug "::: Tokens: "
+    token_map.each { |tok| puts tok }
     
-    # token_map = calculate_token_position number
-#     
+    seeds = calculate_seed_list 0.5
+    logger.debug "::: Seeds: "
+    puts seeds
+    
+    
+    
     # threads = []
     # i = 1
     # token_map.each do |token|
@@ -58,9 +62,9 @@ class ChefNodeController < ApplicationController
     # # parallel bootstrap
     # threads.each {|t| t.join}
     # logger.debug "::: Knife Bootstrapping END [OK]"
-#     
-    # logger.debug "::: Deleting all token temporary files in KCSDB Server..."
-    # system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+    
+    logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+    system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
   end
   
   # provision a new EC2 machine
@@ -165,7 +169,19 @@ class ChefNodeController < ApplicationController
     token_map    
   end
   
-  
+  # seed list
+  private
+  def calculate_seed_list fraction
+    logger.debug "::: Calculating seeds for #{node_number} nodes..."
+    nodes = get_machine_array
+    seeds = ""
+    number_of_seeds = nodes.size * fraction # a given fraction of all nodes in the cluster are seeds 
+    for i in 0..number_of_seeds-1 do
+      seeds << nodes[i].private_ip_address << ","
+    end
+    seeds = seeds[0..-2] # delete the last comma
+    seeds
+  end
   
   # count how many machines are available in the infrastructure
   def check
