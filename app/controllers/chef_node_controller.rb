@@ -39,7 +39,7 @@ class ChefNodeController < ApplicationController
     
     # threads.each { |t| t.join }
     ThreadsWait.all_waits threads
-    exit 0
+    # exit 0
     
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
     
@@ -85,7 +85,7 @@ class ChefNodeController < ApplicationController
     
     # threads.each {|t| t.join}
     ThreadsWait.all_waits threads
-    exit 0
+    # exit 0
     
     logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
     
