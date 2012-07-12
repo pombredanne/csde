@@ -36,7 +36,11 @@ class ChefNodeController < ApplicationController
       thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
       threads << thread
     end
-    threads.each { |t| t.join }
+    
+    # threads.each { |t| t.join }
+    ThreadsWait.all_waits threads
+    exit 0
+    
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
     
     token_map = calculate_token_position number
@@ -79,7 +83,10 @@ class ChefNodeController < ApplicationController
       threads << thread
     end
     
-    threads.each {|t| t.join}
+    # threads.each {|t| t.join}
+    ThreadsWait.all_waits threads
+    exit 0
+    
     logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
     
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."

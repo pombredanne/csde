@@ -4,6 +4,7 @@ require 'rubygems'
 require 'yaml'
 require 'fog'
 require 'yajl'
+require 'thwait'
 
 # Set up gems listed in the Gemfile.
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)
