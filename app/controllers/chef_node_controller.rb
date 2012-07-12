@@ -31,7 +31,7 @@ class ChefNodeController < ApplicationController
     threads = []
     j = 1
     number.times do
-      name = "Cassandra Node " << j.to_s
+      name = "cassandra-node" << j.to_s
       j = j + 1 # next step
       thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
       threads << thread
@@ -63,7 +63,7 @@ class ChefNodeController < ApplicationController
       node = @nodes[i].public_ip_address # for which node
       puts "Node IP: #{node}"
       
-      node_name = "Cassandra Node " << k.to_s
+      node_name = "cassandra-node" << k.to_s
       puts "Node Name: #{node_name}"
       k = k + 1 # next step
 
