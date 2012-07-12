@@ -50,6 +50,7 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Knife Bootstrap #{number} machines..."    
     
     threads = []
+    k = 1
     for i in 0..(@nodes.size - 1) do
       token = token_map[i] # which token position
       node = @nodes[i].public_ip_address # for which node
@@ -61,10 +62,9 @@ class ChefNodeController < ApplicationController
         file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
         file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
       end
-
-      i = i + 1 # used for node name
-      node_name = "Cassandra Node " << i.to_s
-      i = i + 1 # next step
+      
+      node_name = "Cassandra Node " << k.to_s
+      k = k + 1 # next step
       
       thread = Thread.new { system(knife_bootstrap node, token, node_name) }
       threads << thread
