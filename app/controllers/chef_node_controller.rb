@@ -29,9 +29,9 @@ class ChefNodeController < ApplicationController
     security_group = state['security_group_name']
 
     threads = []
-    for i in 1..number do
-      name = "Cassandra Node " << i.to_s
-      i = i + 1 # next step
+    for j in 1..number do
+      name = "Cassandra Node " << j.to_s
+      j = j + 1 # next step
       thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
       threads << thread
     end
