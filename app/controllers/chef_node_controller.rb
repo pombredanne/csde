@@ -98,7 +98,7 @@ class ChefNodeController < ApplicationController
     puts "\n"
     logger.debug "::: Waiting for machine: #{server.id}... [OK]"
 
-    print "." until tcp_test_ssh server.public_ip_address { sleep 1 }
+    print "." until tcp_test_ssh(server.public_ip_address) { sleep 1 }
   end
   
   # knife ec2 server create
