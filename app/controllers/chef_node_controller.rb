@@ -66,7 +66,7 @@ class ChefNodeController < ApplicationController
       node_name = "Cassandra Node " << i.to_s
       i = i + 1 # next step
       
-      thread = Thread.new { system(knife_bootstrap node, token_file, node_name)}
+      thread = Thread.new { system(knife_bootstrap node, token, node_name) }
       threads << thread
     end
     
@@ -123,13 +123,12 @@ class ChefNodeController < ApplicationController
   
   # knife bootstrap
   # node: the IP address of the machine to be bootstraped
-  # token: which token position should the node have, the token is passed by KCSDB Server in form of a user data file for EC2
+  # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
   # name: name of the node in Chef Server
   private
   def knife_bootstrap node, token, name
     $stdout.sync = true
     
-    logger.debug "::: Creating a new machine..."
     state = get_state
     # aws_access_key_id = state['aws_access_key_id']
     # aws_secret_access_key = state['aws_secret_access_key']
@@ -144,6 +143,17 @@ class ChefNodeController < ApplicationController
     chef_client_template_file = state['chef_client_template_file']
     chef_client_role = state['chef_client_role']
 
+    logger.debug "::: Uploading the token file to the node: #{node}... "
+    token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+    system "scp -i #{chef_client_identity_file} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
+    logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
+    
+    logger.debug "::: Executing the token file in the node: #{node}... "
+    system "ssh -i #{chef_client_identity_file} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
+    logger.debug "::: Executing the token file in the node: #{node}... [OK]"
+
+    logger.debug "::: Knife bootstrapping a new machine..."
+    
     # knife_ec2_bootstrap_string = ""
     knife_bootstrap_string = ""
        
@@ -164,7 +174,7 @@ class ChefNodeController < ApplicationController
     knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
     knife_bootstrap_string << "--template-file #{chef_client_template_file} "
     knife_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
-    knife_bootstrap_string << "--user-data #{token} "
+    # knife_bootstrap_string << "--user-data #{token} "
     knife_bootstrap_string << "--node-name \'#{name}\' "
     knife_bootstrap_string << "--yes "
     knife_bootstrap_string << "--no-host-key-verify "
