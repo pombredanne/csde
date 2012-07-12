@@ -142,10 +142,12 @@ class ChefNodeController < ApplicationController
     chef_client_bootstrap_version = state['chef_client_bootstrap_version']
     chef_client_template_file = state['chef_client_template_file']
     chef_client_role = state['chef_client_role']
+    
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
 
     logger.debug "::: Uploading the token file to the node: #{node}... "
     token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-    system "rvmsudo scp -i #{chef_client_identity_file} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
+    system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
     logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
     
     logger.debug "::: Executing the token file in the node: #{node}... "

@@ -90,5 +90,5 @@ run_chef_solo
 start_chef_server
 upload_cookbooks
 upload_roles
-no_strict_host_key_checking
+#no_strict_host_key_checking
 bye
