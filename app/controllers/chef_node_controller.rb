@@ -37,7 +37,7 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Tokens: "
     token_map.each { |tok| puts tok }
     
-    seeds = calculate_seed_list 0.5
+    seeds = calculate_seed_list 0.5, number
     logger.debug "::: Seeds: "
     puts seeds
     
@@ -171,7 +171,7 @@ class ChefNodeController < ApplicationController
   
   # seed list
   private
-  def calculate_seed_list fraction
+  def calculate_seed_list fraction, node_number
     logger.debug "::: Calculating seeds for #{node_number} nodes..."
     nodes = get_machine_array
     seeds = ""
