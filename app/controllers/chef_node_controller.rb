@@ -34,9 +34,9 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Node names: "
     puts node_name_map
     
-    # parallel, depends on CPU cores of KCSDB Server
+    # parallel
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
-    results = Parallel.map(node_name_map) do |node_name|
+    results = Parallel.map(node_name_map, in_threads: node_name_map.size) do |node_name|
       provision_ec2_machine ami, flavor, key_pair, security_group, node_name
     end
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
