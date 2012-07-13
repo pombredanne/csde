@@ -60,13 +60,13 @@ class ChefNodeController < ApplicationController
     
     logger.debug "::: Knife Bootstrap #{number} machines..." 
     bootstrap_array = []   
-    for k in 1..(token_map.size) do
+    for k in 1..(token_array.size) do
       tmp_array = []
       
-      node_ip = node_ip_map[k-1] # for which node
+      node_ip = node_ip_array[k-1] # for which node
       puts "Node IP: #{node_ip}"
       
-      token = token_map[k-1] # which token position
+      token = token_array[k-1] # which token position
       puts "Token: #{token}"
       
       node_name = "cassandra-node" << k.to_s
