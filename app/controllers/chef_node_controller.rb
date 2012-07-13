@@ -21,8 +21,6 @@ class ChefNodeController < ApplicationController
     end
     logger.debug "::: Flavor: #{flavor} selected..."
     
-    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
-    
     state = get_state
     ami = state['chef_client_ami']
     key_pair = state['key_pair_name']
@@ -33,8 +31,15 @@ class ChefNodeController < ApplicationController
       name = "cassandra-node" << i.to_s
       node_name_map << name
     end    
+    logger.debug "::: Node names: "
     puts node_name_map
-
+    
+    # parallel, depends on CPU cores of KCSDB Server
+    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
+    results = Parallel.map(node_name_map) do |node_name|
+      provision_ec2_machine ami, flavor, key_pair, security_group, node_name
+    end
+    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
 =begin
     threads = []
     j = 1
