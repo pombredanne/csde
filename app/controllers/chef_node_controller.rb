@@ -35,56 +35,52 @@ class ChefNodeController < ApplicationController
     puts node_name_map
     
     # parallel
+    # depends on the performance of KCSDB Server
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
     results = Parallel.map(node_name_map, in_threads: node_name_map.size) do |node_name|
       provision_ec2_machine ami, flavor, key_pair, security_group, node_name
     end
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
-=begin
-    threads = []
-    j = 1
-    number.times do
-      name = "cassandra-node" << j.to_s
-      j = j + 1 # next step
-      thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
-      threads << thread
-    end
     
-    threads.each { |t| t.join }
+    # threads = []
+    # j = 1
+    # number.times do
+      # name = "cassandra-node" << j.to_s
+      # j = j + 1 # next step
+      # thread = Thread.new { provision_ec2_machine ami, flavor, key_pair, security_group, name }
+      # threads << thread
+    # end
+    # threads.each { |t| t.join }
     # ThreadsWait.all_waits threads
     # exit 0
     
-    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
-    
     token_map = calculate_token_position number
     logger.debug "::: Tokens: "
-    token_map.each { |tok| puts tok }
+    puts token_map
     
     seeds = calculate_seed_list 0.5, number
     logger.debug "::: Seeds: "
     puts seeds
 
-    logger.debug "::: Nodes: "    
-    for l in 0..(@nodes.size - 1) do
-      puts @nodes[l].public_ip_address
+    logger.debug "::: Node IPs: "    
+    node_ip_map = []
+    for j in 0..(@nodes.size - 1) do
+      node_ip_map << @nodes[j].public_ip_address
     end
+    puts node_ip_map
     
-    logger.debug "::: Knife Bootstrap #{number} machines..."    
-    
-    new_threads = []
-    k = 1
-    for i in 0..(@nodes.size - 1) do
-      token = token_map[i] # which token position
+    logger.debug "::: Knife Bootstrap #{number} machines..." 
+    threads = []   
+    for k in 1..(token_map.size) do
+      token = token_map[k-1] # which token position
       puts "Token: #{token}"
       
-      node = @nodes[i].public_ip_address # for which node
-      puts "Node IP: #{node}"
+      node_ip = node_ip_map[k-1] # for which node
+      puts "Node IP: #{node_ip}"
       
       node_name = "cassandra-node" << k.to_s
       puts "Node Name: #{node_name}"
-      k = k + 1 # next step
-
-      logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
+      
       token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
       File.open(token_file,"w") do |file|
         file << "#!/usr/bin/env bash" << "\n"
@@ -92,19 +88,43 @@ class ChefNodeController < ApplicationController
         file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
       end
       
-      new_thread = Thread.new { system(knife_bootstrap node, token, node_name) }
-      new_threads << new_thread
+      thread = Thread.new { system(knife_bootstrap node_ip, token, node_name) }
+      threads << thread
     end
-    
-    new_threads.each {|t| t.join}
+    threads.each {|t| t.join}
+    logger.debug "::: Knife Bootstrap #{number} machines... [OK]"    
+    # new_threads = []
+    # k = 1
+    # for i in 0..(@nodes.size - 1) do
+      # token = token_map[i] # which token position
+      # puts "Token: #{token}"
+#       
+      # node = @nodes[i].public_ip_address # for which node
+      # puts "Node IP: #{node}"
+#       
+      # node_name = "cassandra-node" << k.to_s
+      # puts "Node Name: #{node_name}"
+      # k = k + 1 # next step
+# 
+      # logger.debug "::: Creating a token data file in EC2 for token: #{token}..."
+      # token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+      # File.open(token_file,"w") do |file|
+        # file << "#!/usr/bin/env bash" << "\n"
+        # file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+        # file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+      # end
+#       
+      # new_thread = Thread.new { system(knife_bootstrap node, token, node_name) }
+      # new_threads << new_thread
+    # end
+#     
+    # new_threads.each {|t| t.join}
     # ThreadsWait.all_waits threads
     # exit 0
     
-    logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
-    
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
-=end    
+    logger.debug "::: Deleting all token temporary files in KCSDB Server... [OK]"
   end
   
   # provision a new EC2 machine
