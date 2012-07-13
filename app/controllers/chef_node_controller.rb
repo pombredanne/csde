@@ -37,8 +37,8 @@ class ChefNodeController < ApplicationController
       threads << thread
     end
     
-    # threads.each { |t| t.join }
-    ThreadsWait.all_waits threads
+    threads.each { |t| t.join }
+    # ThreadsWait.all_waits threads
     # exit 0
     
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
@@ -58,7 +58,7 @@ class ChefNodeController < ApplicationController
     
     logger.debug "::: Knife Bootstrap #{number} machines..."    
     
-    threads = []
+    new_threads = []
     k = 1
     for i in 0..(@nodes.size - 1) do
       token = token_map[i] # which token position
@@ -79,12 +79,12 @@ class ChefNodeController < ApplicationController
         file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
       end
       
-      thread = Thread.new { system(knife_bootstrap node, token, node_name) }
-      threads << thread
+      new_thread = Thread.new { system(knife_bootstrap node, token, node_name) }
+      new_threads << new_thread
     end
     
-    # threads.each {|t| t.join}
-    ThreadsWait.all_waits threads
+    new_threads.each {|t| t.join}
+    # ThreadsWait.all_waits threads
     # exit 0
     
     logger.debug "::: Knife Bootstrap #{number} machines... [OK]"
