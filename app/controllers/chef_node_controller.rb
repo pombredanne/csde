@@ -27,7 +27,15 @@ class ChefNodeController < ApplicationController
     ami = state['chef_client_ami']
     key_pair = state['key_pair_name']
     security_group = state['security_group_name']
+    
+    node_name_map = []
+    for i in 1..number do
+      name = "cassandra-node" << i.to_s
+      node_name_map << name
+    end    
+    puts node_name_map
 
+=begin
     threads = []
     j = 1
     number.times do
@@ -91,6 +99,7 @@ class ChefNodeController < ApplicationController
     
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+=end    
   end
   
   # provision a new EC2 machine
