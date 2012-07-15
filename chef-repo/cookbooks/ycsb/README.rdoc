@@ -1,0 +1,160 @@
+= DESCRIPTION:
+
+This script launches a YCSB machine for testing Cassandra 0.8 and 0.7. It has been modularized for additional tests.
+
+This has been tested in Ubuntu 10.10 and CentOS 5.5, but should support your version of Ubuntu, CentOS, and RedHat.
+
+This script will be developed and housed at: https://github.com/riptano/chef.
+
+= REQUIREMENTS:
+
+Follow the instructions as listed here: http://wiki.opscode.com/display/chef/Quick+Start.
+
+== Configure cloud access
+
+Proceed to configure your cloud access by adding these following lines to your ~/.chef/knife.rb file.
+
+    # Information can be found at: https://manage.rackspacecloud.com/APIAccess.do
+    knife[:rackspace_api_username] = "USER"
+    knife[:rackspace_api_key]      = "KEY"
+
+    # Information can be found at: https://aws-portal.amazon.com/gp/aws/developer/account?ie=UTF8&action=access-key
+    knife[:aws_access_key_id]     = "ID"
+    knife[:aws_secret_access_key] = "KEY"
+
+Place this directory into your cookbooks folder.
+
+Download and place the ycsb and apt cookbooks in your cookbooks folder.
+The apt cookbook can be found here: http://community.opscode.com/cookbooks/apt.
+
+Then run:
+
+    knife cookbook upload -a -o cookbooks/
+
+You should see something similar to:
+
+    Uploading apt                     [1.1.2]
+    Uploading cassandra               [0.1.4]
+    Uploading chef-client             [0.99.5]
+    Uploading ycsb                    [0.1.4]
+    upload complete
+
+= ATTRIBUTES:
+
+The main attributes to look at can be found at $CHEF_HOME/cookbooks/opscenter/attributes/default.rb and are:
+
+    default[:setup][:home] = "/home/ubuntu"
+
+    # Choices of CassandraClient8, CassandraClient7
+    default[:setup][:test] = "CassandraClient8"
+
+For more information, look over $CHEF_HOME/cookbooks/ycsb/metadata.rb.
+
+After properly configuring the attributes, upload the cookbook files again by running:
+
+    knife cookbook upload -a -o cookbooks/
+
+
+= USAGE:
+
+== Configure roles
+
+Run this line from your default chef folder:
+
+    knife role create <role>
+
+where <role> is the value declared as default[:setup][:current_role]. Edit the file to look very similar to this:
+
+    {
+      "name": "ycsb08",
+      "default_attributes": {
+      },
+      "json_class": "Chef::Role",
+      "env_run_lists": {
+      },
+      "run_list": [
+        "recipe[ycsb]"
+      ],
+      "description": "",
+      "chef_type": "role",
+      "override_attributes": {
+        "setup": {
+          "test": "CassandraClient8"
+        }
+      }
+    }
+
+or
+
+    {
+      "name": "ycsb07",
+      "default_attributes": {
+      },
+      "json_class": "Chef::Role",
+      "env_run_lists": {
+      },
+      "run_list": [
+        "recipe[ycsb]"
+      ],
+      "description": "",
+      "chef_type": "role",
+      "override_attributes": {
+        "setup": {
+          "test": "CassandraClient7"
+        }
+      }
+    }
+
+
+== Starting up a cluster
+
+An Ubuntu 10.10 cloud in Rackspace (login as root):
+
+    knife rackspace server create -r "role[ycsb]" -I 69 -f 7 -S YCSB -N YCSB
+
+An Ubuntu 10.10 YCSB server in EC2 (login as ubuntu):
+
+    pemname=<pemFileName>  # do not include ".pem"
+    group=<securityGroupName>
+    knife ec2 server create -r "role[ycsb]" -I ami-08f40561 --flavor m2.4xlarge -S $pemname -G $group -x ubuntu -N YCSB
+
+NOTE: These AMIs only work in the US-East region. For all other regions, see http://cloud.ubuntu.com/ami/.
+
+A Debian 6.0 (Squeeze) cloud in Rackspace (login as root):
+
+    knife rackspace server create -r "role[ycsb]" -I 75 -f 7 -S YCSB -N YCSB
+
+A CentOS 5.5 cloud in Rackspace (login as root):
+
+    knife rackspace server create -r "role[ycsb]" -I 51 -f 7 -d centos5-gems -S YCSB -N YCSB
+
+NOTE: You can run these lines more times as long as the attributes are set properly. Also, these lines should be run consecutively and never in parallel.
+
+== Bootstrapping Commands
+
+In order to run bootstrapping commands, you must be able to complete a passwordless SSH login. Typically, by copying your ~/.ssh/id_rsa.pub key into the target machine's ~/.ssh/authorized_keys file, passwordless SSH should work. Search google for more information.
+
+For an Ubuntu/Debian Machine:
+
+    knife bootstrap -r recipe['ycsb'] --sudo -x root <publicDNS>
+
+For an Ubuntu Machine on EC2:
+
+    knife bootstrap -r recipe['ycsb'] --sudo -x ubuntu <publicDNS>
+
+For a CentOS 5 Machine:
+
+    knife bootstrap -r "recipe['ycsb']" --sudo -x root -d centos5-gems <publicDNS>
+
+For a RedHat 5 Machine (Untested):
+
+    wget http://goo.gl/0k8mV -O- > ~/.chef/bootstrap/rhel5-rbel.erb
+    knife bootstrap --sudo -x root -d rhel5-rbel <publicDNS>
+    knife bootstrap -r recipe['ycsb'] --sudo -x root -d rhel5-rbel <publicDNS>
+
+
+== Other Useful Debugging Commands
+
+    knife node show YCSB --format json
+    knife cookbook metadata ycsb -o cookbooks
+

@@ -34,6 +34,8 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Node names: "
     puts node_name_array
     
+    beginning = Time.now
+    
     # parallel
     # depends on the performance of KCSDB Server
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
@@ -92,6 +94,8 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Deleting all token temporary files in KCSDB Server..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
     logger.debug "::: Deleting all token temporary files in KCSDB Server... [OK]"
+    
+    logger.debug "::: TOTAL TIME: #{Time.now - beginning} seconds"
   end
   
   # provision a new EC2 machine

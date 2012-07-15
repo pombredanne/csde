@@ -33,12 +33,3 @@ service "cassandra" do
   # action [ :enable, :start ]
   action [ :enable, :stop ]
 end
-
-# Test
-# execute "token" do
-  # command "echo #{node[:token_dummy]} > $HOME/token.txt"
-  # action :nothing
-# end
-
-# execute "echo #{node['token_dummy'].inspect} > $HOME/token.txt"
-# execute "echo #{node[:tags]} > $HOME/token.txt"
