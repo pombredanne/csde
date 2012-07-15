@@ -16,6 +16,9 @@ recipe           "cassandra::create_seed_list", "Generates the seed lists for th
 recipe           "cassandra::write_configs", "Writes the configurations for Cassandra."
 recipe           "cassandra::restart_service", "Restarts the Cassandra service."
 
+# LHA
+recipe           "cassandra::configure_cluster", "Configure the Cassandra cluster via Cassandra CLI"
+
 attribute "setup",
   :display_name => "Setup Configurations",
   :description => "Hash of Setup Configurations",
@@ -83,6 +86,12 @@ attribute "cassandra/confPath",
   :display_name => "Cassandra Settings Path",                                                                                                                                                                        
   :description => "The path for cassandra.yaml and cassandra-env.sh",
   :default => "/etc/cassandra/"
+
+# LHA
+attribute "cassandra/replication_factor",
+  :display_name => "Replication Factor",
+  :description => "Replication Factor for each rows in the cluster",
+  :default => "3"
 
 
 

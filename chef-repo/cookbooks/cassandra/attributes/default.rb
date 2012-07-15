@@ -21,5 +21,7 @@ default[:cassandra][:confPath] = "/etc/cassandra/"
 
 default[:internal][:prime] = true
 
+# LHA
+default[:cassandra][:replication_factor] = 3
 
 
