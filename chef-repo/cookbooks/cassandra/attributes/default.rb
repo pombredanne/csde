@@ -22,6 +22,10 @@ default[:cassandra][:confPath] = "/etc/cassandra/"
 default[:internal][:prime] = true
 
 # LHA
-default[:cassandra][:replication_factor] = 3
+default[:cassandra][:replication_factor] = "3"
+default[:cassandra][:keyspace] = "usertable"
+default[:cassandra][:column_family] = "data"
+default[:cassandra][:configure_file] = "/home/ubuntu/configure.txt"
+
 
 

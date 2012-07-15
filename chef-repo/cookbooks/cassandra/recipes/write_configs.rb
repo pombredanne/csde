@@ -59,7 +59,11 @@ ruby_block "buildCassandraYaml" do
     if node[:cassandra][:rpc_address]
       cassandraYaml = cassandraYaml.gsub(/rpc_address:.*/,                "rpc_address: #{node[:cassandra][:rpc_address]}")
     else
-      cassandraYaml = cassandraYaml.gsub(/rpc_address:.*/,                "rpc_address: #{node[:cloud][:private_ips].first}")
+      # cassandraYaml = cassandraYaml.gsub(/rpc_address:.*/,                "rpc_address: #{node[:cloud][:private_ips].first}")
+      
+      # LHA
+      # test
+      cassandraYaml = cassandraYaml.gsub(/rpc_address:.*/,                "rpc_address: 0.0.0.0")
     end
 
     # Cassandra 0.7.x has a slightly different Yaml

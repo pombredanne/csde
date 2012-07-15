@@ -6,7 +6,7 @@
   "env_run_lists": {
   },
   "run_list": [
-  	"recipe[cassandra]"
+  	"recipe[cassandra::configure_cluster]"
   ],
   "description": "",
   "chef_type": "role",
