@@ -34,7 +34,7 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Node names: "
     puts node_name_array
     
-    beginning = Time.now
+    beginning_time = Time.now
     
     # parallel
     # depends on the performance of KCSDB Server
@@ -43,6 +43,10 @@ class ChefNodeController < ApplicationController
       provision_ec2_machine ami, flavor, key_pair, security_group, node_name
     end
     logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
+    
+    provisioning_time = Time.now
+    
+    logger.debug "::: PROVISIONING TIME: #{provisioning_time - beginning_time} seconds"
     
     token_array = calculate_token_position number
     logger.debug "::: Tokens: "
@@ -95,7 +99,9 @@ class ChefNodeController < ApplicationController
     system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
     logger.debug "::: Deleting all token temporary files in KCSDB Server... [OK]"
     
-    logger.debug "::: TOTAL TIME: #{Time.now - beginning} seconds"
+    bootstrap_time = Time.now
+    
+    logger.debug "::: BOOTSTRAP TIME: #{bootstrap_time - provisioning_time} seconds"
   end
   
   # provision a new EC2 machine
