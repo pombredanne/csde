@@ -2,9 +2,22 @@ require 'helper'
 class ChefNodeController < ApplicationController
   include Helper
   
+  def configure
+    replication_factor = params[:replication_factor]
+    logger.debug "::: Replication Factor: #{replication_factor}"
+    
+    keyspace = params[:keyspace]
+    logger.debug "::: Keyspace: #{keyspace}"
+    
+    column_family = params[:column_family]
+    logger.debug "::: Column Family: #{column_family}"
+  end
+  
   # 1. provision new machines in EC2
   # 2. knife bootstrap these machines
   def create
+    recipe = "recipe[cassandra]"
+    
     @nodes = [] # shared variable, used to contain all fog node object
     @mutex = Mutex.new # lock
     
@@ -59,9 +72,6 @@ class ChefNodeController < ApplicationController
     logger.debug "::: Node IPs: "    
     node_ip_array = []
     @nodes.each {|node| node_ip_array << node.public_ip_address}
-    # for j in 0..(@nodes.size - 1) do
-      # node_ip_array << @nodes[j].public_ip_address
-    # end
     puts node_ip_array
     
     logger.debug "::: Knife Bootstrap #{number} machines..." 
@@ -91,7 +101,7 @@ class ChefNodeController < ApplicationController
       bootstrap_array << tmp_array
     end
     results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
-      system(knife_bootstrap block[0], block[1], block[2])
+      system(knife_bootstrap block[0], block[1], block[2], recipe)
     end
     logger.debug "::: Knife Bootstrap #{number} machines... [OK]"    
     
@@ -153,22 +163,15 @@ class ChefNodeController < ApplicationController
   # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
   # name: name of the node in Chef Server
   private
-  def knife_bootstrap node, token, name
+  def knife_bootstrap node, token, name, recipe
     $stdout.sync = true
     
     state = get_state
-    # aws_access_key_id = state['aws_access_key_id']
-    # aws_secret_access_key = state['aws_secret_access_key']
-    # region = state['region']    
-    # security_group_name = state['security_group_name']
-    # chef_client_ami = state['chef_client_ami']
-    # chef_client_flavor = flavor
-    # chef_client_aws_ssh_key_id = state['chef_client_aws_ssh_key_id']
     chef_client_identity_file = state['chef_client_identity_file']
     chef_client_ssh_user = state['chef_client_ssh_user']
     chef_client_bootstrap_version = state['chef_client_bootstrap_version']
     chef_client_template_file = state['chef_client_template_file']
-    chef_client_role = state['chef_client_role']
+    # chef_client_role = state['chef_client_role']
     
     no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
 
@@ -183,27 +186,16 @@ class ChefNodeController < ApplicationController
 
     logger.debug "::: Knife bootstrapping a new machine..."
     
-    # knife_ec2_bootstrap_string = ""
     knife_bootstrap_string = ""
        
-    # knife_ec2_bootstrap_string << "rvmsudo knife ec2 server create "
     knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
     knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
-    # knife_ec2_bootstrap_string << "--aws-access-key-id #{aws_access_key_id} "
-    # knife_ec2_bootstrap_string << "--aws-secret-access-key #{aws_secret_access_key} "
-    # knife_ec2_bootstrap_string << "--region #{region} "
-    # knife_ec2_bootstrap_string << "--groups #{security_group_name} "
-    # knife_ec2_bootstrap_string << "--image #{chef_client_ami} "
-    # knife_ec2_bootstrap_string << "--flavor #{chef_client_flavor} "
-    # knife_ec2_bootstrap_string << "--ssh-key #{chef_client_aws_ssh_key_id} "
-    # knife_ec2_bootstrap_string << "--json-attributes \'#{chef_client_token_position}\' "
-    # knife_ec2_bootstrap_string << "-VV "
     knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
     knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
     knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
     knife_bootstrap_string << "--template-file #{chef_client_template_file} "
-    knife_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
-    # knife_bootstrap_string << "--user-data #{token} "
+    # knife_bootstrap_string << "--run-list \'role[#{chef_client_role}]\' "
+    knife_bootstrap_string << "--run-list \'#{recipe}\' "
     knife_bootstrap_string << "--node-name \'#{name}\' "
     knife_bootstrap_string << "--yes "
     knife_bootstrap_string << "--no-host-key-verify "

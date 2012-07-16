@@ -181,17 +181,34 @@
 				<!-- Automated Benchmark -->
 				<div id="tabs-3">
 		 			<%= form_tag('/chef_node/create') do %>
-				  	<%= label_tag "Flavor Create", "Choose a machine type" %>
+				  	<%= label_tag "Flavor Create", "Choose a machine type:" %>
 				    <input type="radio" name="flavor_create" id="small_create" value="small_create"><label for="small_create">Small</label></input>
 				    <input type="radio" name="flavor_create" id="medium_create" value="medium_create"><label for="medium_create">Medium</label></input>
 				    <input type="radio" name="flavor_create" id="large_create" value="large_create"><label for="large_create">Large</label></input>
 				    </br>
 				
-				    <%= label_tag "Number", "How many machines" %>
+				    <%= label_tag "Number", "How many machines:" %>
 				    <%= text_field_tag "number_create", "dummy" %>
 				    </br>
 				
 					  <button id="createChefNodes" type="submit">Create</button>
+				 	<% end %>
+				 	</br>
+				 	
+				 	<%= form_tag('/chef_node/configure') do %>
+				    <%= label_tag "Replication Factor", "Replication Factor:" %>
+				    <%= text_field_tag "replication_factor", "3" %>
+				    </br>
+				    
+				    <%= label_tag "Keyspace", "Keyspace:" %>
+				    <%= text_field_tag "keyspace", "usertable" %>
+				    </br>
+				    
+				    <%= label_tag "Column Family", "Column Family:" %>
+				    <%= text_field_tag "column_family", "data" %>
+				    </br>
+				
+					  <button id="configureChefNodes" type="submit">Configure</button>
 				 	<% end %>
 				</div>
 				
