@@ -47,8 +47,8 @@ run_chef_solo(){
 start_chef_server(){
 	# -d: detach from console
 	
-	#echo "::: Starting Chef Expander..."
-	#chef-expander -d -n1
+	echo "::: Starting Chef Expander..."
+	chef-expander -d -n1
 
 	echo "::: Starting Chef Solr..."
 	chef-solr -d
