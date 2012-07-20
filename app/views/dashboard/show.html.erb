@@ -211,8 +211,8 @@
 					  <button id="configureChefNodes" type="submit">Configure</button>
 				 	<% end %> -->
 				 	
-				 	<%= form_tag('chef_node/create') do %>
-				 		<%= label_tag "Benchmark Profile File URL", "Benchmark Profile File URL: "%></!DOCTYPE				 		
+				 	<%= form_tag('benchmark/run') do %>
+				 		<%= label_tag "Benchmark Profile File URL", "Benchmark Profile File URL: "%></br>				 		
 						<%= text_field_tag "benchmark_profile_file_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml"%>				 		
 				 	<% end %>
 				 	

@@ -1,7 +1,6 @@
 KCSD1::Application.routes.draw do
-
-  get "benchmark/setup"
-  post "benchmark/setup"
+  post "benchmark/run"
+  get "benchmark/run"  
   
   get "deployment/deploy"
   post "deployment/deploy"
