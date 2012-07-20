@@ -15,6 +15,10 @@ profile1:
   region1:
     name: us-east-1
     machine_type: small
-    template: 3 service1+service3, 2 service2    
+    template: 3 service1+service3, 2 service2
+  region2:
+    name: us-west-1
+    machine_type: small
+    template: 5 service1+service3, 2 service2    
 
     

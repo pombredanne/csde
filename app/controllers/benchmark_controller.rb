@@ -6,18 +6,6 @@ class BenchmarkController < ApplicationController
     @status = ""
     
     benchmark_profile_url = params[:benchmark_profile_url]
-    @status << benchmark_profile_url
-    
-    logger.debug "::: Parsing the benchmark profile..."
-    configuration_array = profile_parse benchmark_profile_url
-        
-  end
-  
-  # parse the profile file to get configuration parameters
-  private
-  def profile_parse benchmark_profile_url
-    # contain all configuration parameters
-    configuration_array = []
     
     logger.debug "::: Getting the benchmark profile from the given source..."
     benchmark_profile_path = "#{Rails.root}/chef-repo/.chef/tmp/benchmark_profiles.yaml"
@@ -52,7 +40,7 @@ class BenchmarkController < ApplicationController
         profile_array << benchmark_profiles[key]
       else
         logger.debug "::: Profile is NOT conform. Please see the sample to write a good benchmark profile"
-        exit 0
+        @status << "Profile is NOT conform. Please see the sample to write a good benchmark profile"
       end
     end
     
@@ -65,7 +53,68 @@ class BenchmarkController < ApplicationController
     logger.debug "========================================="
     logger.debug "::: Parsing the benchmark profile... [OK]"
     logger.debug "========================================="
-    
-    configuration_array
+
+    # NOW, run each profile
+    profile_counter = 1
+    profile_array.each do |profile|
+      # logger.debug "::: Running profile #{profile_counter}..."
+      
+      # each profile uses a dedicated provider
+      # aws | rackspace | zimory
+      provider = profile['provider']
+      logger.debug "Provider: #{provider}"
+      
+      region_array = []
+      region_counter = 1
+      region_found = true
+      
+      # seek regions
+      until ! region_found
+        if profile.key? "region#{region_counter}" 
+          region_array << profile["region#{region_counter}"]
+          region_counter = region_counter + 1
+        else
+          region_found = false
+        end
+      end
+      
+      logger.debug "Regions:"
+      puts region_array
+      
+      profile_counter = profile_counter + 1
+    end
+        
   end
+  
+  private
+  def service service_name, attribute_array
+    if service_name == 'cassandra'
+      service_cassandra attribute_array
+    elsif service_name == 'ycsb'
+      service_ycsb attribute_array
+    elsif service_name == 'gmond'
+      service_gmond attribute_array
+    end  
+  end
+  
+  private
+  def service_cassandra attribute_array
+    logger.debug "::: Service: Cassandra is being deployed..." 
+  end
+  
+  private
+  def service_ycsb attribute_array
+    logger.debug "::: Service: YCSB is being deployed..."
+  end
+  
+  private
+  def service_gmond attribute_array
+    logger.debug "::: Service: Gmond is being deployed..."
+  end
+  
+  private
+  def template_parse
+    
+  end
+  
 end
