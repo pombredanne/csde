@@ -11,6 +11,8 @@ class ChefNodeController < ApplicationController
     
     column_family = params[:column_family]
     logger.debug "::: Column Family: #{column_family}"
+    
+    
   end
   
   # 1. provision new machines in EC2

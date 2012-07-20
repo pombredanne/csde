@@ -180,7 +180,7 @@
 				
 				<!-- Automated Benchmark -->
 				<div id="tabs-3">
-		 			<%= form_tag('/chef_node/create') do %>
+		 			<!-- <%= form_tag('/chef_node/create') do %>
 				  	<%= label_tag "Flavor Create", "Choose a machine type:" %>
 				    <input type="radio" name="flavor_create" id="small_create" value="small_create"><label for="small_create">Small</label></input>
 				    <input type="radio" name="flavor_create" id="medium_create" value="medium_create"><label for="medium_create">Medium</label></input>
@@ -209,7 +209,13 @@
 				    </br>
 				
 					  <button id="configureChefNodes" type="submit">Configure</button>
+				 	<% end %> -->
+				 	
+				 	<%= form_tag('chef_node/create') do %>
+				 		<%= label_tag "Benchmark Profile File URL", "Benchmark Profile File URL: "%></!DOCTYPE				 		
+						<%= text_field_tag "benchmark_profile_file_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml"%>				 		
 				 	<% end %>
+				 	
 				</div>
 				
 				<!-- Credentials -->
