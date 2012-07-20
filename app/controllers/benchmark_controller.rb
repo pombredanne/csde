@@ -57,7 +57,7 @@ class BenchmarkController < ApplicationController
     # NOW, run each profile
     profile_counter = 1
     profile_array.each do |profile|
-      # logger.debug "::: Running profile #{profile_counter}..."
+      logger.debug "::: Running profile #{profile_counter}..."
       
       # each profile uses a dedicated provider
       # aws | rackspace | zimory
@@ -81,9 +81,27 @@ class BenchmarkController < ApplicationController
       logger.debug "Regions:"
       puts region_array
       
+      check_multiple_region = false
+      if region_array.size > 1
+        check_multiple_region = true
+        logger.debug "Deploying database cluster in multiple regions..."        
+      else
+        logger.debug "Deploying database cluster in single region..."
+      end
+      
+      
+      
+      
+      
+      
       profile_counter = profile_counter + 1
     end
         
+  end
+  
+  private
+  def template_parse template_string
+    
   end
   
   private
