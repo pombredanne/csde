@@ -1,3 +1,4 @@
+lha: 1
 service1:
   name: cassandra
   attribute:
