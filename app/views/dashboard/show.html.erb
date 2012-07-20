@@ -212,8 +212,17 @@
 				 	<% end %> -->
 				 	
 				 	<%= form_tag('benchmark/run') do %>
-				 		<%= label_tag "Benchmark Profile File URL", "Benchmark Profile File URL: "%></br>				 		
-						<%= text_field_tag "benchmark_profile_file_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml", size: 55%>				 		
+				 		<%= label_tag "Benchmark Profile URL", "Benchmark Profile URL: "%></br>				 		
+						<%= text_field_tag "benchmark_profile_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml", size: 80%></br>
+						<button id="submit_benchmark_profile" type="submit">Run</button>
+						<script>
+				    	var button_benchmark_profile_opts = {
+						  	icons:{
+						    	primary:"ui-icon-play"
+						    }
+					    };
+					    $("#submit_benchmark_profile").button(button_benchmark_profile_opts);
+	          </script>				 		
 				 	<% end %>
 				 	
 				</div>
@@ -228,15 +237,15 @@
 				        <table>
 				        	<tr>
 				          	<td><%= label_tag "Access Key ID", "Access Key ID" %></td>
-				            <td><%= text_field_tag "aws_access_key_id", @aws_access_key_id, :size => 55 %></td>
+				            <td><%= text_field_tag "aws_access_key_id", @aws_access_key_id, size: 55 %></td>
 				          </tr>
 				        	<tr>
 				          	<td><%= label_tag "Secret Key Access", "Secret Key Access" %></td>
-				            <td><%= text_field_tag "aws_secret_access_key", @aws_secret_access_key, :size => 55 %></td>
+				            <td><%= text_field_tag "aws_secret_access_key", @aws_secret_access_key, size: 55 %></td>
 				          </tr>
 				          <tr>
 				          	<td><%= label_tag "Key Pair and Security Group", "Key Pair and Security Group" %></td>
-				            <td><%= text_field_tag "key_pair_and_group", @key_pair_name, :size => 55 %></td>
+				            <td><%= text_field_tag "key_pair_and_group", @key_pair_name, size: 55 %></td>
 				          </tr>
 				          <tr>
 				          	<td><button id="submit_aws" type="submit">Submit</button></td>
