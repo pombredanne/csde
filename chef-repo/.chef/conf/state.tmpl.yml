@@ -1,16 +1,14 @@
 # AWS EC2
 aws_access_key_id: dummy # AWS Credentials
 aws_secret_access_key: dummy # AWS Credentials
-region: us-east-1 # Where Chef Server and Chef Clients will be launched
 key_pair_name: dummy # Key Pair in AWS EC2
 security_group_name: dummy # Security Group in AWS EC2
 
 # Chef Client
-chef_client_ami: ami-07b6196e # Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
-# chef_client_ami: ami-82fa58eb # Canonical AMI pure 12.04 x64 US-EAST-1
+chef_client_ami_us_west_1: ami-95dcf9d0 # US_WEST_1: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
+chef_client_ami_us_east_1: ami-07b6196e # US_EAST_1: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
 chef_client_ssh_user: ubuntu # SSH Login User
 chef_client_bootstrap_version: 10.12.0
 chef_client_role: cassandra
 chef_client_aws_ssh_key_id: dummy
-chef_client_identity_file: dummy # Full path to SSH Private Key File  
 chef_client_template_file: dummy # Full path to template file for Knife Bootstrap

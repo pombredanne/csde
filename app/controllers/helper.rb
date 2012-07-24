@@ -161,4 +161,12 @@ module Helper
     end
     logger.debug "::: Updating knife.rb... [OK]"
   end
+  
+  # returns the private key path for the given region
+  def get_private_key region
+    state = get_state
+    key_pair = state['key_pair_name']
+    private_key_path = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    private_key_path
+  end
 end

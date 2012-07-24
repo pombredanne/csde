@@ -40,7 +40,7 @@ class BenchmarkController < ApplicationController
         profile_array << benchmark_profiles[key]
       else
         logger.debug "::: Profile is NOT conform. Please see the sample to write a good benchmark profile"
-        @status << "Profile is NOT conform. Please see the sample to write a good benchmark profile"
+        exit 0
       end
     end
     
@@ -55,47 +55,47 @@ class BenchmarkController < ApplicationController
     logger.debug "========================================="
 
     # NOW, run each profile
-    # profile_counter = 1
-    # profile_array.each do |profile|
-      # logger.debug "::: Running profile #{profile_counter}..."
-#       
-      # # each profile uses a dedicated provider
-      # # aws | rackspace | zimory
-      # provider = profile['provider']
-      # logger.debug "Provider: #{provider}"
-#       
-      # region_array = []
-      # region_counter = 1
-      # region_found = true
-#       
-      # # seek regions
-      # until ! region_found
-        # if profile.key? "region#{region_counter}" 
-          # region_array << profile["region#{region_counter}"]
-          # region_counter = region_counter + 1
-        # else
-          # region_found = false
-        # end
-      # end
-#       
-      # logger.debug "Regions:"
-      # puts region_array
-#       
-      # check_multiple_region = false
-      # if region_array.size > 1
-        # check_multiple_region = true
-        # logger.debug "Deploying database cluster in multiple regions..."        
-      # else
-        # logger.debug "Deploying database cluster in single region..."
-      # end
-#       
-#       
-#       
-#       
-#       
-#       
-      # profile_counter = profile_counter + 1
-    # end
+    profile_counter = 1
+    profile_array.each do |profile|
+      logger.debug "::: Running profile #{profile_counter}..."
+      
+      # each profile uses a dedicated provider
+      # aws | rackspace
+      provider = profile['provider']
+      logger.debug "Provider: #{provider}"
+      
+      region_array = []
+      region_counter = 1
+      region_found = true
+      
+      # seek regions
+      until ! region_found
+        if profile.key? "region#{region_counter}" 
+          region_array << profile["region#{region_counter}"]
+          region_counter = region_counter + 1
+        else
+          region_found = false
+        end
+      end
+      
+      logger.debug "Regions:"
+      puts region_array
+      
+      check_multiple_region = false
+      if region_array.size > 1
+        check_multiple_region = true
+        logger.debug "Deploying database cluster in multiple regions..."        
+      else
+        logger.debug "Deploying database cluster in single region..."
+      end
+      
+      
+      
+      
+      
+      
+      profile_counter = profile_counter + 1
+    end
         
   end
   
@@ -139,7 +139,8 @@ class BenchmarkController < ApplicationController
     elsif name == 'ganglia'
       service_ganglia attribute_hash
     else
-      logger.debug "::: Service: #{name} is not supported!"  
+      logger.debug "::: Service: #{name} is not supported!"
+      exit 0  
     end
   end
   
@@ -172,6 +173,7 @@ class BenchmarkController < ApplicationController
       service_provision_rackspace region_hash
     else
       logger.debug "::: Provider: #{provider} is not supported!"
+      exit 0
     end
 
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
@@ -186,27 +188,36 @@ class BenchmarkController < ApplicationController
     @nodes = [] # shared variable, used to contain all fog node object
     @mutex = Mutex.new # lock
 
+    node_counter = 1
     cloud_config_hash.each do |region, values|
       region_name = values['name']
       machine_number = values['number'].to_i
       machine_flavor = values['flavor']
       
       state = get_state
-      ami = state['chef_client_ami']
+      if region_name == 'us-east-1'
+        machine_ami = state['chef_client_ami_us_east_1']
+      elsif region_name == 'us-west-1'
+        machine_ami = state['chef_client_ami_us_west_1']
+      else
+        logger.debug "Region: #{region_name} is not supported!"
+        exit 0
+      end
       key_pair = state['key_pair_name']
       security_group = state['security_group_name']
       
       node_name_array = []
-      for i in 1..machine_number do
-        x = "cassandra-node-" << name << "-" << i.to_s
+      machine_number.times do
+        x = "cassandra-node-" << node_counter.to_s
         node_name_array << x
+        node_counter = node_counter + 1
       end
       
       logger.debug "-------------------------"
-      logger.debug "Region: #{name}"
-      logger.debug "Machine number: #{number}"
-      logger.debug "Machine flavor: #{flavor}"
-      logger.debug "Machine image: #{ami}"
+      logger.debug "Region: #{region_name}"
+      logger.debug "Machine number: #{machine_number}"
+      logger.debug "Machine flavor: #{machine_flavor}"
+      logger.debug "Machine image: #{machine_ami}"
       logger.debug "Key pair: #{key_pair}"
       logger.debug "Security group: #{security_group}"
       logger.debug "Node names: " ; puts node_name_array ;
@@ -216,11 +227,11 @@ class BenchmarkController < ApplicationController
       # parallel
       # depends on the performance of KCSDB Server
       results = Parallel.map(node_name_array, in_threads: node_name_array.size) do |node_name|
-        provision_ec2_machine name, ami, flavor, key_pair, security_group, node_name
+        provision_ec2_machine region_name, machine_ami, machine_flavor, key_pair, security_group, node_name
       end
       provisioning_time = Time.now
     
-      logger.debug "::: PROVISIONING TIME: #{provisioning_time - beginning_time} seconds"
+      logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
     
     logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
@@ -232,18 +243,7 @@ class BenchmarkController < ApplicationController
   def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
     $stdout.sync = true
     
-    ec2 = create_fog_object_ec2 'aws', region
-    
-    logger.debug "=================================="
-    logger.debug "Launching a new machine in AWS EC2"
-    logger.debug "=================================="
-    
-    logger.debug "::: Now, launching a new machine with following configurations..."
-    logger.debug "::: AMI: #{ami}"
-    logger.debug "::: Flavor: #{flavor}"
-    logger.debug "::: Key Pair: #{key_pair}"
-    logger.debug "::: Security Group: #{security_group}"
-    logger.debug "::: Name: #{name}"
+    ec2 = create_fog_object 'aws', region
     
     server_def = {
       image_id: ami,

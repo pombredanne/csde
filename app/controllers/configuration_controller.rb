@@ -10,7 +10,6 @@ class ConfigurationController < ApplicationController
     state['key_pair_name'] = params[:key_pair_and_group]
     state['security_group_name'] = params[:key_pair_and_group]
     state['chef_client_aws_ssh_key_id'] = params[:key_pair_and_group]
-    state['chef_client_identity_file'] = "#{Rails.root}/chef-repo/.chef/pem/#{params[:key_pair_and_group]}.pem"
     state['chef_client_template_file'] = "#{Rails.root}/chef-repo/bootstrap/ubuntu12.04-new-light-gems.erb"
     update_state state    
 
@@ -77,7 +76,6 @@ class ConfigurationController < ApplicationController
         
         # TODO
         # too much open security group
-        # logger.debug "::: Opening ALL ports from ALL sources for TCP and UDP..."
         group = ec2.security_groups.get security_group_name
         group.authorize_port_range(0..65535)
         logger.debug "Creating a new security group #{security_group_name} in AWS EC2... [OK]"
