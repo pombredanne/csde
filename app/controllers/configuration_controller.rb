@@ -15,7 +15,7 @@ class ConfigurationController < ApplicationController
     update_state state    
     
     # ec2 = create_ec2
-    ec2 = create_fog_object_ec2 'ec2', nil
+    ec2 = create_fog_object 'ec2', nil
     
     logger.debug "====================="
     logger.debug "Checking the key pair"

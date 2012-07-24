@@ -147,7 +147,7 @@ class BenchmarkController < ApplicationController
   # used to provision machines in parallel mode
   # 
   # -- cloud_config_hash ---
-  # provider: aws | rackspace | zimory
+  # provider: aws | rackspace
   # regions:
   #   region1: 
   #     name: us-east-1
@@ -188,13 +188,7 @@ class BenchmarkController < ApplicationController
   def service_provision_rackspace cloud_config_hash
     
   end
-  
-  private
-  def service_provision_zimory cloud_config_hash
-    
-  end
-  
-  
+
 # ============================================================  
   private
   def service_cassandra cloud_config_hash, cassandra_config_hash
