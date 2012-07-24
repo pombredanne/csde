@@ -104,21 +104,337 @@ class BenchmarkController < ApplicationController
     
   end
   
+  # --------------
+  # Service Facade
+  # --------------
+  # used to invoke the corresponding service
+  # name: the service to be invoked
+  # atribute_hash: contains all needed attributes for the service 
+  # 
+  # ------------------
+  # Supported Services
+  # ------------------
+  # 1.Provision (primary)
+  #   Provision machines with the given parameters like provider, region, machine number, machine type.
+  #
+  # 2.Cassandra (primary)
+  #   Deploy a Cassandra cluster in single/multiple region(s) with given database configuration parameters
+  # 3.MongoDB (primary)
+  #   Deploy a MongoDB cluster in single/multiple region(s) with given database configuration parameters
+  # 
+  # 4.YCSB (optional)
+  #   Deploy a YCSB cluster to benchmark a given database cluster
+  # 5.Ganglia (optional)
+  #   Deploy Ganglia Agents (gmond) in each node of the given database cluster and Ganglia Central Monitoring (gmetad) in KCSDB Server  
   private
-  def service service_name, attribute_array
-    if service_name == 'cassandra'
-      service_cassandra attribute_array
-    elsif service_name == 'ycsb'
-      service_ycsb attribute_array
-    elsif service_name == 'gmond'
-      service_gmond attribute_array
-    end  
+  def service name, attribute_hash
+    if name == 'provsion'
+      service_provision attribute_hash
+    elsif name == 'cassandra'
+      service_cassandra attribute_hash
+    elsif name == 'mongodb'
+      service_mongodb attribute_hash
+    elsif name == 'ycsb'
+      service_ycsb attribute_hash
+    elsif name == 'ganglia'
+      service_ganglia attribute_hash
+    else
+      logger.debug "::: The service: #{name} is not supported!"  
+    end
+  end
+  
+  # Service Provision
+  # used to provision machines in parallel mode
+  # 
+  # -- cloud_config_hash ---
+  # provider: aws | rackspace | zimory
+  # regions:
+  #   region1: 
+  #     name: us-east-1
+  #     number: 4
+  #     type: m1.small
+  #   region2:
+  #     name: us-weast-1
+  #     number: 2
+  #     type: m1.small
+  # .....    
+  private
+  def service_provision cloud_config_hash
+    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    logger.debug "::: Service: Provision is being deployed..."
+    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    
+    provider = cloud_config_hash['provider']
+    region_hash = cloud_config_hash['regions']
+    if provider == 'aws'
+      service_provision_ec2 region_hash      
+    elsif provider == 'rackspace'
+      service_provision_rackspace region_hash
+    elsif provider == 'zimory'
+      service_provision_zimory region_hash
+    end
+
+    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
+    logger.debug "::: Service: Provision is being deployed... [OK]"
+    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
   end
   
   private
-  def service_cassandra attribute_array
-    logger.debug "::: Service: Cassandra is being deployed..." 
+  def service_provision_ec2 cloud_config_hash
+    
   end
+  
+  private
+  def service_provision_rackspace cloud_config_hash
+    
+  end
+  
+  private
+  def service_provision_zimory cloud_config_hash
+    
+  end
+  
+  
+# ============================================================  
+  private
+  def service_cassandra cloud_config_hash, cassandra_config_hash
+    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    logger.debug "::: Service: Cassandra is being deployed..."
+    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    
+    provider = cloud_config_hash['provider']
+    machine_number = cloud_config_hash['machine_number']
+    machine_type = cloud_config_hash['machine_type']
+    
+        
+  end
+  
+  # 1. provision new machines in EC2
+  # 2. knife bootstrap these machines
+  def create
+    recipe = "recipe[cassandra]"
+    
+    @nodes = [] # shared variable, used to contain all fog node object
+    @mutex = Mutex.new # lock
+    
+    number = params[:number_create].to_i
+    logger.debug "::: Creating #{number} machine(s)..."
+    
+    flavor = ""
+    if params[:flavor_create] == "small_create"
+      flavor = "m1.small"
+    elsif params[:flavor_create] == "medium_create"
+      flavor = "m1.medium"
+    else
+      flavor = "m1.large"  
+    end
+    logger.debug "::: Flavor: #{flavor} selected..."
+    
+    state = get_state
+    ami = state['chef_client_ami']
+    key_pair = state['key_pair_name']
+    security_group = state['security_group_name']
+    
+    node_name_array = []
+    for i in 1..number do
+      name = "cassandra-node" << i.to_s
+      node_name_array << name
+    end    
+    logger.debug "::: Node names: "
+    puts node_name_array
+    
+    beginning_time = Time.now
+    
+    # parallel
+    # depends on the performance of KCSDB Server
+    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
+    results = Parallel.map(node_name_array, in_threads: node_name_array.size) do |node_name|
+      provision_ec2_machine ami, flavor, key_pair, security_group, node_name
+    end
+    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
+    
+    provisioning_time = Time.now
+    
+    logger.debug "::: PROVISIONING TIME: #{provisioning_time - beginning_time} seconds"
+    
+    token_array = calculate_token_position number
+    logger.debug "::: Tokens: "
+    puts token_array
+    
+    seeds = calculate_seed_list 0.5, number
+    logger.debug "::: Seeds: "
+    puts seeds
+
+    logger.debug "::: Node IPs: "    
+    node_ip_array = []
+    @nodes.each {|node| node_ip_array << node.public_ip_address}
+    puts node_ip_array
+    
+    logger.debug "::: Knife Bootstrap #{number} machines..." 
+    bootstrap_array = []   
+    for k in 1..(token_array.size) do
+      tmp_array = []
+      
+      node_ip = node_ip_array[k-1] # for which node
+      puts "Node IP: #{node_ip}"
+      
+      token = token_array[k-1] # which token position
+      puts "Token: #{token}"
+      
+      node_name = "cassandra-node" << k.to_s
+      puts "Node Name: #{node_name}"
+      
+      token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+      File.open(token_file,"w") do |file|
+        file << "#!/usr/bin/env bash" << "\n"
+        file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+        file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+      end
+
+      tmp_array << node_ip
+      tmp_array << token
+      tmp_array << node_name
+      bootstrap_array << tmp_array
+    end
+    results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
+      system(knife_bootstrap block[0], block[1], block[2], recipe)
+    end
+    logger.debug "::: Knife Bootstrap #{number} machines... [OK]"    
+    
+    logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+    system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+    logger.debug "::: Deleting all token temporary files in KCSDB Server... [OK]"
+    
+    bootstrap_time = Time.now
+    
+    logger.debug "::: BOOTSTRAP TIME: #{bootstrap_time - provisioning_time} seconds"
+  end
+  
+  # provision a new EC2 machine
+  private
+  def provision_ec2_machine ami, flavor, key_pair, security_group, name
+    $stdout.sync = true
+    
+    ec2 = create_ec2
+    
+    logger.debug "=================================="
+    logger.debug "Launching a new machine in AWS EC2"
+    logger.debug "=================================="
+    
+    logger.debug "::: Now, launching a new machine with following configurations..."
+    logger.debug "::: AMI: #{ami}"
+    logger.debug "::: Flavor: #{flavor}"
+    logger.debug "::: Key Pair: #{key_pair}"
+    logger.debug "::: Security Group: #{security_group}"
+    logger.debug "::: Name: #{name}"
+    
+    server_def = {
+      image_id: ami,
+      flavor_id: flavor,
+      key_name: key_pair,
+      groups: security_group
+    }
+    
+    server = ec2.servers.create server_def
+    logger.debug "::: Adding tag..."
+    ec2.tags.create key: 'Name', value: name, resource_id: server.id
+
+    logger.debug "::: Waiting for machine: #{server.id}..."
+    server.wait_for { print "."; ready? }
+    # the machine is updated with public IP address
+    puts "\n"
+    logger.debug "::: Waiting for machine: #{server.id}... [OK]"
+
+    print "." until tcp_test_ssh(server.public_ip_address) { sleep 1 }
+
+    # Adding a newly created server to the nodes list
+    # lock    
+    @mutex.synchronize do
+      @nodes << server
+    end
+  end
+  
+  # knife bootstrap
+  # node: the IP address of the machine to be bootstraped
+  # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
+  # name: name of the node in Chef Server
+  private
+  def knife_bootstrap node, token, name, recipe
+    $stdout.sync = true
+    
+    state = get_state
+    chef_client_identity_file = state['chef_client_identity_file']
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
+    chef_client_template_file = state['chef_client_template_file']
+    
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
+
+    logger.debug "::: Uploading the token file to the node: #{node}... "
+    token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+    system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
+    logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
+    
+    logger.debug "::: Executing the token file in the node: #{node}... "
+    system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
+    logger.debug "::: Executing the token file in the node: #{node}... [OK]"
+
+    logger.debug "::: Knife bootstrapping a new machine..."
+    
+    knife_bootstrap_string = ""
+       
+    knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
+    knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
+    knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
+    knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
+    knife_bootstrap_string << "--template-file #{chef_client_template_file} "
+    knife_bootstrap_string << "--run-list \'#{recipe}\' "
+    knife_bootstrap_string << "--node-name \'#{name}\' "
+    knife_bootstrap_string << "--yes "
+    knife_bootstrap_string << "--no-host-key-verify "
+    knife_bootstrap_string << "--sudo "
+    
+    logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
+    knife_bootstrap_string
+  end
+  
+  # token positions for all nodes in cassandra cluster
+  private
+  def calculate_token_position node_number
+    logger.debug "::: Calculating tokens for #{node_number} nodes..."
+    system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{node_number} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
+    json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
+    parser = Yajl::Parser.new
+    hash = parser.parse json
+    token_map = hash["0"].values
+    token_map    
+  end
+  
+  # seed list
+  private
+  def calculate_seed_list fraction, node_number
+    logger.debug "::: Calculating seeds for #{node_number} nodes..."
+    seeds = ""
+    number_of_seeds = @nodes.size * fraction # a given fraction of all nodes in the cluster are seeds 
+    for i in 0..number_of_seeds-1 do
+      seeds << @nodes[i].private_ip_address << ","
+    end
+    seeds = seeds[0..-2] # delete the last comma
+    seeds
+  end
+# ============================================================  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   private
   def service_ycsb attribute_array

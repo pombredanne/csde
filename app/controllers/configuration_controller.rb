@@ -14,7 +14,8 @@ class ConfigurationController < ApplicationController
     state['chef_client_template_file'] = "#{Rails.root}/chef-repo/bootstrap/ubuntu12.04-new-light-gems.erb"
     update_state state    
     
-    ec2 = create_ec2
+    # ec2 = create_ec2
+    ec2 = create_fog_object_ec2 'ec2', nil
     
     logger.debug "====================="
     logger.debug "Checking the key pair"

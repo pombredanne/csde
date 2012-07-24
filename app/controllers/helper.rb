@@ -2,7 +2,76 @@
 # share code among controllers
 
 module Helper
+
+  # Create Fob Object Facade
+  # create a fog object in order to send/receive API requests/responses from/to cloud provider
+  # supported providers: aws | rackspace
+  # regions are corresponding to the provider: e.g. us-east-1 for aws
+  def create_fog_object provider, region 
+    fog_object = nil
+    state = get_state
+    if provider == 'aws'
+      fog_object = create_fog_object_ec2 state, region
+    elsif provider == 'rackspace'
+      fog_object = create_fog_object_rackspace state, region
+    else
+      logger.debug "Provider: #{provider} is not supported...!"  
+    end
+    fog_object
+  end
   
+  # Create Fog Object EC2
+  private
+  def create_fog_object_ec2 state, region
+    logger.debug "::: Creating an Fog EC2 object..."
+    
+    # standard region
+    if region.nil?
+      region = 'us-east-1'   
+    end
+    
+    ec2 = Fog::Compute.new(
+      provider: 'AWS',
+      aws_access_key_id: state['aws_access_key_id'],
+      aws_secret_access_key: state['aws_secret_access_key'],
+      region: region
+    )
+    logger.debug "::: Creating an Fog EC2 object... [OK]"
+    ec2
+  end
+  
+  # Create Fog Object Rackspace
+  # TODO: each region in Rackspace is assigned a different account
+  private
+  def create_fog_object_rackspace state, region
+    logger.debug "::: Creating an Fog Rackspace object..."
+    rackspace = Fog::Compute.new(
+      provider: 'Rackspace',
+      rackspace_api_key: state['rackspace_api_key'],
+      rackspace_username: state['rackspace_username'],
+    )
+    logger.debug "::: Creating an Fog Rackspace object... [OK]"
+    rackspace
+  end
+
+  # get AWS credentials from state.yml
+  # and create an EC2 object
+  # KCSDB uses this object to send/receive API requests/responses to EC2
+  # TODO: Garbage Collector in Ruby??
+  # def create_ec2
+    # state = get_state
+# 
+    # logger.debug "::: Creating an EC2 object..."
+    # ec2 = Fog::Compute.new(
+      # provider: 'AWS',
+      # aws_access_key_id: state['aws_access_key_id'],
+      # aws_secret_access_key: state['aws_secret_access_key'],
+      # region: state['region']
+    # )
+    # logger.debug "::: Creating an EC2 object... [OK]"
+    # ec2
+  # end
+
   # ============================================================ #
   # state.yml contains all related information for KCSD
   # KCSDB stores data in files such as state.yml, not in database 
@@ -23,29 +92,7 @@ module Helper
     File.open("#{Rails.root}/chef-repo/.chef/conf/state.yml","w") {|file| YAML.dump(state,file)}
     logger.debug "::: Updating state.yml... [OK]"
   end
-
-  # ============================================================ #
-  # EC2 
-  # ============================================================ #
-  
-  # get AWS credentials from state.yml
-  # and create an EC2 object
-  # KCSDB uses this object to send/receive API requests/responses to EC2
-  # TODO: Garbage Collector in Ruby??
-  def create_ec2
-    state = get_state
-
-    logger.debug "::: Creating an EC2 object..."
-    ec2 = Fog::Compute.new(
-      provider: 'AWS',
-      aws_access_key_id: state['aws_access_key_id'],
-      aws_secret_access_key: state['aws_secret_access_key'],
-      region: state['region']
-    )
-    logger.debug "::: Creating an EC2 object... [OK]"
-    ec2
-  end
-  
+    
   # check if sshd is ready in the remote machine
   # code reused from knife-ec2 plugin
   # https://github.com/opscode/knife-ec2/blob/master/lib/chef/knife/ec2_server_create.rb
@@ -81,33 +128,6 @@ module Helper
   ensure
     tcp_socket && tcp_socket.close
   end
-  
-  #capture private IPs of all selected running machines in EC2
-  def capture_private_ips_of_running_machines
-    logger.debug "::: Capturing private IPs of running machines..."
-
-    # machines that KCSDB manages
-    machine_array = get_machine_array
-    
-    #contain all running machines
-    tmp_private_ips_of_running_machines = []
-
-    #iterate all instances in EC2 environment
-    #and get only the running instances
-    #and add the private IPs of them to private_ips_of_running_instances array
-    machine_array.each do |machine|
-      if machine.state.to_s == "running"
-        tmp_private_ips_of_running_machines << machine.private_ip_address
-      end
-    end
-
-    #write to a temp file
-    File.open("#{Rails.root}/chef-repo/.chef/capistrano-kcsd/n_ips.txt","w") do |file|
-      tmp_private_ips_of_running_machines.each do |ip|
-        file << ip << "\n"
-      end
-    end
-  end
 
   # capture private IP of KCSDB server and save it into kcsdb_private_ip.txt
   def capture_private_ip_of_kcsdb_server
@@ -141,30 +161,4 @@ module Helper
     end
     logger.debug "::: Updating knife.rb... [OK]"
   end
-
-=begin  
-  # return the machines that KCSDB manages in an array
-  def get_machine_array
-    logger.debug "::: Getting all machines that KCSDB manages..."
-    machine_array = []
-    ec2 = create_ec2
-    state = get_state
-    key_pair_name = state['key_pair_name']
-    # chef_server_id = state['chef_server_id']
-    
-    ec2.servers.each do |server|
-      # show all the instances that KCSD manages
-      if server.key_name == key_pair_name
-        # chef server is not including
-        # if server.id != chef_server_id
-          # the machine is not terminated
-          if server.state.to_s != "terminated"
-            machine_array << server
-          end
-        # end
-      end
-    end
-    machine_array
-  end
-=end
 end
