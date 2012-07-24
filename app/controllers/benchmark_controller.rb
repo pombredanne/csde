@@ -55,47 +55,47 @@ class BenchmarkController < ApplicationController
     logger.debug "========================================="
 
     # NOW, run each profile
-    profile_counter = 1
-    profile_array.each do |profile|
-      logger.debug "::: Running profile #{profile_counter}..."
-      
-      # each profile uses a dedicated provider
-      # aws | rackspace | zimory
-      provider = profile['provider']
-      logger.debug "Provider: #{provider}"
-      
-      region_array = []
-      region_counter = 1
-      region_found = true
-      
-      # seek regions
-      until ! region_found
-        if profile.key? "region#{region_counter}" 
-          region_array << profile["region#{region_counter}"]
-          region_counter = region_counter + 1
-        else
-          region_found = false
-        end
-      end
-      
-      logger.debug "Regions:"
-      puts region_array
-      
-      check_multiple_region = false
-      if region_array.size > 1
-        check_multiple_region = true
-        logger.debug "Deploying database cluster in multiple regions..."        
-      else
-        logger.debug "Deploying database cluster in single region..."
-      end
-      
-      
-      
-      
-      
-      
-      profile_counter = profile_counter + 1
-    end
+    # profile_counter = 1
+    # profile_array.each do |profile|
+      # logger.debug "::: Running profile #{profile_counter}..."
+#       
+      # # each profile uses a dedicated provider
+      # # aws | rackspace | zimory
+      # provider = profile['provider']
+      # logger.debug "Provider: #{provider}"
+#       
+      # region_array = []
+      # region_counter = 1
+      # region_found = true
+#       
+      # # seek regions
+      # until ! region_found
+        # if profile.key? "region#{region_counter}" 
+          # region_array << profile["region#{region_counter}"]
+          # region_counter = region_counter + 1
+        # else
+          # region_found = false
+        # end
+      # end
+#       
+      # logger.debug "Regions:"
+      # puts region_array
+#       
+      # check_multiple_region = false
+      # if region_array.size > 1
+        # check_multiple_region = true
+        # logger.debug "Deploying database cluster in multiple regions..."        
+      # else
+        # logger.debug "Deploying database cluster in single region..."
+      # end
+#       
+#       
+#       
+#       
+#       
+#       
+      # profile_counter = profile_counter + 1
+    # end
         
   end
   

@@ -22,8 +22,6 @@ KCSD1::Application.routes.draw do
   get "chef_node/configure"
   post "chef_node/configure"
 
-
-
   # get "chef_server/setup"
   # get "chef_server/check"
   # get "chef_server/start"

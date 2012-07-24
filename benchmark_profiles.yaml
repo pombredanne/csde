@@ -1,24 +1,24 @@
 service1:
   name: cassandra
-  attribute:
+  attributes:
     replication_factor: 3
 service2:
   name: ycsb
-  attribute:
+  attributes:
     workload_model: hotspot
 service3:
   name: gmond
-  attribute:
+  attributes:
     send_metadata_interval: 60
 profile1:
   provider: aws
   region1:
     name: us-east-1
     machine_type: small
-    template: 3 service1+service3, 2 service2
+    template: 3 service1
   region2:
     name: us-west-1
     machine_type: small
-    template: 5 service1+service3, 2 service2    
+    template: 4 service1    
 
     
