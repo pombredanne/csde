@@ -139,7 +139,7 @@ class BenchmarkController < ApplicationController
     elsif name == 'ganglia'
       service_ganglia attribute_hash
     else
-      logger.debug "::: The service: #{name} is not supported!"  
+      logger.debug "::: Service: #{name} is not supported!"  
     end
   end
   
@@ -152,11 +152,11 @@ class BenchmarkController < ApplicationController
   #   region1: 
   #     name: us-east-1
   #     number: 4
-  #     type: m1.small
+  #     flavor: m1.small
   #   region2:
   #     name: us-weast-1
   #     number: 2
-  #     type: m1.small
+  #     flavor: m1.small
   # .....    
   private
   def service_provision cloud_config_hash
@@ -170,8 +170,8 @@ class BenchmarkController < ApplicationController
       service_provision_ec2 region_hash      
     elsif provider == 'rackspace'
       service_provision_rackspace region_hash
-    elsif provider == 'zimory'
-      service_provision_zimory region_hash
+    else
+      logger.debug "::: Provider: #{provider} is not supported!"
     end
 
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
@@ -181,7 +181,94 @@ class BenchmarkController < ApplicationController
   
   private
   def service_provision_ec2 cloud_config_hash
+    logger.debug "::: Service: Provision EC2 is being deployed..."
     
+    @nodes = [] # shared variable, used to contain all fog node object
+    @mutex = Mutex.new # lock
+
+    cloud_config_hash.each do |region, values|
+      region_name = values['name']
+      machine_number = values['number'].to_i
+      machine_flavor = values['flavor']
+      
+      state = get_state
+      ami = state['chef_client_ami']
+      key_pair = state['key_pair_name']
+      security_group = state['security_group_name']
+      
+      node_name_array = []
+      for i in 1..machine_number do
+        x = "cassandra-node-" << name << "-" << i.to_s
+        node_name_array << x
+      end
+      
+      logger.debug "-------------------------"
+      logger.debug "Region: #{name}"
+      logger.debug "Machine number: #{number}"
+      logger.debug "Machine flavor: #{flavor}"
+      logger.debug "Machine image: #{ami}"
+      logger.debug "Key pair: #{key_pair}"
+      logger.debug "Security group: #{security_group}"
+      logger.debug "Node names: " ; puts node_name_array ;
+      logger.debug "-------------------------"
+      
+      beginning_time = Time.now
+      # parallel
+      # depends on the performance of KCSDB Server
+      results = Parallel.map(node_name_array, in_threads: node_name_array.size) do |node_name|
+        provision_ec2_machine name, ami, flavor, key_pair, security_group, node_name
+      end
+      provisioning_time = Time.now
+    
+      logger.debug "::: PROVISIONING TIME: #{provisioning_time - beginning_time} seconds"
+    end  
+    
+    logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
+  end
+  
+  # provision a new EC2 machine
+  # used for each thread
+  private
+  def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
+    $stdout.sync = true
+    
+    ec2 = create_fog_object_ec2 'aws', region
+    
+    logger.debug "=================================="
+    logger.debug "Launching a new machine in AWS EC2"
+    logger.debug "=================================="
+    
+    logger.debug "::: Now, launching a new machine with following configurations..."
+    logger.debug "::: AMI: #{ami}"
+    logger.debug "::: Flavor: #{flavor}"
+    logger.debug "::: Key Pair: #{key_pair}"
+    logger.debug "::: Security Group: #{security_group}"
+    logger.debug "::: Name: #{name}"
+    
+    server_def = {
+      image_id: ami,
+      flavor_id: flavor,
+      key_name: key_pair,
+      groups: security_group
+    }
+    
+    server = ec2.servers.create server_def
+    logger.debug "::: Adding tag..."
+    ec2.tags.create key: 'Name', value: name, resource_id: server.id
+
+    logger.debug "::: Waiting for machine: #{server.id}..."
+    server.wait_for { print "."; ready? }
+    # the machine is updated with public IP address
+    puts "\n"
+    logger.debug "::: Waiting for machine: #{server.id}... [OK]"
+
+    print "." until tcp_test_ssh(server.public_ip_address) { sleep 1 }
+
+    # Adding a newly created server to the nodes list
+    # lock    
+    @mutex.synchronize do
+      @nodes << server
+    end
   end
   
   private
@@ -304,49 +391,7 @@ class BenchmarkController < ApplicationController
     logger.debug "::: BOOTSTRAP TIME: #{bootstrap_time - provisioning_time} seconds"
   end
   
-  # provision a new EC2 machine
-  private
-  def provision_ec2_machine ami, flavor, key_pair, security_group, name
-    $stdout.sync = true
-    
-    ec2 = create_ec2
-    
-    logger.debug "=================================="
-    logger.debug "Launching a new machine in AWS EC2"
-    logger.debug "=================================="
-    
-    logger.debug "::: Now, launching a new machine with following configurations..."
-    logger.debug "::: AMI: #{ami}"
-    logger.debug "::: Flavor: #{flavor}"
-    logger.debug "::: Key Pair: #{key_pair}"
-    logger.debug "::: Security Group: #{security_group}"
-    logger.debug "::: Name: #{name}"
-    
-    server_def = {
-      image_id: ami,
-      flavor_id: flavor,
-      key_name: key_pair,
-      groups: security_group
-    }
-    
-    server = ec2.servers.create server_def
-    logger.debug "::: Adding tag..."
-    ec2.tags.create key: 'Name', value: name, resource_id: server.id
-
-    logger.debug "::: Waiting for machine: #{server.id}..."
-    server.wait_for { print "."; ready? }
-    # the machine is updated with public IP address
-    puts "\n"
-    logger.debug "::: Waiting for machine: #{server.id}... [OK]"
-
-    print "." until tcp_test_ssh(server.public_ip_address) { sleep 1 }
-
-    # Adding a newly created server to the nodes list
-    # lock    
-    @mutex.synchronize do
-      @nodes << server
-    end
-  end
+  
   
   # knife bootstrap
   # node: the IP address of the machine to be bootstraped
