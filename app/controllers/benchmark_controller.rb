@@ -68,32 +68,13 @@ class BenchmarkController < ApplicationController
       end
 
       logger.debug "::: Invoking Service Provision..."
-      nodes = service 'provsion', cloud_config_hash
-      puts nodes
-            
-#       
-      # cloud_config_hash = Hash.new # attribute hash for Service Provision
-      # cloud_config_hash['provider'] = nil
-      # cloud_config_hash['regions'] = nil
-      # tmp = Hash.new
-#       
-      # # iterate the profile hash
-      # profile.each do |key, value|
-        # if key.to_s.include? "provider"
-          # cloud_config_hash['provider'] = value
-        # else key.to
-#           
-        # end
-      # end  
-#       
-#       
-#       
-      # tmp['provider'] = profile['provider']
-      # cloud_config_hash.merge tmp
-#       
-      
-      
-      
+      service 'provsion', cloud_config_hash
+
+      logger.debug "::: Node IPs: "    
+      node_ip_array = []
+      @nodes.each {|node| node_ip_array << node.public_ip_address}
+      puts node_ip_array      
+
       
       profile_counter += 1
     end    
@@ -292,7 +273,6 @@ class BenchmarkController < ApplicationController
     end  
     
     logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
-    @nodes
   end
   
   # provision a new EC2 machine
