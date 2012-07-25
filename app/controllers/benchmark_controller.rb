@@ -541,10 +541,4 @@ class BenchmarkController < ApplicationController
   def service_gmond attribute_array
     logger.debug "::: Service: Gmond is being deployed..."
   end
-  
-  private
-  def template_parse
-    
-  end
-  
 end
