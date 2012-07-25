@@ -226,24 +226,17 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Service: Provision EC2 is being deployed..."
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
     
-    # @nodes = [] # shared variable, used to contain all fog node object
-    
     @regions = Hash.new # shared variable, used to contain all fog object in each region 
     # regions:
     #   us-east-1: [ip1, ip2, ip3]
     #   us-west-1: [ip4, ip5]
     #   ...
-        
-    @mutex = Mutex.new # lock
 
     node_counter = 1
     cloud_config_hash.each do |region, values|
       region_name = values['name']
       machine_flavor = values['machine_type']
       machine_number = values['template'].to_i
-      
-      # create a corresponding region key
-      @regions[region_name] = []
       
       state = get_state
       if region_name == 'us-east-1'
@@ -275,12 +268,20 @@ class BenchmarkController < ApplicationController
       logger.debug "-------------------------"
       
       beginning_time = Time.now
+
+      # before, @nodes contains nothing
+      @nodes = [] # shared variable, used to contain all node IP in each region
+      @mutex = Mutex.new # lock
+
       # parallel
       # depends on the performance of KCSDB Server
       results = Parallel.map(node_name_array, in_threads: node_name_array.size) do |node_name|
         provision_ec2_machine region_name, machine_ami, machine_flavor, key_pair, security_group, node_name
       end
       provisioning_time = Time.now
+      
+      # after, @nodes contains IPs
+      @regions[region] = @nodes
     
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
@@ -320,8 +321,8 @@ class BenchmarkController < ApplicationController
     # Adding a newly created server to the nodes list
     # lock    
     @mutex.synchronize do
-      # @nodes << server
-      @region[region] << server.public_ip_address
+      @nodes << server.public_ip_address
+      # @region[region] << server.public_ip_address
     end
   end
   
