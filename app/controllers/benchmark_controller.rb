@@ -238,6 +238,14 @@ class BenchmarkController < ApplicationController
       machine_flavor = values['machine_type']
       machine_number = values['template'].to_i
       
+      # regions:
+      #   region1:
+      #     name: us-east-1
+      name = Hash.new
+      name['name'] = region_name
+      @regions[region_name] = name
+      
+      
       state = get_state
       if region_name == 'us-east-1'
         machine_ami = state['chef_client_ami_us_east_1']
@@ -281,7 +289,13 @@ class BenchmarkController < ApplicationController
       provisioning_time = Time.now
       
       # after, @nodes contains IPs
-      @regions[region]["ips"] = @nodes
+      # regions:
+      #   region1:
+      #     name: us-east-1
+      #     ips: [1,2,3]
+      ips = Hash.new
+      ips['ips'] = @nodes
+      @regions[region_name].merge ips
     
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
