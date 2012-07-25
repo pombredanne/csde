@@ -61,17 +61,15 @@ class BenchmarkController < ApplicationController
       
       # clone the parameters
       cloud_config_hash = profile
-      puts "BEFORE:"
-      puts cloud_config_hash
       
       # calculate the machine number
       cloud_config_hash['regions'].each do |region, values|
         values['template'] = template_parse values['template']
       end
-      
-      puts "AFTER"
-      puts cloud_config_hash
-      
+
+      logger.debug "::: Invoking Service Provision..."
+      service 'provsion', cloud_config_hash
+            
 #       
       # cloud_config_hash = Hash.new # attribute hash for Service Provision
       # cloud_config_hash['provider'] = nil
@@ -209,12 +207,13 @@ class BenchmarkController < ApplicationController
   # regions:
   #   region1: 
   #     name: us-east-1
-  #     number: 4
-  #     machine_type: m1.small
+  #     machine_type: m1.small     
+  #     template: 4
+  #     
   #   region2:
   #     name: us-weast-1
-  #     number: 2
-  #     machine_type: m1.small
+  #     machine_type: m1.small     
+  #     template: 2
   # .....    
   private
   def service_provision cloud_config_hash
@@ -248,8 +247,8 @@ class BenchmarkController < ApplicationController
     node_counter = 1
     cloud_config_hash.each do |region, values|
       region_name = values['name']
-      machine_number = values['number'].to_i
       machine_flavor = values['machine_type']
+      machine_number = values['template'].to_i
       
       state = get_state
       if region_name == 'us-east-1'
