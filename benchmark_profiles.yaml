@@ -12,13 +12,14 @@ service3:
     send_metadata_interval: 60
 profile1:
   provider: aws
-  region1:
-    name: us-east-1
-    machine_type: small
-    template: 3 service1
-  region2:
-    name: us-west-1
-    machine_type: small
-    template: 4 service1    
+  regions:
+    region1:
+      name: us-east-1
+      machine_type: small
+      template: 3 service1
+    region2:
+      name: us-west-1
+      machine_type: small
+      template: 4 service1    
 
     

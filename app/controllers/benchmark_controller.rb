@@ -10,11 +10,9 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Getting the benchmark profile from the given source..."
     benchmark_profile_path = "#{Rails.root}/chef-repo/.chef/tmp/benchmark_profiles.yaml"
     system "curl -L #{benchmark_profile_url} -o #{benchmark_profile_path}"
-    logger.debug "::: Getting the benchmark profile from the given source... [OK]"
+    logger.debug "Getting the benchmark profile from the given source... [OK]"
     
-    logger.debug "===================================="
     logger.debug "::: Parsing the benchmark profile..."
-    logger.debug "===================================="
     benchmark_profiles = Psych.load(File.open benchmark_profile_path)
     
     # contain all keys of benchmark profiles
@@ -50,10 +48,45 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Profiles:"
     puts profile_array
     
-    logger.debug "========================================="
-    logger.debug "::: Parsing the benchmark profile... [OK]"
-    logger.debug "========================================="
+    logger.debug "Parsing the benchmark profile... [OK]"
 
+=begin
+    profile_counter = 1
+    profile_array.each do |profile| # each profile is a hash
+      logger.debug "-----------------------------------------"
+      logger.debug "::: Running profile #{profile_counter}..."
+      logger.debug "-----------------------------------------"
+      
+      # Service Provision has to be called at first
+      # to provision machines in cloud infrastructure
+      
+      cloud_config_hash = Hash.new # attribute hash for Service Provision
+      cloud_config_hash['provider'] = nil
+      cloud_config_hash['regions'] = nil
+      tmp = Hash.new
+      
+      # iterate the profile hash
+      profile.each do |key, value|
+        if key.to_s.include? "provider"
+          cloud_config_hash['provider'] = value
+        else key.to
+          
+        end
+      end  
+      
+      
+      
+      tmp['provider'] = profile['provider']
+      cloud_config_hash.merge tmp
+      
+      
+      
+      
+      
+      profile_counter += 1
+    end    
+=end    
+    
 
     # # NOW, run each profile
     # profile_counter = 1
@@ -97,9 +130,20 @@ class BenchmarkController < ApplicationController
         
   end
   
+  # used to detect how many machines should be created
+  # described in template
+  # e.g.: 3 service1+service3, 2 service2
   private
   def template_parse template_string
-    
+    found_number = 0
+    test = template_string.split " "
+    test.each do |el|
+      # "3".to_i --> 3, "service1".to_i --> 0
+      if el.to_i != 0
+        found_number += el.to_i
+      end 
+    end
+    found_number    
   end
   
   # --------------
