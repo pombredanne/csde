@@ -295,8 +295,7 @@ class BenchmarkController < ApplicationController
       #     ips: [1,2,3]
       ips = Hash.new
       ips['ips'] = @nodes
-      puts ips
-      @regions[region].merge ips
+      @regions[region] = @regions[region].merge ips
     
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
