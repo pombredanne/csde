@@ -54,48 +54,46 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Parsing the benchmark profile... [OK]"
     logger.debug "========================================="
 
-    # NOW, run each profile
-    profile_counter = 1
-    profile_array.each do |profile|
-      logger.debug "::: Running profile #{profile_counter}..."
-      
-      # each profile uses a dedicated provider
-      # aws | rackspace
-      provider = profile['provider']
-      logger.debug "Provider: #{provider}"
-      
-      region_array = []
-      region_counter = 1
-      region_found = true
-      
-      # seek regions
-      until ! region_found
-        if profile.key? "region#{region_counter}" 
-          region_array << profile["region#{region_counter}"]
-          region_counter = region_counter + 1
-        else
-          region_found = false
-        end
-      end
-      
-      logger.debug "Regions:"
-      puts region_array
-      
-      check_multiple_region = false
-      if region_array.size > 1
-        check_multiple_region = true
-        logger.debug "Deploying database cluster in multiple regions..."        
-      else
-        logger.debug "Deploying database cluster in single region..."
-      end
-      
-      
-      
-      
-      
-      
-      profile_counter = profile_counter + 1
-    end
+
+    # # NOW, run each profile
+    # profile_counter = 1
+    # profile_array.each do |profile|
+      # logger.debug "::: Running profile #{profile_counter}..."
+#       
+      # # each profile uses a dedicated provider
+      # # aws | rackspace
+      # provider = profile['provider']
+      # logger.debug "Provider: #{provider}"
+#       
+      # region_array = []
+      # region_counter = 1
+      # region_found = true
+#       
+      # # seek regions
+      # until ! region_found
+        # if profile.key? "region#{region_counter}" 
+          # region_array << profile["region#{region_counter}"]
+          # region_counter = region_counter + 1
+        # else
+          # region_found = false
+        # end
+      # end
+#       
+      # logger.debug "Regions:"
+      # puts region_array
+#       
+      # check_multiple_region = false
+      # if region_array.size > 1
+        # check_multiple_region = true
+        # logger.debug "Deploying database cluster in multiple regions..."        
+      # else
+        # logger.debug "Deploying database cluster in single region..."
+      # end
+# 
+      # profile_counter = profile_counter + 1
+    # end
+
+
         
   end
   
@@ -146,6 +144,9 @@ class BenchmarkController < ApplicationController
   
   # Service Provision
   # used to provision machines in parallel mode
+  #
+  # primary service
+  # this service has to be called always at first to provision machines in cloud infrastructure
   # 
   # -- cloud_config_hash ---
   # provider: aws | rackspace
@@ -153,11 +154,11 @@ class BenchmarkController < ApplicationController
   #   region1: 
   #     name: us-east-1
   #     number: 4
-  #     flavor: m1.small
+  #     machine_type: m1.small
   #   region2:
   #     name: us-weast-1
   #     number: 2
-  #     flavor: m1.small
+  #     machine_type: m1.small
   # .....    
   private
   def service_provision cloud_config_hash
@@ -192,7 +193,7 @@ class BenchmarkController < ApplicationController
     cloud_config_hash.each do |region, values|
       region_name = values['name']
       machine_number = values['number'].to_i
-      machine_flavor = values['flavor']
+      machine_flavor = values['machine_type']
       
       state = get_state
       if region_name == 'us-east-1'
