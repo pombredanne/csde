@@ -28,7 +28,7 @@ class BenchmarkController < ApplicationController
     service_array = []
     
     # contain profile1, profile2
-    # each profile is a hash map, e.g. provider => aws, region1 => { name => us-east-1, machine_type => small, template => 3 service1+service2}
+    # each profile is a hash map, e.g. provider => aws, regions => { region1 => { name => us-east-1, machine_type => small, template => 3 service1+service2} }
     profile_array = []
     
     key_array.each do |key|
@@ -50,7 +50,6 @@ class BenchmarkController < ApplicationController
     
     logger.debug "Parsing the benchmark profile... [OK]"
 
-=begin
     profile_counter = 1
     profile_array.each do |profile| # each profile is a hash
       logger.debug "-----------------------------------------"
@@ -60,32 +59,34 @@ class BenchmarkController < ApplicationController
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
       
-      cloud_config_hash = Hash.new # attribute hash for Service Provision
-      cloud_config_hash['provider'] = nil
-      cloud_config_hash['regions'] = nil
-      tmp = Hash.new
-      
-      # iterate the profile hash
-      profile.each do |key, value|
-        if key.to_s.include? "provider"
-          cloud_config_hash['provider'] = value
-        else key.to
-          
-        end
-      end  
-      
-      
-      
-      tmp['provider'] = profile['provider']
-      cloud_config_hash.merge tmp
-      
+      cloud_config_hash = profile
+      puts cloud_config_hash
+#       
+      # cloud_config_hash = Hash.new # attribute hash for Service Provision
+      # cloud_config_hash['provider'] = nil
+      # cloud_config_hash['regions'] = nil
+      # tmp = Hash.new
+#       
+      # # iterate the profile hash
+      # profile.each do |key, value|
+        # if key.to_s.include? "provider"
+          # cloud_config_hash['provider'] = value
+        # else key.to
+#           
+        # end
+      # end  
+#       
+#       
+#       
+      # tmp['provider'] = profile['provider']
+      # cloud_config_hash.merge tmp
+#       
       
       
       
       
       profile_counter += 1
     end    
-=end    
     
 
     # # NOW, run each profile
