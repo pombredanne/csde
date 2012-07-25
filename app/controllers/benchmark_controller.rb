@@ -64,17 +64,17 @@ class BenchmarkController < ApplicationController
       
       # calculate the machine number
       cloud_config_hash['regions'].each do |region, values|
-        values['template'] = template_parse values['template']
+        values['template'] = template_parse_to_machine_number values['template']
       end
 
       logger.debug "::: Invoking Service Provision..."
       service 'provsion', cloud_config_hash
 
       logger.debug "::: Node IPs: "    
-      node_ip_array = []
-      @nodes.each {|node| node_ip_array << node.public_ip_address}
-      puts node_ip_array      
-
+      # node_ip_array = []
+      # @nodes.each {|node| node_ip_array << node.public_ip_address}
+      # puts node_ip_array      
+      puts @regions
       
       profile_counter += 1
     end    
@@ -126,7 +126,7 @@ class BenchmarkController < ApplicationController
   # described in template
   # e.g.: 3 service1+service3, 2 service2
   private
-  def template_parse template_string
+  def template_parse_to_machine_number template_string
     found_number = 0
     test = template_string.split " "
     test.each do |el|
@@ -178,6 +178,7 @@ class BenchmarkController < ApplicationController
     end
   end
   
+  # -------------------------------------------------------------------------------------------- #
   # Service Provision
   # used to provision machines in parallel mode
   #
@@ -221,9 +222,18 @@ class BenchmarkController < ApplicationController
   
   private
   def service_provision_ec2 cloud_config_hash
+    logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Provision EC2 is being deployed..."
+    logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
     
-    @nodes = [] # shared variable, used to contain all fog node object
+    # @nodes = [] # shared variable, used to contain all fog node object
+    
+    @regions = Hash.new # shared variable, used to contain all fog object in each region 
+    # regions:
+    #   us-east-1: [ip1, ip2, ip3]
+    #   us-west-1: [ip4, ip5]
+    #   ...
+        
     @mutex = Mutex.new # lock
 
     node_counter = 1
@@ -231,6 +241,9 @@ class BenchmarkController < ApplicationController
       region_name = values['name']
       machine_flavor = values['machine_type']
       machine_number = values['template'].to_i
+      
+      # create a corresponding region key
+      @regions[region_name] = []
       
       state = get_state
       if region_name == 'us-east-1'
@@ -272,7 +285,9 @@ class BenchmarkController < ApplicationController
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
     
+    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
+    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
   end
   
   # provision a new EC2 machine
@@ -305,7 +320,8 @@ class BenchmarkController < ApplicationController
     # Adding a newly created server to the nodes list
     # lock    
     @mutex.synchronize do
-      @nodes << server
+      # @nodes << server
+      @region[region] << server.public_ip_address
     end
   end
   
@@ -313,20 +329,137 @@ class BenchmarkController < ApplicationController
   def service_provision_rackspace cloud_config_hash
     
   end
-
-# ============================================================  
+  
+  # provision a new Rackspace machine
+  # used for each thread
   private
-  def service_cassandra cloud_config_hash, cassandra_config_hash
+  def provision_rackspace_machine
+    
+  end
+  # -------------------------------------------------------------------------------------------- #
+  
+  # -------------------------------------------------------------------------------------------- #
+  # Service Cassandra
+  # database service
+  # used to deploy a database cluster in single/multiple region(s) in parallel mode
+  #
+  # primary service
+  # a database service (Cassandra | MongoDB) has always to be called
+  #
+  
+  private
+  def service_cassandra cassandra_config_hash
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Cassandra is being deployed..."
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     
-    provider = cloud_config_hash['provider']
-    machine_number = cloud_config_hash['machine_number']
-    machine_type = cloud_config_hash['machine_type']
+    recipe = "recipe[cassandra]"
     
-        
+    
+    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
+    logger.debug "::: Service: Cassandra is being deployed... [OK]"
+    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"    
   end
+  
+  # token positions for all nodes in cassandra cluster
+  # private
+  # def calculate_token_position node_number
+    # logger.debug "::: Calculating tokens for #{node_number} nodes..."
+    # system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{node_number} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
+    # json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
+    # parser = Yajl::Parser.new
+    # hash = parser.parse json
+    # token_map = hash["0"].values
+    # token_map    
+  # end
+  
+  # token positions for all node in single/multiple regions
+  #
+  # token_per_region_hash
+  # region1 => 3
+  # region2 => 2
+  # ...
+  private
+  def calculate_token_position token_per_region_hash 
+    logger.debug "::: Calculating tokens..."
+    param = ""
+    token_per_region_hash.each do |key, value|
+      logger.debug "#{key}: #{value} nodes"
+      param << value << " "
+    end
+    system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{param} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
+    json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
+    parser = Yajl::Parser.new
+    token_hash = parser.parse json
+    token_hash
+  end
+  
+  # seed list
+  private
+  def calculate_seed_list fraction, node_number
+    logger.debug "::: Calculating seeds for #{node_number} nodes..."
+    seeds = ""
+    number_of_seeds = @nodes.size * fraction # a given fraction of all nodes in the cluster are seeds 
+    for i in 0..number_of_seeds-1 do
+      seeds << @nodes[i].private_ip_address << ","
+    end
+    seeds = seeds[0..-2] # delete the last comma
+    seeds
+  end
+  
+  # knife bootstrap
+  # node: the IP address of the machine to be bootstraped
+  # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
+  # name: name of the node in Chef Server
+  private
+  def knife_bootstrap node, token, name, recipe
+    $stdout.sync = true
+    
+    state = get_state
+    chef_client_identity_file = state['chef_client_identity_file']
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
+    chef_client_template_file = state['chef_client_template_file']
+    
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
+
+    logger.debug "::: Uploading the token file to the node: #{node}... "
+    token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+    system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
+    logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
+    
+    logger.debug "::: Executing the token file in the node: #{node}... "
+    system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
+    logger.debug "::: Executing the token file in the node: #{node}... [OK]"
+
+    logger.debug "::: Knife bootstrapping a new machine..."
+    
+    knife_bootstrap_string = ""
+       
+    knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
+    knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
+    knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
+    knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
+    knife_bootstrap_string << "--template-file #{chef_client_template_file} "
+    knife_bootstrap_string << "--run-list \'#{recipe}\' "
+    knife_bootstrap_string << "--node-name \'#{name}\' "
+    knife_bootstrap_string << "--yes "
+    knife_bootstrap_string << "--no-host-key-verify "
+    knife_bootstrap_string << "--sudo "
+    
+    logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
+    knife_bootstrap_string
+  end
+  # -------------------------------------------------------------------------------------------- #
+  
+  
+  
+  
+  
+  
+
+  
   
   # 1. provision new machines in EC2
   # 2. knife bootstrap these machines
@@ -428,90 +561,6 @@ class BenchmarkController < ApplicationController
     
     logger.debug "::: BOOTSTRAP TIME: #{bootstrap_time - provisioning_time} seconds"
   end
-  
-  
-  
-  # knife bootstrap
-  # node: the IP address of the machine to be bootstraped
-  # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
-  # name: name of the node in Chef Server
-  private
-  def knife_bootstrap node, token, name, recipe
-    $stdout.sync = true
-    
-    state = get_state
-    chef_client_identity_file = state['chef_client_identity_file']
-    chef_client_ssh_user = state['chef_client_ssh_user']
-    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
-    chef_client_template_file = state['chef_client_template_file']
-    
-    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
-
-    logger.debug "::: Uploading the token file to the node: #{node}... "
-    token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-    system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
-    logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
-    
-    logger.debug "::: Executing the token file in the node: #{node}... "
-    system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
-    logger.debug "::: Executing the token file in the node: #{node}... [OK]"
-
-    logger.debug "::: Knife bootstrapping a new machine..."
-    
-    knife_bootstrap_string = ""
-       
-    knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
-    knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
-    knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
-    knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
-    knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
-    knife_bootstrap_string << "--template-file #{chef_client_template_file} "
-    knife_bootstrap_string << "--run-list \'#{recipe}\' "
-    knife_bootstrap_string << "--node-name \'#{name}\' "
-    knife_bootstrap_string << "--yes "
-    knife_bootstrap_string << "--no-host-key-verify "
-    knife_bootstrap_string << "--sudo "
-    
-    logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
-    knife_bootstrap_string
-  end
-  
-  # token positions for all nodes in cassandra cluster
-  private
-  def calculate_token_position node_number
-    logger.debug "::: Calculating tokens for #{node_number} nodes..."
-    system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{node_number} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
-    json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
-    parser = Yajl::Parser.new
-    hash = parser.parse json
-    token_map = hash["0"].values
-    token_map    
-  end
-  
-  # seed list
-  private
-  def calculate_seed_list fraction, node_number
-    logger.debug "::: Calculating seeds for #{node_number} nodes..."
-    seeds = ""
-    number_of_seeds = @nodes.size * fraction # a given fraction of all nodes in the cluster are seeds 
-    for i in 0..number_of_seeds-1 do
-      seeds << @nodes[i].private_ip_address << ","
-    end
-    seeds = seeds[0..-2] # delete the last comma
-    seeds
-  end
-# ============================================================  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   private
   def service_ycsb attribute_array
