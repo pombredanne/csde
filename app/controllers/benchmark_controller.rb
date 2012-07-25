@@ -281,7 +281,7 @@ class BenchmarkController < ApplicationController
       provisioning_time = Time.now
       
       # after, @nodes contains IPs
-      @regions[region] = @nodes
+      @regions[region]["ips"] = @nodes
     
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
