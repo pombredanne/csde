@@ -59,8 +59,19 @@ class BenchmarkController < ApplicationController
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
       
+      # clone the parameters
       cloud_config_hash = profile
+      puts "BEFORE:"
       puts cloud_config_hash
+      
+      # calculate the machine number
+      cloud_config_hash['regions'].each do |region, value|
+        region['template'] = template_parse region['template']
+      end
+      
+      puts "AFTER"
+      puts cloud_config_hash
+      
 #       
       # cloud_config_hash = Hash.new # attribute hash for Service Provision
       # cloud_config_hash['provider'] = nil
