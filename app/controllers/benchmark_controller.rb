@@ -68,7 +68,8 @@ class BenchmarkController < ApplicationController
       end
 
       logger.debug "::: Invoking Service Provision..."
-      service 'provsion', cloud_config_hash
+      nodes = service 'provsion', cloud_config_hash
+      puts nodes
             
 #       
       # cloud_config_hash = Hash.new # attribute hash for Service Provision
@@ -291,6 +292,7 @@ class BenchmarkController < ApplicationController
     end  
     
     logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
+    @nodes
   end
   
   # provision a new EC2 machine
