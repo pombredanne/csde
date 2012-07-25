@@ -295,6 +295,7 @@ class BenchmarkController < ApplicationController
       #     ips: [1,2,3]
       ips = Hash.new
       ips['ips'] = @nodes
+      puts ips
       @regions[region].merge ips
     
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
@@ -336,7 +337,6 @@ class BenchmarkController < ApplicationController
     # lock    
     @mutex.synchronize do
       @nodes << server.public_ip_address
-      # @region[region] << server.public_ip_address
     end
   end
   
