@@ -65,8 +65,8 @@ class BenchmarkController < ApplicationController
       puts cloud_config_hash
       
       # calculate the machine number
-      cloud_config_hash['regions'].each do |region, value|
-        region['template'] = template_parse region['template']
+      cloud_config_hash['regions'].each do |region, values|
+        values['template'] = template_parse values['template']
       end
       
       puts "AFTER"
