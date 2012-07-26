@@ -1,7 +1,7 @@
 service1:
   name: cassandra
   attributes:
-    replication_factor: 2,2
+    replication_factor: 2, 2
 service2:
   name: ycsb
   attributes:

@@ -50,6 +50,8 @@ class BenchmarkController < ApplicationController
     
     logger.debug "Parsing the benchmark profile... [OK]"
 
+    exit 0
+
     profile_counter = 1
     profile_array.each do |profile| # each profile is a hash
       
@@ -534,7 +536,7 @@ class BenchmarkController < ApplicationController
   private
   def fetch_attributes_for_cassandra cassandra_config_hash
     @service_array.each do |service|
-      if service['name'] = 'cassandra'
+      if service['name'] == 'cassandra'
         cassandra_config_hash['attributes'] = service['attributes']
       end
     end
