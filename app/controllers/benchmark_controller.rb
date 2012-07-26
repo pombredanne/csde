@@ -71,6 +71,7 @@ class BenchmarkController < ApplicationController
       
       puts profile
       puts profile['regions']['region1']['template']
+      exit 0
       
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
