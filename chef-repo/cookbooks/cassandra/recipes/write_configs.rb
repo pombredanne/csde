@@ -69,7 +69,7 @@ ruby_block "build_cassandra_yaml" do
       cassandra_yaml.gsub!(/endpoint_snitch:.*/,           "endpoint_snitch: Ec2Snitch")
       cassandra_yaml.gsub!(/# broadcast_address:.*/,       "broadcast_address: #{node[:cloud][:private_ips].first}")
     else # multiple regions
-      cassandra_yaml.gsub!(/endpoint_snitch:.*/,           "endpoint_snitch: Ec2MultRegionSnitch")
+      cassandra_yaml.gsub!(/endpoint_snitch:.*/,           "endpoint_snitch: Ec2MultiRegionSnitch:")
       cassandra_yaml.gsub!(/# broadcast_address:.*/,       "broadcast_address: #{node[:cloud][:public_ips].first}")
     end
     
