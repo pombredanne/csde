@@ -448,7 +448,7 @@ class BenchmarkController < ApplicationController
       
       bootstrap_array = []
       for j in 0..(node_ip_array.size - 1) do
-        tmp_arr = []
+        tmp_array = []
         
         node_ip = node_ip_array[j] # for which node
         puts "Node IP: #{node_ip}"
