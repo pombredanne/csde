@@ -447,8 +447,6 @@ class BenchmarkController < ApplicationController
       param << values['ips'].size.to_s << " "
     end  
 
-    puts param
-
     # call tokentool.py    
     system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{param} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
     json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
@@ -508,10 +506,14 @@ class BenchmarkController < ApplicationController
         end
       end
       
+      puts seeds
+      
       seeds_hash = Hash.new
       seeds_hash['seeds'] = seeds
       
-      values = values.merge seeds_hash 
+      puts seeds_hash
+      
+      cassandra_config_hash[key] = cassandra_config_hash[key].merge seeds_hash
     end
 
     cassandra_config_hash
