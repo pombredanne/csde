@@ -50,8 +50,6 @@ class BenchmarkController < ApplicationController
     
     logger.debug "Parsing the benchmark profile... [OK]"
 
-    exit 0
-
     profile_counter = 1
     profile_array.each do |profile| # each profile is a hash
       
