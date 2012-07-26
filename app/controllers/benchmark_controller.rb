@@ -445,8 +445,10 @@ class BenchmarkController < ApplicationController
     param = ""
     cassandra_config_hash.each do |key, values|
       logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
-      param << values['ips'].size << " "
+      param << values['ips'].size.to_s << " "
     end  
+
+    puts param
 
     # call tokentool.py    
     system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{param} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
