@@ -63,6 +63,7 @@ ruby_block "build_cassandra_yaml" do
     cassandra_yaml = cassandra_yaml.gsub(/initial_token:.*/,              "initial_token: #{node[:cassandra][:initial_token]}")
     cassandra_yaml = cassandra_yaml.gsub(/seeds:.*/,                      "seeds: \"#{node[:cassandra][:seeds]}\"")
     cassandra_yaml = cassandra_yaml.gsub(/listen_address:.*/,             "listen_address: #{node[:cloud][:private_ips].first}")    
+    cassandra_yaml = cassandra_yaml.gsub(/partitioner:.*/,                "partitioner: org.apache.cassandra.dht.#{node[:cassandra][:partitioner]}")    
     
     if node[:cassandra][:single_region] == 'true' # single region
       cassandra_yaml = cassandra_yaml.gsub(/endpoint_snitch:.*/,           "endpoint_snitch: Ec2Snitch")
