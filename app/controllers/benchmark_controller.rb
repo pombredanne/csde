@@ -69,6 +69,9 @@ class BenchmarkController < ApplicationController
       logger.debug "::: Running profile #{profile_counter}..."
       logger.debug "-----------------------------------------"
       
+      puts profile
+      puts profile['regions']['region1']['template']
+      
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
       
