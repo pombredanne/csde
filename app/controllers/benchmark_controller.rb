@@ -605,13 +605,11 @@ class BenchmarkController < ApplicationController
   # ...
   private
   def update_default_rb_of_cookbooks param_hash
-    puts param_hash
-
     logger.debug "Updating default.rb of cassandra cookbook..."
     file_name = "#{Rails.root}/chef-repo/cookbooks/cassandra/attributes/default.rb"
     default_rb = File.read file_name
     param_hash.each do |key, value|
-      default_rb = default_rb.gsub(/default[:cassandra][:#{key}]/, "default[:cassandra][:#{key}] = \'#{value}\'")
+      default_rb.gsub!(/.*default\[:cassandra\]\[:#{key}\].*/, "default[:cassandra][:#{key}] = \'#{value}\'")
     end  
     File.open(file_name,'w') {|f| f.write default_rb }
     
