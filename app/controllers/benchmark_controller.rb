@@ -92,7 +92,7 @@ class BenchmarkController < ApplicationController
       #     ips: [4,5]
       #....
       logger.debug "::: Node IPs: "    
-      @regions.each do |key,value|
+      @regions.each do |key,values|
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
       end
@@ -451,6 +451,9 @@ class BenchmarkController < ApplicationController
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Cassandra is being deployed..."
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    
+    puts "Cassandra Config Hash:"
+    puts cassandra_config_hash
     
     recipe = "recipe[cassandra]"
     
