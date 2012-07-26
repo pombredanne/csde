@@ -69,22 +69,24 @@ class BenchmarkController < ApplicationController
       logger.debug "::: Running profile #{profile_counter}..."
       logger.debug "-----------------------------------------"
       
+      logger.debug "::: The profile we'are running now...'"
       puts profile
-      puts profile['regions']['region1']['template']
       
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
       
-      # clone the parameters
-      cloud_config_hash = profile
-      
-      # calculate the machine number
-      cloud_config_hash['regions'].each do |region, values|
-        values['template'] = template_parse_to_machine_number values['template']
-      end
+      # # clone the parameters
+      # cloud_config_hash = profile
+#       
+      # # calculate the machine number
+      # cloud_config_hash['regions'].each do |region, values|
+        # values['template'] = template_parse_to_machine_number values['template']
+      # end
 
       logger.debug "::: Invoking Service Provision..."
-      service 'provsion', cloud_config_hash
+      # service 'provsion', cloud_config_hash
+      service 'provsion', profile
+
 
       # --- @regions ---
       #   region1:
@@ -105,9 +107,9 @@ class BenchmarkController < ApplicationController
       
       logger.debug "::: Invoking Service Database..."
       
-      puts "Test"
-      puts profile['regions']['region1']['template']
-      
+      # puts "Test"
+      # puts profile['regions']['region1']['template']
+#       
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
         service 'cassandra', database_config_hash
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
@@ -266,12 +268,12 @@ class BenchmarkController < ApplicationController
   #   region1: 
   #     name: us-east-1
   #     machine_type: small     
-  #     template: 4
+  #     template: 3 cassandra, 2 ycsb
   #     
   #   region2:
   #     name: us-weast-1
   #     machine_type: small     
-  #     template: 2
+  #     template: 2 cassandra
   # .....    
   private
   def service_provision cloud_config_hash
@@ -315,7 +317,9 @@ class BenchmarkController < ApplicationController
     cloud_config_hash.each do |region, values|
       region_name = values['name']
       machine_flavor = "m1." + values['machine_type']
-      machine_number = values['template'].to_i
+      
+      # calculate the machine number for this region from template
+      machine_number = (template_parse_to_machine_number(values['template'])).to_i
       
       # region1:
       #   name: us-east-1
