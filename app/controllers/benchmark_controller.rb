@@ -74,17 +74,8 @@ class BenchmarkController < ApplicationController
       
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
-      
-      # # clone the parameters
-      # cloud_config_hash = profile
-#       
-      # # calculate the machine number
-      # cloud_config_hash['regions'].each do |region, values|
-        # values['template'] = template_parse_to_machine_number values['template']
-      # end
 
       logger.debug "::: Invoking Service Provision..."
-      # service 'provsion', cloud_config_hash
       service 'provsion', profile
 
 
@@ -107,9 +98,6 @@ class BenchmarkController < ApplicationController
       
       logger.debug "::: Invoking Service Database..."
       
-      # puts "Test"
-      # puts profile['regions']['region1']['template']
-#       
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
         service 'cassandra', database_config_hash
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
@@ -118,53 +106,10 @@ class BenchmarkController < ApplicationController
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
-      
-      
+
       
       profile_counter += 1
     end    
-    
-
-    # # NOW, run each profile
-    # profile_counter = 1
-    # profile_array.each do |profile|
-      # logger.debug "::: Running profile #{profile_counter}..."
-#       
-      # # each profile uses a dedicated provider
-      # # aws | rackspace
-      # provider = profile['provider']
-      # logger.debug "Provider: #{provider}"
-#       
-      # region_array = []
-      # region_counter = 1
-      # region_found = true
-#       
-      # # seek regions
-      # until ! region_found
-        # if profile.key? "region#{region_counter}" 
-          # region_array << profile["region#{region_counter}"]
-          # region_counter = region_counter + 1
-        # else
-          # region_found = false
-        # end
-      # end
-#       
-      # logger.debug "Regions:"
-      # puts region_array
-#       
-      # check_multiple_region = false
-      # if region_array.size > 1
-        # check_multiple_region = true
-        # logger.debug "Deploying database cluster in multiple regions..."        
-      # else
-        # logger.debug "Deploying database cluster in single region..."
-      # end
-# 
-      # profile_counter = profile_counter + 1
-    # end
-
-
-        
   end
   
   # used to detect how many machines should be created
@@ -468,8 +413,8 @@ class BenchmarkController < ApplicationController
     recipe = "recipe[cassandra]"
     
     # calculate the tokens for nodes in single/multiple regions
-    token_per_region
-    
+    cassandra_config_hash = calculate_token_position cassandra_config_hash
+    puts cassandra_config_hash
     
     
     # calculate the seeds for nodes in single/multiple regions
@@ -485,23 +430,51 @@ class BenchmarkController < ApplicationController
   
   # token positions for all node in single/multiple regions
   #
-  # --- token_per_region_hash ---
-  #   region1: 3
-  #   region2: 2
-  # ...
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
   private
-  def calculate_token_position token_per_region_hash 
+  def calculate_token_position cassandra_config_hash 
     logger.debug "::: Calculating tokens..."
+    
+    # generate parameter for tokentool.py
     param = ""
-    token_per_region_hash.each do |key, value|
-      logger.debug "#{key}: #{value} nodes"
-      param << value << " "
-    end
+    cassandra_config_hash.each do |key, values|
+      logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
+      param << values['ips'].size << " "
+    end  
+
+    # call tokentool.py    
     system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{param} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
     json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
     parser = Yajl::Parser.new
     token_hash = parser.parse json
-    token_hash
+    # {
+      # "0": {
+          # "0": 0, 
+          # "1": 56713727820156410577229101238628035242, 
+          # "2": 113427455640312821154458202477256070485
+      # }, 
+      # "1": {
+          # "0": 28356863910078205288614550619314017621, 
+          # "1": 85070591730234615865843651857942052863, 
+          # "2": 141784319550391026443072753096570088106
+      # }
+    # }
+
+    # adding tokens into cassandra_config_hash
+    token_hash.each do |key, values|
+      tmp_arr = values.values # tmp_arr contains tokens for the region
+      t = Hash.new
+      t['tokens'] = tmp_arr
+      cassandra_config_hash["region#{key.to_i + 1}"].merge t
+    end  
+
+    cassandra_config_hash
   end
   
   # seed list
