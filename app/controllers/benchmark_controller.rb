@@ -25,7 +25,7 @@ class BenchmarkController < ApplicationController
     
     # contain service1, service2, etc..
     # each service is a hash map, e.g. name => cassandra, attribute => { replication_factor => 3, partitioner => RandomPartitioner }
-    service_array = []
+    @service_array = []
     
     # contain profile1, profile2
     # each profile is a hash map, e.g. provider => aws, regions => { region1 => { name => us-east-1, machine_type => small, template => 3 service1+service2} }
@@ -43,7 +43,7 @@ class BenchmarkController < ApplicationController
     end
     
     logger.debug "::: Services:"
-    puts service_array
+    puts @service_array
     
     logger.debug "::: Profiles:"
     puts profile_array
@@ -52,6 +52,19 @@ class BenchmarkController < ApplicationController
 
     profile_counter = 1
     profile_array.each do |profile| # each profile is a hash
+      
+      # --- profile ---
+      # provider: aws
+      # regions:
+      #   region1:
+      #     name: us-east-1
+      #     machine_type: small
+      #     template: 3 cassandra+gmond, 2 ycsb
+      #   region2:
+      #     name: us-west-1
+      #     machine_type: small
+      #     template: 5 cassandra+gmond, 4 ycsb
+      # ...     
       logger.debug "-----------------------------------------"
       logger.debug "::: Running profile #{profile_counter}..."
       logger.debug "-----------------------------------------"
@@ -70,11 +83,35 @@ class BenchmarkController < ApplicationController
       logger.debug "::: Invoking Service Provision..."
       service 'provsion', cloud_config_hash
 
+      # --- @regions ---
+      #   region1:
+      #     name: us-east-1
+      #     ips: [1,2,3]
+      #   region2:
+      #     name: us-west-1
+      #     ips: [4,5]
+      #....
       logger.debug "::: Node IPs: "    
-      # node_ip_array = []
-      # @nodes.each {|node| node_ip_array << node.public_ip_address}
-      # puts node_ip_array      
-      puts @regions
+      @regions.each do |key,value|
+        logger.debug "Region: #{values['name']}"
+        logger.debug "IPs: #{values['ips']}"       
+      end
+      
+      # clone the parameters
+      database_config_hash = @regions
+      
+      logger.debug "::: Invoking Service Database..."
+      
+      if profile['regions']['region1']['template'].to_s.include? "cassandra"
+        service 'cassandra', database_config_hash
+      elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
+        service 'mongodb', database_config_hash
+      else
+        logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
+        exit 0  
+      end      
+      
+      
       
       profile_counter += 1
     end    
@@ -124,7 +161,7 @@ class BenchmarkController < ApplicationController
   
   # used to detect how many machines should be created
   # described in template
-  # e.g.: 3 service1+service3, 2 service2
+  # e.g.: 3 cassandra+gmond, 2 ycsb
   private
   def template_parse_to_machine_number template_string
     found_number = 0
@@ -136,6 +173,38 @@ class BenchmarkController < ApplicationController
       end 
     end
     found_number    
+  end
+  
+  # --- template_string ---
+  # 3 cassandra+gmond, 2 ycsb 
+  private
+  def template_parse_to_find_service template_string
+    sub_cluster_arr = []
+    
+    # ycsb is needed
+    if template_string.to_s.include? ","
+      sub_cluster_arr = template_string.to_s.split ","
+      
+      # delete the first and last white spaces in each sub cluster
+      for i in 0..(sub_cluster_arr.size - 1)
+        sub_cluster_arr[i] = sub_cluster_arr[i].to_s.strip
+      end
+    
+    # ycsb is not needed
+    else
+      sub_cluster_arr << template_string.to_s.strip
+    end
+
+    # validation
+    # cassandra | mongoDB 
+    if (sub_cluster_arr[0].to_s.include? "cassandra") && (sub_cluster_arr[0].to_s.include? "mongodb")
+      logger.debug "::: Cassandra OR MongoDB, not the parallel!"
+      exit 0
+    end
+
+    sub_cluster_arr
+    # sub_cluster_arr[0]: database sub cluster
+    # sub_cluster_arr[1]: benchmark sub cluster
   end
   
   # --------------
@@ -190,12 +259,12 @@ class BenchmarkController < ApplicationController
   # regions:
   #   region1: 
   #     name: us-east-1
-  #     machine_type: m1.small     
+  #     machine_type: small     
   #     template: 4
   #     
   #   region2:
   #     name: us-weast-1
-  #     machine_type: m1.small     
+  #     machine_type: small     
   #     template: 2
   # .....    
   private
@@ -227,20 +296,23 @@ class BenchmarkController < ApplicationController
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
     
     @regions = Hash.new # shared variable, used to contain all fog object in each region 
-    # regions:
-    #   us-east-1: [ip1, ip2, ip3]
-    #   us-west-1: [ip4, ip5]
-    #   ...
+    # --- @regions ---
+    # region1:
+    #   name: us-east-1
+    #   ips: [1,2,3]
+    # region2:
+    #   name: us-west-1
+    #   ips: [4,5]
+    #....
 
     node_counter = 1
     cloud_config_hash.each do |region, values|
       region_name = values['name']
-      machine_flavor = values['machine_type']
+      machine_flavor = "m1." + values['machine_type']
       machine_number = values['template'].to_i
       
-      # regions:
-      #   region1:
-      #     name: us-east-1
+      # region1:
+      #   name: us-east-1
       name = Hash.new
       name['name'] = region_name
       @regions[region] = name
@@ -289,13 +361,12 @@ class BenchmarkController < ApplicationController
       provisioning_time = Time.now
       
       # after, @nodes contains IPs
-      # regions:
-      #   region1:
-      #     name: us-east-1
-      #     ips: [1,2,3]
       ips = Hash.new
       ips['ips'] = @nodes
       @regions[region] = @regions[region].merge ips
+      # region1:
+      #   name: us-east-1
+      #   ips: [1,2,3]
     
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
@@ -360,7 +431,21 @@ class BenchmarkController < ApplicationController
   # primary service
   # a database service (Cassandra | MongoDB) has always to be called
   #
-  
+  # --- (should be) cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: [1,2] (will be calculated)
+  #   tokens: [0,121212,352345] (will be calculated)
+  #   attributes: (will be referenced)
+  #     replaction_factor: 3
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: [4] (will be calculated)
+  #   tokens: [4545, 32412341234] (will be calculated)
+  #   attributes: (will be referenced)
+  #     replication_factor: 2     
   private
   def service_cassandra cassandra_config_hash
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
@@ -369,23 +454,20 @@ class BenchmarkController < ApplicationController
     
     recipe = "recipe[cassandra]"
     
+    # calculate the tokens for nodes in single/multiple regions
+    
+    
+    
+    # calculate the seeds for nodes in single/multiple regions
+    
+    
+    
+    
     
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Cassandra is being deployed... [OK]"
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"    
   end
-  
-  # token positions for all nodes in cassandra cluster
-  # private
-  # def calculate_token_position node_number
-    # logger.debug "::: Calculating tokens for #{node_number} nodes..."
-    # system "python #{Rails.root}/chef-repo/.chef/sh/tokentool.py #{node_number} > #{Rails.root}/chef-repo/.chef/tmp/tokens.json"
-    # json = File.open("#{Rails.root}/chef-repo/.chef/tmp/tokens.json","r")
-    # parser = Yajl::Parser.new
-    # hash = parser.parse json
-    # token_map = hash["0"].values
-    # token_map    
-  # end
   
   # token positions for all node in single/multiple regions
   #
@@ -467,9 +549,12 @@ class BenchmarkController < ApplicationController
   end
   # -------------------------------------------------------------------------------------------- #
   
-  
-  
-  
+  # -------------------------------------------------------------------------------------------- #
+  private
+  def service_mongodb mongodb_config_hash
+    
+  end
+  # -------------------------------------------------------------------------------------------- #
   
   
 
