@@ -389,12 +389,12 @@ class BenchmarkController < ApplicationController
   # region1:
   #   name: us-east-1
   #   ips: [1,2,3]
-  #   seeds: [1,2] (will be calculated)
+  #   seeds: 1,2 (will be calculated)
   #   tokens: [0,121212,352345] (will be calculated)
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  #   seeds: [4] (will be calculated)
+  #   seeds: 4 (will be calculated)
   #   tokens: [4545, 32412341234] (will be calculated)
   # attributes:
   #   replication_factor: 2,2 (will be fetched)
@@ -416,14 +416,74 @@ class BenchmarkController < ApplicationController
 
     # calculate the seeds for nodes in single/multiple regions
     cassandra_config_hash = calculate_seed_list cassandra_config_hash    
-    logger.debug "Cassandra Config Hash (incl. Tokens and Seeds)"
-    puts cassandra_config_hash
+    # logger.debug "Cassandra Config Hash (incl. Tokens and Seeds)"
+    # puts cassandra_config_hash
     
     # fetch the attributes for nodes
     cassandra_config_hash = fetch_attributes_for_cassandra cassandra_config_hash
     logger.debug "Cassandra Config Hash (incl. Tokens, Seeds, Attributes)"
     puts cassandra_config_hash
     
+    # check multiple regions or single region
+    single_region_hash = Hash.new
+    if cassandra_config_hash.has_key? "region2" # at least region2 exists
+      single_region_hash['single_region'] = false
+    else
+      single_region_hash['single_region'] = true
+    end
+    
+    # update default.rb
+    default_rb_hash = cassandra_config_hash['attributes'].merge single_region_hash    
+    update_default_rb_of_cookbooks default_rb_hash
+        
+    exit 0
+    
+    logger.debug "Deploying Cassandra in each region..."
+    region_counter = 1
+    cassandra_node_counter = 1
+    until ! cassandra_config_hash.has_key? "region#{region_counter}" do
+      current_region = cassandra_config_hash["region#{region_counter}"]
+      
+      node_ip_array = current_region['ips']
+      token_array = current_region['tokens']
+      seeds = current_region['seeds']
+      
+      bootstrap_array = []
+      for j in 0..(node_ip_array.size - 1) do
+        tmp_arr = []
+        
+        node_ip = node_ip_array[j] # for which node
+        puts "Node IP: #{node_ip}"
+      
+        token = token_array[j] # which token position
+        puts "Token: #{token}"
+        
+        node_name = "cassandra-node" << cassandra_node_counter.to_s
+        cassandra_node_counter += 1
+        puts "Node Name: #{node_name}"
+        
+        token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+        File.open(token_file,"w") do |file|
+          file << "#!/usr/bin/env bash" << "\n"
+          file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+          file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+        end
+
+        tmp_array << node_ip
+        tmp_array << token
+        tmp_array << node_name
+        bootstrap_array << tmp_array
+      end
+      
+      results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
+        system(knife_bootstrap block[0], block[1], block[2], recipe)
+      end
+      logger.debug "::: Knife Bootstrap machines... [OK]"    
+      
+      logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+      system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+      logger.debug "::: Deleting all token temporary files in KCSDB Server... [OK]"
+    end
     
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Cassandra is being deployed... [OK]"
@@ -495,26 +555,22 @@ class BenchmarkController < ApplicationController
     fraction = 0.5
     
     logger.debug "::: Calculating seeds..."
-    
     cassandra_config_hash.each do |key, values|
       logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
       
-      seeds = []
+      seeds = ""
       if values['ips'].size == 1 # only one node, this node is seed 
-        seeds << values['ips'][0]
+        seeds << values['ips'][0] << ","
       else # more than one node
         number_of_seeds = values['ips'].size * fraction
         for i in 0..(number_of_seeds - 1) do
           seeds << values['ips'][i]
         end
+        seeds = seeds[0..-2] # delete the last comma
       end
-      
-      puts seeds
       
       seeds_hash = Hash.new
       seeds_hash['seeds'] = seeds
-      
-      puts seeds_hash
       
       cassandra_config_hash[key] = cassandra_config_hash[key].merge seeds_hash
     end
@@ -541,7 +597,25 @@ class BenchmarkController < ApplicationController
     cassandra_config_hash  
   end
   
-  
+  # update the parameters that are written in cookbooks/cassandra/attributes/default.rb
+  # and upload cookbooks once again
+  #
+  # --- param_hash ---
+  # seeds: 1,2,3
+  # ...
+  private
+  def update_default_rb_of_cookbooks param_hash
+    logger.debug "Updating default.rb of cassandra cookbook..."
+    file_name = "#{Rails.root}/chef-repo/cookbooks/cassandra/attributes/default.rb"
+    default_rb = File.read file_name
+    param_hash.each do |key, value|
+      default_rb = default_rb.gsub(/default[:cassandra][:#{key}]/, "default[:cassandra][:#{key}] = \'#{value}\'")
+    end  
+    File.open(filename,'w') {|f| f.write default_rb }
+    
+    logger.debug "Uploading cookbooks to Chef Server..."
+    system "rvmsudo knife cookbook upload --all --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+  end
   
   # knife bootstrap
   # node: the IP address of the machine to be bootstraped
