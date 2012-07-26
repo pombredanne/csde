@@ -64,7 +64,7 @@ ruby_block "build_cassandra_yaml" do
     cassandra_yaml = cassandra_yaml.gsub(/seeds:.*/,                      "seeds: \"#{node[:cassandra][:seeds]}\"")
     cassandra_yaml = cassandra_yaml.gsub(/listen_address:.*/,             "listen_address: #{node[:cloud][:private_ips].first}")    
     
-    if node[:cassandra][:single_region] # single region
+    if node[:cassandra][:single_region] == 'true' # single region
       cassandra_yaml = cassandra_yaml.gsub(/endpoint_snitch:.*/,           "endpoint_snitch: Ec2Snitch")
       cassandra_yaml = cassandra_yaml.gsub(/# broadcast_address:.*/,       "broadcast_address: #{node[:cloud][:private_ips].first}")
     else # multiple regions

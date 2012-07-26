@@ -427,9 +427,9 @@ class BenchmarkController < ApplicationController
     # check multiple regions or single region
     single_region_hash = Hash.new
     if cassandra_config_hash.has_key? "region2" # at least region2 exists
-      single_region_hash['single_region'] = false
+      single_region_hash['single_region'] = 'false'
     else
-      single_region_hash['single_region'] = true
+      single_region_hash['single_region'] = 'true'
     end
     
     # update default.rb
