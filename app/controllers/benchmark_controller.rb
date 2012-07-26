@@ -389,12 +389,12 @@ class BenchmarkController < ApplicationController
   # region1:
   #   name: us-east-1
   #   ips: [1,2,3]
-  #   seeds: 1,2 (will be calculated)
+  #   seeds: 1,2,4 (will be calculated)
   #   tokens: [0,121212,352345] (will be calculated)
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  #   seeds: 4 (will be calculated)
+  #   seeds: 1,2,4 (will be calculated)
   #   tokens: [4545, 32412341234] (will be calculated)
   # attributes:
   #   replication_factor: 2,2 (will be fetched)
@@ -556,23 +556,24 @@ class BenchmarkController < ApplicationController
     fraction = 0.5
     
     logger.debug "::: Calculating seeds..."
+    seeds = ""
     cassandra_config_hash.each do |key, values|
       logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
       
-      seeds = ""
       if values['ips'].size == 1 # only one node, this node is seed 
-        seeds << values['ips'][0]
+        seeds << values['ips'][0] << ","
       else # more than one node
         number_of_seeds = values['ips'].size * fraction
         for i in 0..(number_of_seeds - 1) do
           seeds << values['ips'][i] << ","
         end
-        seeds = seeds[0..-2] # delete the last comma
       end
-      
+    end
+    seeds = seeds[0..-2] # delete the last comma
+    
+    cassandra_config_hash.each do |key,value|
       seeds_hash = Hash.new
       seeds_hash['seeds'] = seeds
-      
       cassandra_config_hash[key] = cassandra_config_hash[key].merge seeds_hash
     end
 
