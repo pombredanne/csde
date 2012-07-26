@@ -33,7 +33,7 @@ class BenchmarkController < ApplicationController
     
     key_array.each do |key|
       if key.to_s.include? "service"
-        service_array << benchmark_profiles[key]
+        @service_array << benchmark_profiles[key]
       elsif key.to_s.include? "profile"
         profile_array << benchmark_profiles[key]
       else
