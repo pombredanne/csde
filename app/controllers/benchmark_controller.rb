@@ -272,7 +272,6 @@ class BenchmarkController < ApplicationController
       name['name'] = region_name
       @regions[region] = name
       
-      
       state = get_state
       if region_name == 'us-east-1'
         machine_ami = state['chef_client_ami_us_east_1']
@@ -392,15 +391,13 @@ class BenchmarkController < ApplicationController
   #   ips: [1,2,3]
   #   seeds: [1,2] (will be calculated)
   #   tokens: [0,121212,352345] (will be calculated)
-  #   attributes: (will be referenced)
-  #     replaction_factor: 3
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
   #   seeds: [4] (will be calculated)
   #   tokens: [4545, 32412341234] (will be calculated)
-  #   attributes: (will be referenced)
-  #     replication_factor: 2     
+  # attributes:
+  #   replication_factor: 2,2 (will be fetched)
   private
   def service_cassandra cassandra_config_hash
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
@@ -414,13 +411,19 @@ class BenchmarkController < ApplicationController
     
     # calculate the tokens for nodes in single/multiple regions
     cassandra_config_hash = calculate_token_position cassandra_config_hash
-    logger.debug "Cassandra Config Hash (incl. Tokens)"
-    puts cassandra_config_hash
-    
+    # logger.debug "Cassandra Config Hash (incl. Tokens)"
+    # puts cassandra_config_hash
+
     # calculate the seeds for nodes in single/multiple regions
     cassandra_config_hash = calculate_seed_list cassandra_config_hash    
-    logger.debug "Cassandra Config Hash (incl. Seeds)"
+    logger.debug "Cassandra Config Hash (incl. Tokens and Seeds)"
     puts cassandra_config_hash
+    
+    # fetch the attributes for nodes
+    cassandra_config_hash = fetch_attributes_for_cassandra cassandra_config_hash
+    logger.debug "Cassandra Config Hash (incl. Tokens, Seeds, Attributes)"
+    puts cassandra_config_hash
+    
     
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Cassandra is being deployed... [OK]"
@@ -518,6 +521,27 @@ class BenchmarkController < ApplicationController
 
     cassandra_config_hash
   end
+  
+  # fetch attributes from definitions
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  private
+  def fetch_attributes_for_cassandra cassandra_config_hash
+    @service_array.each do |service|
+      if service['name'] = 'cassandra'
+        cassandra_config_hash['attributes'] = service['attributes']
+      end
+    end
+    cassandra_config_hash  
+  end
+  
+  
   
   # knife bootstrap
   # node: the IP address of the machine to be bootstraped
