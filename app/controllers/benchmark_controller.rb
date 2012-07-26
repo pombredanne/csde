@@ -102,6 +102,9 @@ class BenchmarkController < ApplicationController
       
       logger.debug "::: Invoking Service Database..."
       
+      puts "Test"
+      puts profile['regions']['region1']['template']
+      
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
         service 'cassandra', database_config_hash
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
@@ -458,6 +461,7 @@ class BenchmarkController < ApplicationController
     recipe = "recipe[cassandra]"
     
     # calculate the tokens for nodes in single/multiple regions
+    token_per_region
     
     
     
@@ -474,9 +478,9 @@ class BenchmarkController < ApplicationController
   
   # token positions for all node in single/multiple regions
   #
-  # token_per_region_hash
-  # region1 => 3
-  # region2 => 2
+  # --- token_per_region_hash ---
+  #   region1: 3
+  #   region2: 2
   # ...
   private
   def calculate_token_position token_per_region_hash 
