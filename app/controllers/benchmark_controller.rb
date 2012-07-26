@@ -407,8 +407,6 @@ class BenchmarkController < ApplicationController
     logger.debug "Cassandra Config Hash:"
     puts cassandra_config_hash
     
-    recipe = "recipe[cassandra]"
-    
     # calculate the tokens for nodes in single/multiple regions
     cassandra_config_hash = calculate_token_position cassandra_config_hash
     # logger.debug "Cassandra Config Hash (incl. Tokens)"
@@ -436,12 +434,12 @@ class BenchmarkController < ApplicationController
     default_rb_hash = cassandra_config_hash['attributes'].merge single_region_hash    
     update_default_rb_of_cookbooks default_rb_hash
         
-    exit 0
-    
     logger.debug "Deploying Cassandra in each region..."
+    recipe = "recipe[cassandra]"
     region_counter = 1
     cassandra_node_counter = 1
     until ! cassandra_config_hash.has_key? "region#{region_counter}" do
+      logger.debug "Deploying Cassandra in region #{region_counter}"
       current_region = cassandra_config_hash["region#{region_counter}"]
       
       node_ip_array = current_region['ips']
@@ -458,7 +456,7 @@ class BenchmarkController < ApplicationController
         token = token_array[j] # which token position
         puts "Token: #{token}"
         
-        node_name = "cassandra-node" << cassandra_node_counter.to_s
+        node_name = "cassandra-node-" << cassandra_node_counter.to_s
         cassandra_node_counter += 1
         puts "Node Name: #{node_name}"
         
@@ -475,14 +473,17 @@ class BenchmarkController < ApplicationController
         bootstrap_array << tmp_array
       end
       
+      logger.debug "--- Knife Bootstrap #{bootstrap_array.size} machines..."
       results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
-        system(knife_bootstrap block[0], block[1], block[2], recipe)
+        system(knife_bootstrap block[0], block[1], block[2], recipe, current_region['name'])
       end
-      logger.debug "::: Knife Bootstrap machines... [OK]"    
+      logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
       
-      logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+      logger.debug "--- Deleting all token temporary files in KCSDB Server..."
       system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
-      logger.debug "::: Deleting all token temporary files in KCSDB Server... [OK]"
+      logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
+      
+      region_counter += 1
     end
     
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
@@ -560,11 +561,11 @@ class BenchmarkController < ApplicationController
       
       seeds = ""
       if values['ips'].size == 1 # only one node, this node is seed 
-        seeds << values['ips'][0] << ","
+        seeds << values['ips'][0]
       else # more than one node
         number_of_seeds = values['ips'].size * fraction
         for i in 0..(number_of_seeds - 1) do
-          seeds << values['ips'][i]
+          seeds << values['ips'][i] << ","
         end
         seeds = seeds[0..-2] # delete the last comma
       end
@@ -622,11 +623,14 @@ class BenchmarkController < ApplicationController
   # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
   # name: name of the node in Chef Server
   private
-  def knife_bootstrap node, token, name, recipe
+  def knife_bootstrap node, token, name, recipe, region
     $stdout.sync = true
     
     state = get_state
-    chef_client_identity_file = state['chef_client_identity_file']
+
+    key_pair = state['key_pair_name']
+    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    
     chef_client_ssh_user = state['chef_client_ssh_user']
     chef_client_bootstrap_version = state['chef_client_bootstrap_version']
     chef_client_template_file = state['chef_client_template_file']
