@@ -30,6 +30,10 @@ default[:cassandra][:initial_token] = "dummy"
 # will be passed by the node itself
 default[:cassandra][:seeds] = "dummy"
 
+# RandomPartitioner | ByteOrderedPartitioner
+# will be passed by KCSDB Server
+default[:cassandra][:partitioner] = "dummy"
+
 # not change
 # default[:cassandra][:rpc_address] = "0.0.0.0"
 
