@@ -605,6 +605,8 @@ class BenchmarkController < ApplicationController
   # ...
   private
   def update_default_rb_of_cookbooks param_hash
+    puts param_hash
+
     logger.debug "Updating default.rb of cassandra cookbook..."
     file_name = "#{Rails.root}/chef-repo/cookbooks/cassandra/attributes/default.rb"
     default_rb = File.read file_name
@@ -614,7 +616,7 @@ class BenchmarkController < ApplicationController
     File.open(file_name,'w') {|f| f.write default_rb }
     
     logger.debug "Uploading cookbooks to Chef Server..."
-    system "rvmsudo knife cookbook upload --all --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    system "rvmsudo knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
   end
   
   # knife bootstrap
