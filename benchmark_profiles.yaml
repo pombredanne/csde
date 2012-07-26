@@ -16,7 +16,7 @@ profile1:
     region1:
       name: us-east-1
       machine_type: small
-      template: "2 cassandra"
+      template: "2 cassandra, 3 ycsb"
     region2:
       name: us-west-1
       machine_type: small
