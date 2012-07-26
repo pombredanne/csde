@@ -417,12 +417,10 @@ class BenchmarkController < ApplicationController
     logger.debug "Cassandra Config Hash (incl. Tokens)"
     puts cassandra_config_hash
     
-    
     # calculate the seeds for nodes in single/multiple regions
-    
-    
-    
-    
+    cassandra_config_hash = calculate_seed_list cassandra_config_hash    
+    logger.debug "Cassandra Config Hash (incl. Seeds)"
+    puts cassandra_config_hash
     
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Cassandra is being deployed... [OK]"
@@ -480,17 +478,43 @@ class BenchmarkController < ApplicationController
     cassandra_config_hash
   end
   
-  # seed list
+  # seed list for each region
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
   private
-  def calculate_seed_list fraction, node_number
-    logger.debug "::: Calculating seeds for #{node_number} nodes..."
-    seeds = ""
-    number_of_seeds = @nodes.size * fraction # a given fraction of all nodes in the cluster are seeds 
-    for i in 0..number_of_seeds-1 do
-      seeds << @nodes[i].private_ip_address << ","
+  def calculate_seed_list cassandra_config_hash
+    # 50% nodes are seeds in each region
+    # at least one node
+    fraction = 0.5
+    
+    logger.debug "::: Calculating seeds..."
+    
+    cassandra_config_hash.each do |key, values|
+      logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
+      
+      seeds = []
+      if values['ips'].size == 1 # only one node, this node is seed 
+        seeds << values['ips'][0]
+      else # more than one node
+        number_of_seeds = values['ips'].size * fraction
+        for i in 0..(number_of_seeds - 1) do
+          seeds << values['ips'][i]
+        end
+      end
+      
+      seeds_hash = Hash.new
+      seeds_hash['seeds'] = seeds
+      
+      values = values.merge seeds_hash 
     end
-    seeds = seeds[0..-2] # delete the last comma
-    seeds
+
+    cassandra_config_hash
   end
   
   # knife bootstrap
