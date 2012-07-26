@@ -407,13 +407,14 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Service: Cassandra is being deployed..."
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     
-    puts "Cassandra Config Hash:"
+    logger.debug "Cassandra Config Hash:"
     puts cassandra_config_hash
     
     recipe = "recipe[cassandra]"
     
     # calculate the tokens for nodes in single/multiple regions
     cassandra_config_hash = calculate_token_position cassandra_config_hash
+    logger.debug "Cassandra Config Hash (incl. Tokens)"
     puts cassandra_config_hash
     
     
@@ -473,7 +474,7 @@ class BenchmarkController < ApplicationController
       tmp_arr = values.values # tmp_arr contains tokens for the region
       t = Hash.new
       t['tokens'] = tmp_arr
-      cassandra_config_hash["region#{key.to_i + 1}"].merge t
+      cassandra_config_hash["region#{key.to_i + 1}"] = cassandra_config_hash["region#{key.to_i + 1}"].merge t
     end  
 
     cassandra_config_hash
