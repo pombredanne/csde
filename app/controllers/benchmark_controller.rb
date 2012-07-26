@@ -611,7 +611,7 @@ class BenchmarkController < ApplicationController
     param_hash.each do |key, value|
       default_rb = default_rb.gsub(/default[:cassandra][:#{key}]/, "default[:cassandra][:#{key}] = \'#{value}\'")
     end  
-    File.open(filename,'w') {|f| f.write default_rb }
+    File.open(file_name,'w') {|f| f.write default_rb }
     
     logger.debug "Uploading cookbooks to Chef Server..."
     system "rvmsudo knife cookbook upload --all --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
