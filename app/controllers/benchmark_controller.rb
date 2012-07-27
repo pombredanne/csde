@@ -277,6 +277,10 @@ class BenchmarkController < ApplicationController
         machine_ami = state['chef_client_ami_us_east_1']
       elsif region_name == 'us-west-1'
         machine_ami = state['chef_client_ami_us_west_1']
+      elsif region_name == 'us-west-2'
+        machine_ami = state['chef_client_ami_us_west_2']
+      elsif region_name == 'eu-west-1'
+        machine_ami = state['chef_client_ami_eu_west_1']
       else
         logger.debug "Region: #{region_name} is not supported!"
         exit 0

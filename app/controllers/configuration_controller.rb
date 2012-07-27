@@ -18,6 +18,8 @@ class ConfigurationController < ApplicationController
     supported_regions = []
     supported_regions << "us-east-1" # US EAST Virginira
     supported_regions << "us-west-1" # US WEST N. California
+    supported_regions << "us-west-2" # US WEST Oregon
+    supported_regions << "eu-west-1" # EU WEST Ireland
     logger.debug "::: AWS supported regions:"
     puts supported_regions
 
