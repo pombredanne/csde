@@ -59,7 +59,7 @@ ruby_block "build_cassandra_yaml" do
     cassandra_yaml.gsub!(/\/.*\/cassandra\/commitlog/,    "#{node[:cassandra][:commitlog_dir]}/cassandra/commitlog")
     cassandra_yaml.gsub!(/\/.*\/cassandra\/saved_caches/, "#{node[:cassandra][:data_dir]}/cassandra/saved_caches")
     cassandra_yaml.gsub!(/cluster_name:.*/,               "cluster_name: '#{node[:cassandra][:cluster_name]}'")
-    cassandra_yaml.gsub!(/rpc_address:.*/,                "rpc_address: 0.0.0.0")
+    cassandra_yaml.gsub!(/rpc_address:.*/,                "rpc_address: #{node[:cassandra][:rpc_address]}")
     cassandra_yaml.gsub!(/initial_token:.*/,              "initial_token: #{node[:cassandra][:initial_token]}")
     cassandra_yaml.gsub!(/seeds:.*/,                      "seeds: \"#{node[:cassandra][:seeds]}\"")
     cassandra_yaml.gsub!(/listen_address:.*/,             "listen_address: #{node[:cloud][:private_ips].first}")    

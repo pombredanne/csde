@@ -434,57 +434,63 @@ class BenchmarkController < ApplicationController
     default_rb_hash = cassandra_config_hash['attributes'].merge single_region_hash    
     update_default_rb_of_cookbooks default_rb_hash
         
-    logger.debug "Deploying Cassandra in each region..."
-    recipe = "recipe[cassandra]"
-    region_counter = 1
-    cassandra_node_counter = 1
-    until ! cassandra_config_hash.has_key? "region#{region_counter}" do
-      logger.debug "Deploying Cassandra in region #{region_counter}"
-      current_region = cassandra_config_hash["region#{region_counter}"]
-      
-      node_ip_array = current_region['ips']
-      token_array = current_region['tokens']
-      seeds = current_region['seeds']
-      
-      bootstrap_array = []
-      for j in 0..(node_ip_array.size - 1) do
-        tmp_array = []
-        
-        node_ip = node_ip_array[j] # for which node
-        puts "Node IP: #{node_ip}"
-      
-        token = token_array[j] # which token position
-        puts "Token: #{token}"
-        
-        node_name = "cassandra-node-" << cassandra_node_counter.to_s
-        cassandra_node_counter += 1
-        puts "Node Name: #{node_name}"
-        
-        token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-        File.open(token_file,"w") do |file|
-          file << "#!/usr/bin/env bash" << "\n"
-          file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
-          file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
-        end
-
-        tmp_array << node_ip
-        tmp_array << token
-        tmp_array << node_name
-        bootstrap_array << tmp_array
-      end
-      
-      logger.debug "--- Knife Bootstrap #{bootstrap_array.size} machines..."
-      results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
-        system(knife_bootstrap block[0], block[1], block[2], recipe, current_region['name'])
-      end
-      logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
-      
-      logger.debug "--- Deleting all token temporary files in KCSDB Server..."
-      system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
-      logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
-      
-      region_counter += 1
-    end
+    # deploy cassandra
+    deploy_cassandra cassandra_config_hash
+    
+    # logger.debug "Deploying Cassandra in each region..."
+    # recipe = "recipe[cassandra]"
+    # region_counter = 1
+    # cassandra_node_counter = 1
+    # until ! cassandra_config_hash.has_key? "region#{region_counter}" do
+      # logger.debug "Deploying Cassandra in region #{region_counter}"
+      # current_region = cassandra_config_hash["region#{region_counter}"]
+#       
+      # node_ip_array = current_region['ips']
+      # token_array = current_region['tokens']
+      # seeds = current_region['seeds']
+#       
+      # bootstrap_array = []
+      # for j in 0..(node_ip_array.size - 1) do
+        # tmp_array = []
+#         
+        # node_ip = node_ip_array[j] # for which node
+        # puts "Node IP: #{node_ip}"
+#       
+        # token = token_array[j] # which token position
+        # puts "Token: #{token}"
+#         
+        # node_name = "cassandra-node-" << cassandra_node_counter.to_s
+        # cassandra_node_counter += 1
+        # puts "Node Name: #{node_name}"
+#         
+        # token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+        # File.open(token_file,"w") do |file|
+          # file << "#!/usr/bin/env bash" << "\n"
+          # file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+          # file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+        # end
+# 
+        # tmp_array << node_ip
+        # tmp_array << token
+        # tmp_array << node_name
+        # bootstrap_array << tmp_array
+      # end
+#       
+      # logger.debug "--- Knife Bootstrap #{bootstrap_array.size} machines..."
+      # results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
+        # system(knife_bootstrap block[0], block[1], block[2], recipe, current_region['name'])
+      # end
+      # logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
+#       
+      # logger.debug "--- Deleting all token temporary files in KCSDB Server..."
+      # system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+      # logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
+#       
+      # region_counter += 1
+    # end
+    
+    # configure cassandra via cassandra-cli
+    configure_cassandra cassandra_config_hash
     
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Cassandra is being deployed... [OK]"
@@ -666,6 +672,147 @@ class BenchmarkController < ApplicationController
     logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
     knife_bootstrap_string
   end
+  
+  
+  # deploy cassandra in each region in parallel mode (for each region)
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  # attributes:
+  #   replication_factor: 2,2  
+  private
+  def deploy_cassandra cassandra_config_hash
+    logger.debug "-------------------------------------"
+    logger.debug "Deploying Cassandra in each region..."
+    logger.debug "-------------------------------------"
+    recipe = "recipe[cassandra]"
+    region_counter = 1
+    cassandra_node_counter = 1
+    until ! cassandra_config_hash.has_key? "region#{region_counter}" do
+      logger.debug "--------------------------------"
+      logger.debug "Deploying Cassandra in region #{region_counter}"
+      logger.debug "--------------------------------"
+      current_region = cassandra_config_hash["region#{region_counter}"]
+      
+      node_ip_array = current_region['ips']
+      token_array = current_region['tokens']
+      seeds = current_region['seeds']
+      
+      bootstrap_array = []
+      for j in 0..(node_ip_array.size - 1) do
+        tmp_array = []
+        
+        node_ip = node_ip_array[j] # for which node
+        puts "Node IP: #{node_ip}"
+      
+        token = token_array[j] # which token position
+        puts "Token: #{token}"
+        
+        node_name = "cassandra-node-" << cassandra_node_counter.to_s
+        cassandra_node_counter += 1
+        puts "Node Name: #{node_name}"
+        
+        token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+        File.open(token_file,"w") do |file|
+          file << "#!/usr/bin/env bash" << "\n"
+          file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+          file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+        end
+
+        tmp_array << node_ip
+        tmp_array << token
+        tmp_array << node_name
+        bootstrap_array << tmp_array
+      end
+      
+      logger.debug "--- Knife Bootstrap #{bootstrap_array.size} machines..."
+      results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
+        system(knife_bootstrap block[0], block[1], block[2], recipe, current_region['name'])
+      end
+      logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
+      
+      logger.debug "--- Deleting all token temporary files in KCSDB Server..."
+      system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+      logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
+      
+      region_counter += 1
+    end
+  end
+  
+  
+  
+  # configure cassandra via cassandra-cli
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  # attributes:
+  #   replication_factor: 2,2 
+  private
+  def configure_cassandra cassandra_config_hash
+    logger.debug "--------------------------------"
+    logger.debug "Configuring Cassandra cluster..."
+    logger.debug "--------------------------------"
+    
+    # delete the recipe[cassandra] in cassandra-node-1
+    system "rvmsudo knife node run_list remove cassandra-node-1 'recipe[cassandra]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    
+    # update replication_factor
+    replication_factor = configure_cassandra['attributes']['replication_factor']
+    rep_fac_arr = []
+    if replication_factor.to_s.include? "," # multiple regions
+      rep_fac_arr = replication_factor.to_s.split ","
+      
+      # delete the first and last white spaces
+      for i in 0..(rep_fac_arr.size - 1)
+        rep_fac_arr[i] = rep_fac_arr[i].to_s.strip
+      end
+    else # single region
+      rep_fac_arr << replication_factor.to_s.strip
+    end
+
+    for i in 0..(rep_fac_arr.size - 1)
+      rep_fac_arr[i] = cassandra_config_hash["region#{i + 1}"]['name'] << ":" << rep_fac_arr[i]  
+    end
+     
+    replication_factor = ""
+    rep_fac_arr.each do |rep|
+      replication_factor << rep << ","
+    end
+    replication_factor = replication_factor[0..-2]
+    
+    puts replication_factor
+    
+    exit 0
+    
+    rep_fac_hash = Hash.new
+    rep_fac_hash['replication_factor'] = replication_factor
+    
+    update_default_rb_of_cookbooks rep_fac_hash
+    
+    # invoke the recipe[cassandra::configure_cluster]
+    system "rvmsudo knife node run_list add cassandra-node-1 'recipe[cassandra::configure_cluster]'"
+  end
+  
+  
+  
   # -------------------------------------------------------------------------------------------- #
   
   # -------------------------------------------------------------------------------------------- #
