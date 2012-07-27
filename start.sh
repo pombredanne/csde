@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-(cd $HOME/kcsdb && rvmsudo rails server)
+rvmsudo rails server
