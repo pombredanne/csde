@@ -773,17 +773,16 @@ class BenchmarkController < ApplicationController
     system "rvmsudo knife node run_list remove cassandra-node-1 'recipe[cassandra]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
     
     # update replication_factor
-    replication_factor = cassandra_config_hash['attributes']['replication_factor']
     rep_fac_arr = []
-    if replication_factor.to_s.include? "," # multiple regions
-      rep_fac_arr = replication_factor.to_s.split ","
+    if cassandra_config_hash['attributes']['replication_factor'].to_s.include? "," # multiple regions
+      rep_fac_arr = cassandra_config_hash['attributes']['replication_factor'].to_s.split ","
       
       # delete the first and last white spaces
       for i in 0..(rep_fac_arr.size - 1)
         rep_fac_arr[i] = rep_fac_arr[i].to_s.strip
       end
     else # single region
-      rep_fac_arr << replication_factor.to_s.strip
+      rep_fac_arr << cassandra_config_hash['attributes']['replication_factor'].to_s.strip
     end
 
     # us-east-1:2,us-west-1:1
