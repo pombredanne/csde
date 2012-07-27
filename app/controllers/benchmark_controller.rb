@@ -796,10 +796,6 @@ class BenchmarkController < ApplicationController
     end
     replication_factor = replication_factor[0..-2] # delete the last comma
     
-    puts replication_factor
-    
-    exit 0
-    
     rep_fac_hash = Hash.new
     rep_fac_hash['replication_factor'] = replication_factor
     
