@@ -807,7 +807,7 @@ class BenchmarkController < ApplicationController
     key_pair = state['key_pair_name']
     region = cassandra_config_hash['region1']['name'] # cassandra-node-1 is always in region1
     system "rvmsudo knife node run_list add cassandra-node-1 'recipe[cassandra::configure_cluster]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
-    system "rvmsudo knife ssh name:cassandra-node-1 -x #{ssh_user} -i #{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem -a ec2.public_hostname 'sudo chef-client'"
+    system "rvmsudo knife ssh name:cassandra-node-1 --config #{Rails.root}/chef-repo/.chef/conf/knife.rb -x #{ssh_user} -i #{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem -a ec2.public_hostname 'sudo chef-client' "
   end
   
   
