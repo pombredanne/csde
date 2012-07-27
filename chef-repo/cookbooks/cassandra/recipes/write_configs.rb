@@ -73,11 +73,13 @@ ruby_block "build_cassandra_yaml" do
       cassandra_yaml.gsub!(/# broadcast_address:.*/,       "broadcast_address: #{node[:cloud][:public_ips].first}")
     end
     
+    cassandra_yaml.gsub!(/key_cache_size_in_mb:.*/,        "key_cache_size_in_mb: #{node[:cassandra][:key_cache_size_in_mb]}")    
+    cassandra_yaml.gsub!(/key_cache_save_period:.*/,       "key_cache_save_period: #{node[:cassandra][:key_cache_save_period]}")
+    cassandra_yaml.gsub!(/row_cache_size_in_mb:.*/,        "row_cache_size_in_mb: #{node[:cassandra][:row_cache_size_in_mb]}")
+    cassandra_yaml.gsub!(/row_cache_save_period:.*/,       "row_cache_save_period: #{node[:cassandra][:row_cache_save_period]}")
     
-    
-    
-    
-    
+default[:cassandra][:row_cache_save_period] = "0"
+default[:cassandra][:row_cache_provider] = "SerializingCacheProvider" # ConcurrentLinkedHashCacheProvider | SerializingCacheProvider
     
     
     
