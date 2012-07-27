@@ -748,8 +748,6 @@ class BenchmarkController < ApplicationController
     end
   end
   
-  
-  
   # configure cassandra via cassandra-cli
   #
   # --- cassandra_config_hash ---
@@ -764,7 +762,7 @@ class BenchmarkController < ApplicationController
   #   seeds: 1,2,4
   #   tokens: [4545, 32412341234]
   # attributes:
-  #   replication_factor: 2,2 
+  #   replication_factor: 2,1
   private
   def configure_cassandra cassandra_config_hash
     logger.debug "--------------------------------"
@@ -775,7 +773,7 @@ class BenchmarkController < ApplicationController
     system "rvmsudo knife node run_list remove cassandra-node-1 'recipe[cassandra]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
     
     # update replication_factor
-    replication_factor = configure_cassandra['attributes']['replication_factor']
+    replication_factor = cassandra_config_hash['attributes']['replication_factor']
     rep_fac_arr = []
     if replication_factor.to_s.include? "," # multiple regions
       rep_fac_arr = replication_factor.to_s.split ","
@@ -788,15 +786,15 @@ class BenchmarkController < ApplicationController
       rep_fac_arr << replication_factor.to_s.strip
     end
 
+    # us-east-1:2,us-west-1:1
     for i in 0..(rep_fac_arr.size - 1)
       rep_fac_arr[i] = cassandra_config_hash["region#{i + 1}"]['name'] << ":" << rep_fac_arr[i]  
     end
-     
     replication_factor = ""
     rep_fac_arr.each do |rep|
       replication_factor << rep << ","
     end
-    replication_factor = replication_factor[0..-2]
+    replication_factor = replication_factor[0..-2] # delete the last comma
     
     puts replication_factor
     
