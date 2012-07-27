@@ -73,6 +73,17 @@ ruby_block "build_cassandra_yaml" do
       cassandra_yaml.gsub!(/# broadcast_address:.*/,       "broadcast_address: #{node[:cloud][:public_ips].first}")
     end
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     File.open(filename,'w') {|f| f.write cassandra_yaml }
   end
   action :create

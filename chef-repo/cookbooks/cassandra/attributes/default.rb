@@ -76,10 +76,6 @@ default[:cassandra][:multithreaded_compaction] = false
 default[:cassandra][:reduce_cache_sizes_at] = "0.85"
 default[:cassandra][:reduce_cache_capacity_to] = "0.6"
 
-
-
-
-
 # ============================================= #
 # Configuration via Cassandra CLI (cassandra-cli)
 # ============================================= #
