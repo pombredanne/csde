@@ -45,6 +45,29 @@ default[:cassandra][:rpc_address] = "0.0.0.0"
 # will be passed by KCSDB Server
 default[:cassandra][:partitioner] = "RandomPartitioner"
 
+# ::::: #
+# CACHE #
+# ::::: #
+default[:cassandra][:key_cache_size_in_mb] = "dummy"
+default[:cassandra][:key_cache_save_period] = "dummy"
+default[:cassandra][:row_cache_size_in_mb] = "dummy"
+default[:cassandra][:row_cache_save_period] = "dummy"
+default[:cassandra][:row_cache_provider] = "SerializingCacheProvider" # ConcurrentLinkedHashCacheProvider | SerializingCacheProvider
+
+# ::::::::::::::::::::::::::::::::::::::::::: #
+# PERFORMANCE TUNING: MEMTABLE and COMPACTION #
+# ::::::::::::::::::::::::::::::::::::::::::: #
+default[:cassandra][:column_index_size_in_kb] = "64"
+default[:cassandra][:commitlog_sync] = "periodic"
+default[:cassandra][:commitlog_sync_period_in_ms] = "10000"
+default[:cassandra][:commitlog_total_space_in_mb] = "4096" # HAVE TO UNCOMMENT
+default[:cassandra][:compaction_preheat_key_cache] = true
+default[:cassandra][:compaction_throughput_mb_per_sec] = "16"
+default[:cassandra][:concurrent_compactors] = "1" # HAVE TO UNCOMMENT
+default[:cassandra][:concurrent_reads] = "32"
+default[:cassandra][:concurrent_writes] = "32"
+
+
 # ============================================= #
 # Configuration via Cassandra CLI (cassandra-cli)
 # ============================================= #
