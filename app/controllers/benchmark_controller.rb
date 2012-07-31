@@ -463,6 +463,13 @@ class BenchmarkController < ApplicationController
     # deploy cassandra
     deploy_cassandra cassandra_config_hash
     
+    
+    # for single region mode only
+    # make a small pause, the cassandra server needs sometime to be ready
+    if single_region_hash['single_region'] == 'true'
+      sleep 10
+    end
+    
     # configure cassandra via cassandra-cli
     configure_cassandra cassandra_config_hash
     
