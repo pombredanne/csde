@@ -1,7 +1,7 @@
 service1:
   name: cassandra
   attributes:
-    replication_factor: 2, 1, 1, 1
+    replication_factor: 2
     partitioner: RandomPartitioner
 service2:
   name: ycsb
@@ -18,17 +18,17 @@ profile1:
       name: us-east-1
       machine_type: small
       template: 2 cassandra
-    region2:
-      name: us-west-1
-      machine_type: small
-      template: 1 cassandra
-    region3:
-      name: us-west-2
-      machine_type: small
-      template: 1 cassandra
-    region4:
-      name: eu-west-1
-      machine_type: small
-      template: 1 cassandra       
+    # region2:
+      # name: us-west-1
+      # machine_type: small
+      # template: 1 cassandra
+    # region3:
+      # name: us-west-2
+      # machine_type: small
+      # template: 1 cassandra
+    # region4:
+      # name: eu-west-1
+      # machine_type: small
+      # template: 1 cassandra       
 
     
