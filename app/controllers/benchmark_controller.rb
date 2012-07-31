@@ -467,7 +467,7 @@ class BenchmarkController < ApplicationController
     # for single region mode only
     # make a small pause, the cassandra server needs sometime to be ready
     if single_region_hash['single_region'] == 'true'
-      sleep 10
+      sleep 60
     end
     
     # configure cassandra via cassandra-cli
