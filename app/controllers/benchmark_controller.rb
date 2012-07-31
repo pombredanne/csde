@@ -7,12 +7,17 @@ class BenchmarkController < ApplicationController
     
     benchmark_profile_url = params[:benchmark_profile_url]
     
+    logger.debug "----------------------------------------------------------"
     logger.debug "::: Getting the benchmark profile from the given source..."
+    logger.debug "----------------------------------------------------------"
     benchmark_profile_path = "#{Rails.root}/chef-repo/.chef/tmp/benchmark_profiles.yaml"
     system "curl -L #{benchmark_profile_url} -o #{benchmark_profile_path}"
     logger.debug "Getting the benchmark profile from the given source... [OK]"
     
+    
+    logger.debug "------------------------------------"
     logger.debug "::: Parsing the benchmark profile..."
+    logger.debug "------------------------------------"
     benchmark_profiles = Psych.load(File.open benchmark_profile_path)
     
     # contain all keys of benchmark profiles
@@ -20,7 +25,9 @@ class BenchmarkController < ApplicationController
     # service key: service1, service2, etc...
     # profile key: profile1, profile2, etc...
     key_array = benchmark_profiles.keys
+    logger.debug "---------"
     logger.debug "::: Keys:"
+    logger.debug "---------"
     puts key_array
     
     # contain service1, service2, etc..
@@ -42,10 +49,14 @@ class BenchmarkController < ApplicationController
       end
     end
     
+    logger.debug "-------------"
     logger.debug "::: Services:"
+    logger.debug "-------------"
     puts @service_array
     
+    logger.debug "-------------"
     logger.debug "::: Profiles:"
+    logger.debug "-------------"
     puts profile_array
     
     logger.debug "Parsing the benchmark profile... [OK]"
@@ -69,13 +80,16 @@ class BenchmarkController < ApplicationController
       logger.debug "::: Running profile #{profile_counter}..."
       logger.debug "-----------------------------------------"
       
-      logger.debug "::: The profile we'are running now...'"
+      logger.debug "-------------------------------------"
+      logger.debug "::: The profile we'are running now..."
+      logger.debug "-------------------------------------"
       puts profile
       
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
-
+      logger.debug "---------------------------------"
       logger.debug "::: Invoking Service Provision..."
+      logger.debug "---------------------------------"
       service 'provsion', profile
 
 
@@ -87,7 +101,9 @@ class BenchmarkController < ApplicationController
       #     name: us-west-1
       #     ips: [4,5]
       #....
-      logger.debug "::: Node IPs: "    
+      logger.debug "-------------"
+      logger.debug "::: Node IPs:"
+      logger.debug "-------------"    
       @regions.each do |key,values|
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
@@ -96,7 +112,9 @@ class BenchmarkController < ApplicationController
       # clone the parameters
       database_config_hash = @regions
       
+      logger.debug "--------------------------------"
       logger.debug "::: Invoking Service Database..."
+      logger.debug "--------------------------------"
       
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
         service 'cassandra', database_config_hash
@@ -408,7 +426,9 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Service: Cassandra is being deployed..."
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     
-    logger.debug "Cassandra Config Hash:"
+    logger.debug "--------------------------"
+    logger.debug "::: Cassandra Config Hash:"
+    logger.debug "--------------------------"
     puts cassandra_config_hash
     
     # calculate the tokens for nodes in single/multiple regions
@@ -423,7 +443,9 @@ class BenchmarkController < ApplicationController
     
     # fetch the attributes for nodes
     cassandra_config_hash = fetch_attributes_for_cassandra cassandra_config_hash
-    logger.debug "Cassandra Config Hash (incl. Tokens, Seeds, Attributes)"
+    logger.debug "-----------------------------------------------------------"
+    logger.debug "::: Cassandra Config Hash (incl. Tokens, Seeds, Attributes)"
+    logger.debug "-----------------------------------------------------------"
     puts cassandra_config_hash
     
     # check multiple regions or single region
@@ -460,7 +482,9 @@ class BenchmarkController < ApplicationController
   #   ips: [4,5]
   private
   def calculate_token_position cassandra_config_hash 
+    logger.debug "-------------------------"
     logger.debug "::: Calculating tokens..."
+    logger.debug "-------------------------"
     
     # generate parameter for tokentool.py
     param = ""
@@ -513,7 +537,9 @@ class BenchmarkController < ApplicationController
     # at least one node
     fraction = 0.5
     
+    logger.debug "------------------------"
     logger.debug "::: Calculating seeds..."
+    logger.debug "------------------------"
     seeds = ""
     cassandra_config_hash.each do |key, values|
       logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
@@ -565,7 +591,9 @@ class BenchmarkController < ApplicationController
   # ...
   private
   def update_default_rb_of_cookbooks param_hash
-    logger.debug "Updating default.rb of cassandra cookbook..."
+    logger.debug "------------------------------------------------"
+    logger.debug "::: Updating default.rb of cassandra cookbook..."
+    logger.debug "------------------------------------------------"
     file_name = "#{Rails.root}/chef-repo/cookbooks/cassandra/attributes/default.rb"
     default_rb = File.read file_name
     param_hash.each do |key, value|
@@ -573,7 +601,9 @@ class BenchmarkController < ApplicationController
     end  
     File.open(file_name,'w') {|f| f.write default_rb }
     
-    logger.debug "Uploading cookbooks to Chef Server..."
+    logger.debug "-----------------------------------------"
+    logger.debug "::: Uploading cookbooks to Chef Server..."
+    logger.debug "-----------------------------------------"
     system "rvmsudo knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
   end
   
@@ -596,16 +626,18 @@ class BenchmarkController < ApplicationController
     
     no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
 
+    logger.debug "-----------------------------------------------------"
     logger.debug "::: Uploading the token file to the node: #{node}... "
+    logger.debug "-----------------------------------------------------"
     token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
     system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
     logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
     
+    logger.debug "-----------------------------------------------------"
     logger.debug "::: Executing the token file in the node: #{node}... "
+    logger.debug "-----------------------------------------------------"
     system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
     logger.debug "::: Executing the token file in the node: #{node}... [OK]"
-
-    logger.debug "::: Knife bootstrapping a new machine..."
     
     knife_bootstrap_string = ""
        
@@ -621,7 +653,11 @@ class BenchmarkController < ApplicationController
     knife_bootstrap_string << "--no-host-key-verify "
     knife_bootstrap_string << "--sudo "
     
-    logger.debug "::: The knife bootstrap command: #{knife_bootstrap_string}"
+    logger.debug "----------------------------------------"
+    logger.debug "::: Knife bootstrapping a new machine..."
+    logger.debug "::: The knife bootstrap command:"
+    logger.debug "----------------------------------------" 
+    logger.debug knife_bootstrap_string
     knife_bootstrap_string
   end
   
@@ -643,16 +679,16 @@ class BenchmarkController < ApplicationController
   #   replication_factor: 2,2  
   private
   def deploy_cassandra cassandra_config_hash
-    logger.debug "-------------------------------------"
-    logger.debug "Deploying Cassandra in each region..."
-    logger.debug "-------------------------------------"
+    logger.debug "-----------------------------------------"
+    logger.debug "::: Deploying Cassandra in each region..."
+    logger.debug "-----------------------------------------"
     recipe = "recipe[cassandra]"
     region_counter = 1
     cassandra_node_counter = 1
     until ! cassandra_config_hash.has_key? "region#{region_counter}" do
-      logger.debug "--------------------------------"
-      logger.debug "Deploying Cassandra in region #{region_counter}"
-      logger.debug "--------------------------------"
+      logger.debug "-------------------------------------"
+      logger.debug "::: Deploying Cassandra in region #{region_counter}"
+      logger.debug "-------------------------------------"
       current_region = cassandra_config_hash["region#{region_counter}"]
       
       node_ip_array = current_region['ips']
@@ -686,13 +722,17 @@ class BenchmarkController < ApplicationController
         bootstrap_array << tmp_array
       end
       
-      logger.debug "--- Knife Bootstrap #{bootstrap_array.size} machines..."
+      logger.debug "-------------------------------------------------------"
+      logger.debug "::: Knife Bootstrap #{bootstrap_array.size} machines..."
+      logger.debug "-------------------------------------------------------"
       results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
         system(knife_bootstrap block[0], block[1], block[2], recipe, current_region['name'])
       end
       logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
       
-      logger.debug "--- Deleting all token temporary files in KCSDB Server..."
+      logger.debug "---------------------------------------------------------"
+      logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+      logger.debug "---------------------------------------------------------"
       system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
       logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
       
@@ -717,9 +757,9 @@ class BenchmarkController < ApplicationController
   #   replication_factor: 2,1
   private
   def configure_cassandra cassandra_config_hash
-    logger.debug "--------------------------------"
-    logger.debug "Configuring Cassandra cluster..."
-    logger.debug "--------------------------------"
+    logger.debug "------------------------------------"
+    logger.debug "::: Configuring Cassandra cluster..."
+    logger.debug "------------------------------------"
     
     # delete the recipe[cassandra] in cassandra-node-1
     system "rvmsudo knife node run_list remove cassandra-node-1 'recipe[cassandra]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"

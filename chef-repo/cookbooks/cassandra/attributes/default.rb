@@ -17,7 +17,7 @@ default[:cassandra][:single_region] = "dummy"
 default[:cassandra][:conf_path] = "/etc/cassandra/"
 
 # It is best to have the commit log and the data
-# directory on two seperate drives
+# directory on two separate drives
 default[:cassandra][:commitlog_dir] = "/var/lib"
 default[:cassandra][:data_dir] = "/var/lib"
 
