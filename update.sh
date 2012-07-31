@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-rvmsudo git pull
+rvmsudo git pull --no-commit
