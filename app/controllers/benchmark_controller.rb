@@ -125,6 +125,8 @@ class BenchmarkController < ApplicationController
         exit 0  
       end      
 
+
+
       
       profile_counter += 1
     end    
@@ -819,127 +821,35 @@ class BenchmarkController < ApplicationController
     system cmd
     # system "rvmsudo knife ssh name:cassandra-node-1 --config #{Rails.root}/chef-repo/.chef/conf/knife.rb -x #{ssh_user} -i #{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem -a ec2.public_hostname 'sudo chef-client'"
   end
-  
-  
-  
   # -------------------------------------------------------------------------------------------- #
+ 
+  # -------------------------------------------------------------------------------------------- # 
+  # install ycsb cluster in each region
+  #
+  # --- ycsb_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3] # IPs of Cassandra's nodes
+  #   ycsb_number: 2 # numbers of YCSB node in region1 
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  private
+  def service_ycsb ycsb_config_bash
+    logger.debug "--------------------------------------"
+    logger.debug "::: Service: YCSB is being deployed..."
+    logger.debug "--------------------------------------"
+    
+    
+  end
+  # --------------------------------------------------------------------------------------------#
   
   # -------------------------------------------------------------------------------------------- #
   private
   def service_mongodb mongodb_config_hash
     
   end
-  # -------------------------------------------------------------------------------------------- #
-  
-  
-
-  
-  
-  # 1. provision new machines in EC2
-  # 2. knife bootstrap these machines
-  def create
-    recipe = "recipe[cassandra]"
-    
-    @nodes = [] # shared variable, used to contain all fog node object
-    @mutex = Mutex.new # lock
-    
-    number = params[:number_create].to_i
-    logger.debug "::: Creating #{number} machine(s)..."
-    
-    flavor = ""
-    if params[:flavor_create] == "small_create"
-      flavor = "m1.small"
-    elsif params[:flavor_create] == "medium_create"
-      flavor = "m1.medium"
-    else
-      flavor = "m1.large"  
-    end
-    logger.debug "::: Flavor: #{flavor} selected..."
-    
-    state = get_state
-    ami = state['chef_client_ami']
-    key_pair = state['key_pair_name']
-    security_group = state['security_group_name']
-    
-    node_name_array = []
-    for i in 1..number do
-      name = "cassandra-node" << i.to_s
-      node_name_array << name
-    end    
-    logger.debug "::: Node names: "
-    puts node_name_array
-    
-    beginning_time = Time.now
-    
-    # parallel
-    # depends on the performance of KCSDB Server
-    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}..."
-    results = Parallel.map(node_name_array, in_threads: node_name_array.size) do |node_name|
-      provision_ec2_machine ami, flavor, key_pair, security_group, node_name
-    end
-    logger.debug "::: Provisioning #{number} machines with flavor #{flavor}... [OK]"
-    
-    provisioning_time = Time.now
-    
-    logger.debug "::: PROVISIONING TIME: #{provisioning_time - beginning_time} seconds"
-    
-    token_array = calculate_token_position number
-    logger.debug "::: Tokens: "
-    puts token_array
-    
-    seeds = calculate_seed_list 0.5, number
-    logger.debug "::: Seeds: "
-    puts seeds
-
-    logger.debug "::: Node IPs: "    
-    node_ip_array = []
-    @nodes.each {|node| node_ip_array << node.public_ip_address}
-    puts node_ip_array
-    
-    logger.debug "::: Knife Bootstrap #{number} machines..." 
-    bootstrap_array = []   
-    for k in 1..(token_array.size) do
-      tmp_array = []
-      
-      node_ip = node_ip_array[k-1] # for which node
-      puts "Node IP: #{node_ip}"
-      
-      token = token_array[k-1] # which token position
-      puts "Token: #{token}"
-      
-      node_name = "cassandra-node" << k.to_s
-      puts "Node Name: #{node_name}"
-      
-      token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-      File.open(token_file,"w") do |file|
-        file << "#!/usr/bin/env bash" << "\n"
-        file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
-        file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
-      end
-
-      tmp_array << node_ip
-      tmp_array << token
-      tmp_array << node_name
-      bootstrap_array << tmp_array
-    end
-    results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
-      system(knife_bootstrap block[0], block[1], block[2], recipe)
-    end
-    logger.debug "::: Knife Bootstrap #{number} machines... [OK]"    
-    
-    logger.debug "::: Deleting all token temporary files in KCSDB Server..."
-    system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
-    logger.debug "::: Deleting all token temporary files in KCSDB Server... [OK]"
-    
-    bootstrap_time = Time.now
-    
-    logger.debug "::: BOOTSTRAP TIME: #{bootstrap_time - provisioning_time} seconds"
-  end
-  
-  private
-  def service_ycsb attribute_array
-    logger.debug "::: Service: YCSB is being deployed..."
-  end
+  # -------------------------------------------------------------------------------------------- #  
   
   private
   def service_gmond attribute_array
