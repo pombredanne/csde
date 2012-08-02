@@ -21,7 +21,7 @@ class BenchmarkController < ApplicationController
     benchmark_profiles = Psych.load(File.open benchmark_profile_path)
     
     # contain all keys of benchmark profiles
-    # the keys are splitted in 2 groups
+    # the keys are split in 2 groups
     # service key: service1, service2, etc...
     # profile key: profile1, profile2, etc...
     key_array = benchmark_profiles.keys
@@ -76,24 +76,56 @@ class BenchmarkController < ApplicationController
       #     machine_type: small
       #     template: 5 cassandra+gmond, 4 ycsb
       # ...     
-      logger.debug "-----------------------------------------"
-      logger.debug "::: Running profile #{profile_counter}..."
-      logger.debug "-----------------------------------------"
+      logger.debug "-----------------------"
+      logger.debug "::: RUNNING PROFILE #{profile_counter}..."
+      logger.debug "-----------------------"
       
       logger.debug "-------------------------------------"
       logger.debug "::: The profile we'are running now..."
       logger.debug "-------------------------------------"
       puts profile
       
+      @db_regions = Hash.new 
+      # shared variable, used to contain all fog objects in each region
+      # relevant information for DATABASE NODES and GMOND AGENTS which are installed in these nodes 
+      # --- @db_regions ---
+      # region1:
+      #   name: us-east-1
+      #   ips: [1,2,3]
+      # region2:
+      #   name: us-west-1
+      #   ips: [4,5]
+      #....
+      
+      @bench_regions = Hash.new
+      # shared variable, used to contain all fog objects in each region
+      # relevant information for BENCHMARK NODES and GMOND AGENTS which are installed in these nodes
+      # ---@bench_regions ---
+      # region1:
+      #   name: us-east-1
+      #   ips: [1,2,3]
+      # region2:
+      #   name: us-west-1
+      #   ips: [4,5]
+      #....
+      
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
-      logger.debug "---------------------------------"
-      logger.debug "::: Invoking Service Provision..."
-      logger.debug "---------------------------------"
-      service 'provsion', profile
+      # profile hash is used to fill @db_regions hash
+      logger.debug "-----------------------------------------------------------"
+      logger.debug "STEP 1: Invoking Service [Provision] for Dabtase Cluster..."
+      logger.debug "-----------------------------------------------------------"
+      if profile['regions']['region1']['template'].to_s.include? "cassandra"
+        service 'provision', profile, 'cassandra'   
+      elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
+        service 'provision', profile, 'mongodb'
+      else
+        logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
+        exit 0
+      end
+      # service 'provsion', profile
 
-
-      # --- @regions ---
+      # --- @db_regions ---
       #   region1:
       #     name: us-east-1
       #     ips: [1,2,3]
@@ -101,52 +133,70 @@ class BenchmarkController < ApplicationController
       #     name: us-west-1
       #     ips: [4,5]
       #....
-      logger.debug "-------------"
-      logger.debug "::: Node IPs:"
-      logger.debug "-------------"    
-      @regions.each do |key,values|
+      logger.debug "--------------------------------"
+      logger.debug "::: Node IPs for Dabase Cluster:"
+      logger.debug "--------------------------------"    
+      @db_regions.each do |key,values|
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
       end
       
       # clone the parameters
-      database_config_hash = @regions
-      
-      logger.debug "--------------------------------"
-      logger.debug "::: Invoking Service Database..."
-      logger.debug "--------------------------------"
+      # database_config_hash = @regions
+      logger.debug "-------....------------------------------------------------"
+      logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
+      logger.debug "-----------....--------------------------------------------"
       
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
-        service 'cassandra', database_config_hash
+        # service 'cassandra', database_config_hash
+        service 'cassandra', @db_regions
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
-        service 'mongodb', database_config_hash
+        # service 'mongodb', database_config_hash
+        service 'mongodb', @db_regions
       else
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
-
-
-
       
       profile_counter += 1
     end    
   end
   
-  # used to detect how many machines should be created
-  # described in template
-  # e.g.: 3 cassandra+gmond, 2 ycsb
+  # used to detect how many machines should be created for DATABASE service
+  # convention: first place in template
+  # e.g.: 3 cassandra+gmond, 2 ycsb --> 3
   private
-  def template_parse_to_machine_number template_string
+  def template_parse_to_find_machine_number_for_database_service template_string
     found_number = 0
     test = template_string.split " "
-    test.each do |el|
-      # "3".to_i --> 3, "service1".to_i --> 0
-      if el.to_i != 0
-        found_number += el.to_i
-      end 
-    end
-    found_number    
+    found_number = test[0].to_i
+    found_number
   end
+
+  # used to detect how many machines should be created for BENCHMARK service
+  # convention: direct after the comma
+  # e.g.: 3 cassandra+gmond, 2 ycsb --> 2
+  private
+  def template_parse_to_find_machine_number_for_benchmark_service template_string
+    found_number = 0
+    test = template_string.split ","
+    test[1] = test[1].to_s.strip # delete the white spaces
+    found_number = test[1].to_s.split(" ")[0]
+    found_number
+  end
+
+  # private
+  # def template_parse_to_machine_number template_string
+    # found_number = 0
+    # test = template_string.split " "
+    # test.each do |el|
+      # # "3".to_i --> 3, "service1".to_i --> 0
+      # if el.to_i != 0
+        # found_number += el.to_i
+      # end 
+    # end
+    # found_number    
+  # end
   
   # --- template_string ---
   # 3 cassandra+gmond, 2 ycsb 
@@ -185,7 +235,8 @@ class BenchmarkController < ApplicationController
   # --------------
   # used to invoke the corresponding service
   # name: the service to be invoked
-  # atribute_hash: contains all needed attributes for the service 
+  # atribute_hash: contains all needed attributes for the service
+  # flag: optional for service calls
   # 
   # ------------------
   # Supported Services
@@ -203,15 +254,22 @@ class BenchmarkController < ApplicationController
   # 5.Ganglia (optional)
   #   Deploy Ganglia Agents (gmond) in each node of the given database cluster and Ganglia Central Monitoring (gmetad) in KCSDB Server  
   private
-  def service name, attribute_hash
-    if name == 'provsion'
-      service_provision attribute_hash
+  def service name, attribute_hash, flag
+    # SERVICE_ID: 1
+    if name == 'provision'
+      service_provision attribute_hash, flag
+
+    # SERVICE_ID: 2    
     elsif name == 'cassandra'
       service_cassandra attribute_hash
     elsif name == 'mongodb'
       service_mongodb attribute_hash
+
+    # SERVICE_ID: 3
     elsif name == 'ycsb'
       service_ycsb attribute_hash
+    
+    # SERVICE_ID: 4
     elsif name == 'ganglia'
       service_ganglia attribute_hash
     else
@@ -240,18 +298,23 @@ class BenchmarkController < ApplicationController
   #     machine_type: small     
   #     template: 2 cassandra
   # .....    
+  # SERVICE_ID: 1
   private
-  def service_provision cloud_config_hash
+  def service_provision cloud_config_hash, flag
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Provision is being deployed..."
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     
     provider = cloud_config_hash['provider']
     region_hash = cloud_config_hash['regions']
+    
+    # SERVICE_ID: 1.1
     if provider == 'aws'
-      service_provision_ec2 region_hash      
+      service_provision_ec2 region_hash, flag      
+    
+    # SERVICE_ID: 1.2
     elsif provider == 'rackspace'
-      service_provision_rackspace region_hash
+      service_provision_rackspace region_hash, flag
     else
       logger.debug "::: Provider: #{provider} is not supported!"
       exit 0
@@ -262,14 +325,32 @@ class BenchmarkController < ApplicationController
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
   end
   
+  # provision EC2 machine for database service and benchmark service
+  # --> defined via the flag variable
+  #
+  # SERVICE_ID: 1.1
   private
-  def service_provision_ec2 cloud_config_hash
+  def service_provision_ec2 cloud_config_hash, flag
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
     logger.debug "::: Service: Provision EC2 is being deployed..."
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
     
-    @regions = Hash.new # shared variable, used to contain all fog object in each region 
-    # --- @regions ---
+    # @db_regions = Hash.new 
+    # shared variable, used to contain all fog objects in each region
+    # relevant information for DATABASE NODES and the GMOND AGENTS which are installed in these nodes 
+    # --- @db_regions ---
+    # region1:
+    #   name: us-east-1
+    #   ips: [1,2,3]
+    # region2:
+    #   name: us-west-1
+    #   ips: [4,5]
+    #....
+    
+    # @bench_regions = Hash.new
+    # shared variable, used to contain all fog objects in each region
+    # relevant information for BENCHMARK NODES
+    # ---@bench_regions ---
     # region1:
     #   name: us-east-1
     #   ips: [1,2,3]
@@ -284,13 +365,25 @@ class BenchmarkController < ApplicationController
       machine_flavor = "m1." + values['machine_type']
       
       # calculate the machine number for this region from template
-      machine_number = (template_parse_to_machine_number(values['template'])).to_i
+      # depends on the flag
+      machine_number = 0
+      if flag == "cassandra" or flag == "mongodb"
+        machine_number = template_parse_to_find_machine_number_for_database_service(values['template']).to_i       
+      elsif flag == "ycsb"
+        machine_number = template_parse_to_find_machine_number_for_benchmark_service(values['template']).to_i
+      end
       
       # region1:
       #   name: us-east-1
       name = Hash.new
       name['name'] = region_name
-      @regions[region] = name
+      
+      if flag == "cassandra" or flag == "mongodb"
+        @db_regions[region] = name
+      elsif flag == "ycsb"
+        @bench_regions[region] = name
+      end
+      # @regions[region] = name
       
       state = get_state
       if region_name == 'us-east-1'
@@ -310,7 +403,8 @@ class BenchmarkController < ApplicationController
       
       node_name_array = []
       machine_number.times do
-        x = "cassandra-node-" << node_counter.to_s
+        x = "#{flag}-node-" << node_counter.to_s
+        # x = "cassandra-node-" << node_counter.to_s
         node_name_array << x
         node_counter = node_counter + 1
       end
@@ -327,7 +421,7 @@ class BenchmarkController < ApplicationController
       
       beginning_time = Time.now
 
-      # before, @nodes contains nothing
+      # BEFORE, @nodes contains nothing
       @nodes = [] # shared variable, used to contain all node IP in each region
       @mutex = Mutex.new # lock
 
@@ -338,10 +432,16 @@ class BenchmarkController < ApplicationController
       end
       provisioning_time = Time.now
       
-      # after, @nodes contains IPs
+      # AFTER, @nodes contains IPs, filled by provision_ec2_machine
       ips = Hash.new
       ips['ips'] = @nodes
-      @regions[region] = @regions[region].merge ips
+      if flag == "cassandra" or flag == "mongodb"
+        @db_regions[region] = @db_regions[region].merge ips
+      elsif flag == "ycsb"
+        @bench_regions[region] = @bench_regions[region].merge ips
+      end
+      # @regions[region] = @regions[region].merge ips
+      
       # region1:
       #   name: us-east-1
       #   ips: [1,2,3]
@@ -388,8 +488,9 @@ class BenchmarkController < ApplicationController
     end
   end
   
+  # SERVICE_ID: 1.2
   private
-  def service_provision_rackspace cloud_config_hash
+  def service_provision_rackspace cloud_config_hash, flag
     
   end
   
@@ -422,6 +523,7 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234] (will be calculated)
   # attributes:
   #   replication_factor: 2,2 (will be fetched)
+  # SERVICE_ID: 2
   private
   def service_cassandra cassandra_config_hash
     logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
@@ -434,16 +536,19 @@ class BenchmarkController < ApplicationController
     puts cassandra_config_hash
     
     # calculate the tokens for nodes in single/multiple regions
+    # SERVICE_ID: 2.1
     cassandra_config_hash = calculate_token_position cassandra_config_hash
     # logger.debug "Cassandra Config Hash (incl. Tokens)"
     # puts cassandra_config_hash
 
     # calculate the seeds for nodes in single/multiple regions
+    # SERVICE_ID: 2.2
     cassandra_config_hash = calculate_seed_list cassandra_config_hash    
     # logger.debug "Cassandra Config Hash (incl. Tokens and Seeds)"
     # puts cassandra_config_hash
     
     # fetch the attributes for nodes
+    # SERVICE_ID: 2.3
     cassandra_config_hash = fetch_attributes_for_cassandra cassandra_config_hash
     logger.debug "-----------------------------------------------------------"
     logger.debug "::: Cassandra Config Hash (incl. Tokens, Seeds, Attributes)"
@@ -459,10 +564,12 @@ class BenchmarkController < ApplicationController
     end
     
     # update default.rb
+    # SERVICE_ID: 2.4
     default_rb_hash = cassandra_config_hash['attributes'].merge single_region_hash    
     update_default_rb_of_cookbooks default_rb_hash
         
     # deploy cassandra
+    # SERVICE_ID: 2.5
     deploy_cassandra cassandra_config_hash
     
     
@@ -473,6 +580,7 @@ class BenchmarkController < ApplicationController
     end
     
     # configure cassandra via cassandra-cli
+    # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
     
     logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
@@ -489,6 +597,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
+  # SERVICE_ID: 2.1
   private
   def calculate_token_position cassandra_config_hash 
     logger.debug "-------------------------"
@@ -540,6 +649,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
+  # SERVICE_ID: 2.2
   private
   def calculate_seed_list cassandra_config_hash
     # 50% nodes are seeds in each region
@@ -582,6 +692,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
+  # SERVICE_ID: 2.3
   private
   def fetch_attributes_for_cassandra cassandra_config_hash
     @service_array.each do |service|
@@ -598,6 +709,7 @@ class BenchmarkController < ApplicationController
   # --- param_hash ---
   # seeds: 1,2,3
   # ...
+  # SERVICE_ID: 2.4
   private
   def update_default_rb_of_cookbooks param_hash
     logger.debug "------------------------------------------------"
@@ -616,61 +728,6 @@ class BenchmarkController < ApplicationController
     system "rvmsudo knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
   end
   
-  # knife bootstrap
-  # node: the IP address of the machine to be bootstraped
-  # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
-  # name: name of the node in Chef Server
-  private
-  def knife_bootstrap node, token, name, recipe, region
-    $stdout.sync = true
-    
-    state = get_state
-
-    key_pair = state['key_pair_name']
-    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
-    
-    chef_client_ssh_user = state['chef_client_ssh_user']
-    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
-    chef_client_template_file = state['chef_client_template_file']
-    
-    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
-
-    logger.debug "-----------------------------------------------------"
-    logger.debug "::: Uploading the token file to the node: #{node}... "
-    logger.debug "-----------------------------------------------------"
-    token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-    system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
-    logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
-    
-    logger.debug "-----------------------------------------------------"
-    logger.debug "::: Executing the token file in the node: #{node}... "
-    logger.debug "-----------------------------------------------------"
-    system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
-    logger.debug "::: Executing the token file in the node: #{node}... [OK]"
-    
-    knife_bootstrap_string = ""
-       
-    knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
-    knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
-    knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
-    knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
-    knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
-    knife_bootstrap_string << "--template-file #{chef_client_template_file} "
-    knife_bootstrap_string << "--run-list \'#{recipe}\' "
-    knife_bootstrap_string << "--node-name \'#{name}\' "
-    knife_bootstrap_string << "--yes "
-    knife_bootstrap_string << "--no-host-key-verify "
-    knife_bootstrap_string << "--sudo "
-    
-    logger.debug "----------------------------------------"
-    logger.debug "::: Knife bootstrapping a new machine..."
-    logger.debug "::: The knife bootstrap command:"
-    logger.debug "----------------------------------------" 
-    logger.debug knife_bootstrap_string
-    knife_bootstrap_string
-  end
-  
-  
   # deploy cassandra in each region in parallel mode (for each region)
   #
   # --- cassandra_config_hash ---
@@ -686,6 +743,7 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234]
   # attributes:
   #   replication_factor: 2,2  
+  # SERVICE_ID: 2.5
   private
   def deploy_cassandra cassandra_config_hash
     logger.debug "-----------------------------------------"
@@ -749,6 +807,61 @@ class BenchmarkController < ApplicationController
     end
   end
   
+  # knife bootstrap
+  # node: the IP address of the machine to be bootstraped
+  # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
+  # name: name of the node in Chef Server
+  # SERVICE_ID: 2.5.1
+  private
+  def knife_bootstrap node, token, name, recipe, region
+    $stdout.sync = true
+    
+    state = get_state
+
+    key_pair = state['key_pair_name']
+    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    chef_client_bootstrap_version = state['chef_client_bootstrap_version']
+    chef_client_template_file = state['chef_client_template_file']
+    
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
+
+    logger.debug "-----------------------------------------------------"
+    logger.debug "::: Uploading the token file to the node: #{node}... "
+    logger.debug "-----------------------------------------------------"
+    token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
+    system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
+    logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
+    
+    logger.debug "-----------------------------------------------------"
+    logger.debug "::: Executing the token file in the node: #{node}... "
+    logger.debug "-----------------------------------------------------"
+    system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
+    logger.debug "::: Executing the token file in the node: #{node}... [OK]"
+    
+    knife_bootstrap_string = ""
+       
+    knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
+    knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
+    knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
+    knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
+    knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
+    knife_bootstrap_string << "--template-file #{chef_client_template_file} "
+    knife_bootstrap_string << "--run-list \'#{recipe}\' "
+    knife_bootstrap_string << "--node-name \'#{name}\' "
+    knife_bootstrap_string << "--yes "
+    knife_bootstrap_string << "--no-host-key-verify "
+    knife_bootstrap_string << "--sudo "
+    
+    logger.debug "----------------------------------------"
+    logger.debug "::: Knife bootstrapping a new machine..."
+    logger.debug "::: The knife bootstrap command:"
+    logger.debug "----------------------------------------" 
+    logger.debug knife_bootstrap_string
+    knife_bootstrap_string
+  end
+  
   # configure cassandra via cassandra-cli
   #
   # --- cassandra_config_hash ---
@@ -764,6 +877,7 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234]
   # attributes:
   #   replication_factor: 2,1
+  # SERVICE_ID: 2.6
   private
   def configure_cassandra cassandra_config_hash
     logger.debug "------------------------------------"
