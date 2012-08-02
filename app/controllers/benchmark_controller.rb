@@ -133,9 +133,9 @@ class BenchmarkController < ApplicationController
       #     name: us-west-1
       #     ips: [4,5]
       #....
-      logger.debug "--------------------------------"
-      logger.debug "::: Node IPs for Dabase Cluster:"
-      logger.debug "--------------------------------"    
+      logger.debug "----------------------------------"
+      logger.debug "::: Node IPs for Database Cluster:"
+      logger.debug "----------------------------------"    
       @db_regions.each do |key,values|
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
