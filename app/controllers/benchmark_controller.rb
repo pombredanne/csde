@@ -149,10 +149,10 @@ class BenchmarkController < ApplicationController
       
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
         # service 'cassandra', database_config_hash
-        service 'cassandra', @db_regions
+        service 'cassandra', @db_regions, nil
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
         # service 'mongodb', database_config_hash
-        service 'mongodb', @db_regions
+        service 'mongodb', @db_regions, nil
       else
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
