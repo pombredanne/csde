@@ -179,6 +179,19 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
+      
+      logger.debug "TEST"
+      logger.debug "@db_regions:"
+      puts @db_regions
+      logger.debug "@bench_regions:"
+      puts @bench_regions
+      
+      logger.debug "--------------------------------------------------------"
+      logger.debug "STEP 4: Invoking Service [YCSB] for Benchmark Cluster..."
+      logger.debug "--------------------------------------------------------"
+      
+      
+      
       profile_counter += 1
     end    
   end
@@ -969,6 +982,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
+  # SERVICE_ID: 3
   private
   def service_ycsb ycsb_config_bash
     logger.debug "--------------------------------------"
