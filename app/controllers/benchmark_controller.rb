@@ -113,17 +113,17 @@ class BenchmarkController < ApplicationController
       # to provision machines in cloud infrastructure
       # profile hash is used to fill @db_regions hash
       logger.debug "-----------------------------------------------------------"
-      logger.debug "STEP 1: Invoking Service [Provision] for Dabtase Cluster..."
+      logger.debug "STEP 1: Invoking Service [Provision] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
-        service 'provision', profile, 'cassandra'   
+        service 'provision', profile, 'cassandra' # provision machines with flag 'cassandra' 
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
         service 'provision', profile, 'mongodb'
       else
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0
       end
-      # service 'provsion', profile
+      # service 'provision', profile
 
       # --- @db_regions ---
       #   region1:
@@ -143,9 +143,9 @@ class BenchmarkController < ApplicationController
       
       # clone the parameters
       # database_config_hash = @regions
-      logger.debug "-------....------------------------------------------------"
+      logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
-      logger.debug "-----------....--------------------------------------------"
+      logger.debug "-----------------------------------------------------------"
       
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
         # service 'cassandra', database_config_hash
@@ -157,6 +157,27 @@ class BenchmarkController < ApplicationController
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
+      
+      logger.debug "-------------------------------------------------------------"
+      logger.debug "STEP 3: Invoking Service [Provision] for Benchmark Cluster..."
+      logger.debug "-------------------------------------------------------------"
+      service 'provision', profile, 'ycsb' # provision machines with flag 'ycsb'
+      
+      # --- @bench_regions ---
+      #   region1:
+      #     name: us-east-1
+      #     ips: [1,2,3]
+      #   region2:
+      #     name: us-west-1
+      #     ips: [4,5]
+      #....
+      logger.debug "-----------------------------------"
+      logger.debug "::: Node IPs for Benchmark Cluster:"
+      logger.debug "-----------------------------------"    
+      @bench_regions.each do |key,values|
+        logger.debug "Region: #{values['name']}"
+        logger.debug "IPs: #{values['ips']}"       
+      end
       
       profile_counter += 1
     end    
@@ -574,7 +595,7 @@ class BenchmarkController < ApplicationController
     
     
     # for single region mode only
-    # make a small pause, the cassandra server needs sometime to be ready
+    # make a small pause, the cassandra server needs a little time to be ready
     if single_region_hash['single_region'] == 'true'
       sleep 60
     end
