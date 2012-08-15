@@ -92,10 +92,15 @@ class BenchmarkController < ApplicationController
       # region1:
       #   name: us-east-1
       #   ips: [1,2,3]
+      #   seeds: 1,2,4
+      #   tokens: [0,121212,352345]
       # region2:
       #   name: us-west-1
       #   ips: [4,5]
-      #....
+      #   seeds: 1,2,4
+      #   tokens: [4545, 32412341234]
+      # attributes:
+      #   replication_factor: 2,2
       
       @bench_regions = Hash.new
       # shared variable, used to contain all fog objects in each region
@@ -107,7 +112,8 @@ class BenchmarkController < ApplicationController
       # region2:
       #   name: us-west-1
       #   ips: [4,5]
-      #....
+      # attributes:
+      #   workload_model: hotspot
       
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
@@ -179,8 +185,9 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-      
+      logger.debug "----"
       logger.debug "TEST"
+      logger.debug "----"
       logger.debug "@db_regions:"
       puts @db_regions
       logger.debug "@bench_regions:"
@@ -189,7 +196,7 @@ class BenchmarkController < ApplicationController
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 4: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
-      
+      service 'ycsb', @bench_regions, nil
       
       
       profile_counter += 1
@@ -606,7 +613,6 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.5
     deploy_cassandra cassandra_config_hash
     
-    
     # for single region mode only
     # make a small pause, the cassandra server needs a little time to be ready
     if single_region_hash['single_region'] == 'true'
@@ -974,22 +980,68 @@ class BenchmarkController < ApplicationController
   # -------------------------------------------------------------------------------------------- # 
   # install ycsb cluster in each region
   #
-  # --- ycsb_config_hash ---
+  # uses 2 shared hash maps
+  #
+  # --- @db_regions ---
   # region1:
   #   name: us-east-1
-  #   ips: [1,2,3] # IPs of Cassandra's nodes
-  #   ycsb_number: 2 # numbers of YCSB node in region1 
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  # SERVICE_ID: 3
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  #
+  # ---@bench_regions = ycsb_config_hash---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  # attributes:
+  #   workload_model: hotspot
   private
-  def service_ycsb ycsb_config_bash
+  def service_ycsb ycsb_config_hash
     logger.debug "--------------------------------------"
     logger.debug "::: Service: YCSB is being deployed..."
     logger.debug "--------------------------------------"
+        
+    logger.debug "-----------------"    
+    logger.debug "YCSB Config Hash:"
+    logger.debug "-----------------"
+    puts ycsb_config_hash
+    
+    # fetch attributes
+    ycsb_config_hash = fetch_attributes_for_ycsb ycsb_config_hash
+    
+    logger.debug "------------------------------------"    
+    logger.debug "YCSB Config Hash (incl. Attributes):"
+    logger.debug "------------------------------------"
+    puts ycsb_config_hash
     
     
+  end
+  
+  # fetch attributes from definitions
+  #
+  # --- ycsb_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  private
+  def fetch_attributes_for_ycsb ycsb_config_hash
+    @service_array.each do |service|
+      if service['name'] == 'ycsb'
+        ycsb_config_hash['attributes'] = service['attributes']
+      end
+    end
+    ycsb_config_hash  
   end
   # --------------------------------------------------------------------------------------------#
   
