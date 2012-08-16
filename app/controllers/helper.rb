@@ -23,7 +23,7 @@ module Helper
   # Create Fog Object EC2
   private
   def create_fog_object_ec2 state, region
-    logger.debug "::: Creating an Fog EC2 object..."
+    # logger.debug "::: Creating an Fog EC2 object..."
     
     # standard region
     if region.nil?
@@ -36,7 +36,7 @@ module Helper
       aws_secret_access_key: state['aws_secret_access_key'],
       region: region
     )
-    logger.debug "::: Creating an Fog EC2 object... [OK]"
+    # logger.debug "::: Creating an Fog EC2 object... [OK]"
     ec2
   end
   
@@ -79,18 +79,18 @@ module Helper
   
   # return state as a YAML object
   def get_state
-    logger.debug "::: Loading state.yml..."
+    # logger.debug "::: Loading state.yml..."
     state = YAML.load(File.open("#{Rails.root}/chef-repo/.chef/conf/state.yml"))
-    logger.debug "::: Loading state.yml... [OK]"
+    # logger.debug "::: Loading state.yml... [OK]"
     state
   end
 
   # update state.yml
   # input as a YAML object
   def update_state state
-    logger.debug "::: Updating state.yml..."
+    # logger.debug "::: Updating state.yml..."
     File.open("#{Rails.root}/chef-repo/.chef/conf/state.yml","w") {|file| YAML.dump(state,file)}
-    logger.debug "::: Updating state.yml... [OK]"
+    # logger.debug "::: Updating state.yml... [OK]"
   end
     
   # check if sshd is ready in the remote machine
