@@ -848,9 +848,11 @@ class BenchmarkController < ApplicationController
   end
   
   # knife bootstrap
-  # node: the IP address of the machine to be bootstraped
+  # node: the IP address of the machine to be bootstrapped
   # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
   # name: name of the node in Chef Server
+  # recipe: which recipe should be used: cassandra or ycsb
+  # region: which region --> find the corresponding private key
   # SERVICE_ID: 2.5.1
   private
   def knife_bootstrap node, token, name, recipe, region
@@ -873,13 +875,21 @@ class BenchmarkController < ApplicationController
     token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
     system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{token_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"
     logger.debug "::: Uploading the token file to the node: #{node}... [OK]"
-    
+      
     logger.debug "-----------------------------------------------------"
     logger.debug "::: Executing the token file in the node: #{node}... "
     logger.debug "-----------------------------------------------------"
     system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'sudo bash #{token}.sh'"
     logger.debug "::: Executing the token file in the node: #{node}... [OK]"
-    
+      
+    if File.exist? "#{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
+      logger.debug "---------------------------------------------"
+      logger.debug "::: Uploading zoo.cfg to the node: #{node}..."
+      logger.debug "---------------------------------------------"
+      zoo_cfg_file = "#{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"  
+      system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{zoo_cfg_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"     
+    end
+
     knife_bootstrap_string = ""
        
     knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
@@ -1022,6 +1032,8 @@ class BenchmarkController < ApplicationController
     logger.debug "------------------------------------"
     puts ycsb_config_hash
     
+    # deploy ycsb for each region in parallel mode
+    deploy_ycsb ycsb_config_hash
     
   end
   
@@ -1043,6 +1055,120 @@ class BenchmarkController < ApplicationController
     end
     ycsb_config_hash  
   end
+  
+  # deploy ycsb in each region in parallel mode (for each region)
+  #
+  # --- ycsb_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  # attributes:
+  #   workload_model: hotspot  
+  private
+  def deploy_ycsb ycsb_config_hash
+    logger.debug "--------------------------------"
+    logger.debug "Deploying YCSB in each region..."
+    logger.debug "--------------------------------"
+    recipe = 'recipe[ycsb]'
+
+    logger.debug "-------------------------"
+    logger.debug "::: Generating zoo.cfg..."
+    logger.debug "-------------------------"
+    
+    # fetch IPs for ycsb_node_array
+    region_counter = 1
+    ycsb_node_array = []
+    until ! ycsb_config_hash.has_key? "region#{region_counter}" do
+      current_region = ycsb_config_hash["region#{region_counter}"]
+      
+      # IPs in the current region
+      node_ip_array = current_region['ips']
+      
+      # merge with the ycsb_node_array
+      ycsb_node_array += node_ip_array
+       
+      region_counter += 1  
+    end
+    
+    # write zoo.cfg
+    zoo_cfg_file = "#{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
+    File.open(zoo_cfg_file,"w") do |file|
+      file << "tickTime=2000" << "\n"
+      file << "initLimit=10" << "\n"
+      file << "syncLimit=5" << "\n"
+      file << "dataDir=/home/ubuntu/zk" << "\n"
+      file << "clientPort=2181" << "\n"
+      for i in 0..(ycsb_node_array.size - 1)
+        file << "server.#{i + 1}=#{ycsb_node_array[i]}:2888:3888" << "\n"
+      end
+    end
+    
+    # iterate each region in ycsb_config_hash
+    region_counter = 1
+    ycsb_node_counter = 1
+    until ! ycsb_config_hash.has_key? "region#{region_counter}" do
+      logger.debug "::: Deploying YCSB in region: #{region_counter}..."
+      
+      ycsb_current_region = ycsb_config_hash["region#{region_counter}"]
+      cassandra_current_region = @db_regions["region#{region_counter}"]
+      
+      ycsb_node_ip_array = ycsb_current_region['ips']
+      cassandra_node_ip_array = cassandra_current_region['ips']
+      
+      # contain all Cassandra's IPs in the current region
+      hosts = ""
+      cassandra_node_ip_array.each do |ip|
+        hosts = ip.to_s << ","
+      end
+      hosts = hosts[0..-2] # delete the last comma
+      
+      bootstrap_array = []
+      for j in 0..(ycsb_node_ip_array.size - 1) do
+        tmp_array = []
+        
+        ycsb_node_ip = ycsb_node_ip_array[j] # IP of YCSB node
+        puts "YCSB Node IP: #{ycsb_node_ip}"
+        
+        ycsb_node_name = "ycsb-node-" << ycsb_node_counter.to_s
+        puts "YCSB Node Name: #{ycsb_node_name}"
+        
+        ycsb_id_file = "#{Rails.root}/chef-repo/.chef/tmp/#{j}.sh"
+        File.open(ycsb_id_file,"w") do |file|
+          file << "#!/usr/bin/env bash" << "\n"
+          file << "echo #{j} | tee /home/ubuntu/myid" << "\n"
+          file << "echo #{hosts} | tee /home/ubuntu/hosts.txt" << "\n"
+        end
+
+        tmp_array << ycsb_node_ip
+        tmp_array << j
+        tmp_array << ycsb_node_name
+        bootstrap_array << tmp_array
+        
+        ycsb_node_counter += 1
+      end
+
+      logger.debug "-------------------------------------------------------"
+      logger.debug "::: Knife Bootstrap #{bootstrap_array.size} machines..."
+      logger.debug "-------------------------------------------------------"
+      results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
+        system(knife_bootstrap block[0], block[1], block[2], recipe, ycsb_current_region['name'])
+      end
+      logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
+      
+      logger.debug "---------------------------------------------------------"
+      logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+      logger.debug "---------------------------------------------------------"
+      system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+      system "rm #{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
+      logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
+      
+      region_counter += 1
+    end
+  end
+  
   # --------------------------------------------------------------------------------------------#
   
   # -------------------------------------------------------------------------------------------- #
