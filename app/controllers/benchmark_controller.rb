@@ -339,9 +339,9 @@ class BenchmarkController < ApplicationController
   # SERVICE_ID: 1
   private
   def service_provision cloud_config_hash, flag
-    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
-    logger.debug "::: Service: Provision is being deployed..."
-    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::: Service: Provision is being deployed..."
+    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     
     provider = cloud_config_hash['provider']
     region_hash = cloud_config_hash['regions']
@@ -358,9 +358,9 @@ class BenchmarkController < ApplicationController
       exit 0
     end
 
-    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
-    logger.debug "::: Service: Provision is being deployed... [OK]"
-    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::: Service: Provision is being deployed... [OK]"
+    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
   end
   
   # provision EC2 machine for database service and benchmark service
@@ -369,9 +369,9 @@ class BenchmarkController < ApplicationController
   # SERVICE_ID: 1.1
   private
   def service_provision_ec2 cloud_config_hash, flag
-    logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
-    logger.debug "::: Service: Provision EC2 is being deployed..."
-    logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::: Service: Provision EC2 is being deployed..."
+    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
     
     # @db_regions = Hash.new 
     # shared variable, used to contain all fog objects in each region
@@ -421,7 +421,6 @@ class BenchmarkController < ApplicationController
       elsif flag == "ycsb"
         @bench_regions[region] = name
       end
-      # @regions[region] = name
       
       state = get_state
       if region_name == 'us-east-1'
@@ -442,7 +441,6 @@ class BenchmarkController < ApplicationController
       node_name_array = []
       machine_number.times do
         x = "#{flag}-node-" << node_counter.to_s
-        # x = "cassandra-node-" << node_counter.to_s
         node_name_array << x
         node_counter = node_counter + 1
       end
@@ -478,7 +476,6 @@ class BenchmarkController < ApplicationController
       elsif flag == "ycsb"
         @bench_regions[region] = @bench_regions[region].merge ips
       end
-      # @regions[region] = @regions[region].merge ips
       
       # region1:
       #   name: us-east-1
@@ -487,9 +484,9 @@ class BenchmarkController < ApplicationController
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
     
-    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
-    logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
-    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
+    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
   end
   
   # provision a new EC2 machine
@@ -564,9 +561,9 @@ class BenchmarkController < ApplicationController
   # SERVICE_ID: 2
   private
   def service_cassandra cassandra_config_hash
-    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
-    logger.debug "::: Service: Cassandra is being deployed..."
-    logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::: Service: Cassandra is being deployed..."
+    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
     
     logger.debug "--------------------------"
     logger.debug "::: Cassandra Config Hash:"
@@ -620,9 +617,9 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
     
-    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
-    logger.debug "::: Service: Cassandra is being deployed... [OK]"
-    logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"    
+    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
+    #logger.debug "::: Service: Cassandra is being deployed... [OK]"
+    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"    
   end
   
   # token positions for all node in single/multiple regions
@@ -1135,7 +1132,8 @@ class BenchmarkController < ApplicationController
       puts hosts
       
       bootstrap_array = []
-      for j in 0..(ycsb_node_ip_array.size - 1) do
+      #for j in 0..(ycsb_node_ip_array.size - 1) do
+      until ycsb_node_counter <= ycsb_node_ip_array.size do
         tmp_array = []
         
         ycsb_node_ip = ycsb_node_ip_array[j] # IP of YCSB node
@@ -1144,15 +1142,15 @@ class BenchmarkController < ApplicationController
         ycsb_node_name = "ycsb-node-" << ycsb_node_counter.to_s
         puts "YCSB Node Name: #{ycsb_node_name}"
         
-        ycsb_id_file = "#{Rails.root}/chef-repo/.chef/tmp/#{j}.sh"
+        ycsb_id_file = "#{Rails.root}/chef-repo/.chef/tmp/#{ycsb_node_counter}.sh"
         File.open(ycsb_id_file,"w") do |file|
           file << "#!/usr/bin/env bash" << "\n"
-          file << "echo #{j + 1} | tee /home/ubuntu/myid" << "\n"
+          file << "echo #{ycsb_node_counter + 1} | tee /home/ubuntu/myid" << "\n"
           file << "echo #{hosts} | tee /home/ubuntu/hosts.txt" << "\n"
         end
 
         tmp_array << ycsb_node_ip
-        tmp_array << j
+        tmp_array << ycsb_node_counter
         tmp_array << ycsb_node_name
         bootstrap_array << tmp_array
         
