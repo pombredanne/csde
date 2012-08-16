@@ -1145,7 +1145,7 @@ class BenchmarkController < ApplicationController
         ycsb_id_file = "#{Rails.root}/chef-repo/.chef/tmp/#{ycsb_node_counter}.sh"
         File.open(ycsb_id_file,"w") do |file|
           file << "#!/usr/bin/env bash" << "\n"
-          file << "echo #{ycsb_node_counter + 1} | tee /home/ubuntu/myid" << "\n"
+          file << "echo #{ycsb_node_counter} | tee /home/ubuntu/myid" << "\n"
           file << "echo #{hosts} | tee /home/ubuntu/hosts.txt" << "\n"
         end
 
