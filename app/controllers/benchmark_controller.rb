@@ -14,7 +14,6 @@ class BenchmarkController < ApplicationController
     system "curl -L #{benchmark_profile_url} -o #{benchmark_profile_path}"
     logger.debug "Getting the benchmark profile from the given source... [OK]"
     
-    
     logger.debug "------------------------------------"
     logger.debug "::: Parsing the benchmark profile..."
     logger.debug "------------------------------------"
@@ -129,7 +128,6 @@ class BenchmarkController < ApplicationController
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0
       end
-      # service 'provision', profile
 
       # --- @db_regions ---
       #   region1:
@@ -147,8 +145,7 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-      # clone the parameters
-      # database_config_hash = @regions
+=begin      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -163,6 +160,7 @@ class BenchmarkController < ApplicationController
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
+=end
       
       logger.debug "-------------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [Provision] for Benchmark Cluster..."
@@ -197,7 +195,6 @@ class BenchmarkController < ApplicationController
       logger.debug "STEP 4: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
       service 'ycsb', @bench_regions, nil
-      
       
       profile_counter += 1
     end    
@@ -1078,7 +1075,7 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Generating zoo.cfg..."
     logger.debug "-------------------------"
     
-    # fetch IPs for ycsb_node_array
+    # fetch IPs for ycsb_node_array in all regions
     region_counter = 1
     ycsb_node_array = []
     until ! ycsb_config_hash.has_key? "region#{region_counter}" do
@@ -1092,6 +1089,12 @@ class BenchmarkController < ApplicationController
        
       region_counter += 1  
     end
+    
+    logger.debug ":::::::::::::::"
+    logger.debug "---> DEBUG <---"
+    logger.debug ":::::::::::::::"
+    logger.debug "YCSB Node IP Array for all Regions:"
+    puts ycsb_node_array
     
     # write zoo.cfg
     zoo_cfg_file = "#{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
@@ -1110,7 +1113,7 @@ class BenchmarkController < ApplicationController
     region_counter = 1
     ycsb_node_counter = 1
     until ! ycsb_config_hash.has_key? "region#{region_counter}" do
-      logger.debug "::: Deploying YCSB in region: #{region_counter}..."
+      logger.debug "::: Deploying YCSB in region: #{region_counter}"
       
       ycsb_current_region = ycsb_config_hash["region#{region_counter}"]
       cassandra_current_region = @db_regions["region#{region_counter}"]
@@ -1125,6 +1128,14 @@ class BenchmarkController < ApplicationController
       end
       hosts = hosts[0..-2] # delete the last comma
       
+      logger.debug ":::::::::::::::"
+      logger.debug "---> DEBUG <---"
+      logger.debug ":::::::::::::::"
+      logger.debug "Cassandra Node IP in the region #{region_counter}:"
+      puts hosts
+
+      exit 0
+      
       bootstrap_array = []
       for j in 0..(ycsb_node_ip_array.size - 1) do
         tmp_array = []
@@ -1138,7 +1149,7 @@ class BenchmarkController < ApplicationController
         ycsb_id_file = "#{Rails.root}/chef-repo/.chef/tmp/#{j}.sh"
         File.open(ycsb_id_file,"w") do |file|
           file << "#!/usr/bin/env bash" << "\n"
-          file << "echo #{j} | tee /home/ubuntu/myid" << "\n"
+          file << "echo #{j + 1} | tee /home/ubuntu/myid" << "\n"
           file << "echo #{hosts} | tee /home/ubuntu/hosts.txt" << "\n"
         end
 
@@ -1162,11 +1173,13 @@ class BenchmarkController < ApplicationController
       logger.debug "::: Deleting all token temporary files in KCSDB Server..."
       logger.debug "---------------------------------------------------------"
       system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
-      system "rm #{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
       logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
       
       region_counter += 1
     end
+    
+    logger.debug "Deleting zoo.cfg..."
+    system "rm #{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
   end
   
   # --------------------------------------------------------------------------------------------#
