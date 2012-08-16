@@ -145,22 +145,18 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-=begin      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
       
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
-        # service 'cassandra', database_config_hash
         service 'cassandra', @db_regions, nil
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
-        # service 'mongodb', database_config_hash
         service 'mongodb', @db_regions, nil
       else
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
-=end
       
       logger.debug "-------------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [Provision] for Benchmark Cluster..."
@@ -183,9 +179,9 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-      logger.debug "----"
-      logger.debug "TEST"
-      logger.debug "----"
+      logger.debug ":::::::::::::::"
+      logger.debug "---> DEBUG <---"
+      logger.debug ":::::::::::::::"
       logger.debug "@db_regions:"
       puts @db_regions
       logger.debug "@bench_regions:"
