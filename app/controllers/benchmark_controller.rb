@@ -1132,8 +1132,8 @@ class BenchmarkController < ApplicationController
       puts hosts
       
       bootstrap_array = []
-      #for j in 0..(ycsb_node_ip_array.size - 1) do
-      until ycsb_node_counter <= ycsb_node_ip_array.size do
+      for j in 0..(ycsb_node_ip_array.size - 1) do
+      #until ycsb_node_counter <= ycsb_node_ip_array.size do
         tmp_array = []
         
         ycsb_node_ip = ycsb_node_ip_array[j] # IP of YCSB node
