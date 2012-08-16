@@ -1134,7 +1134,6 @@ class BenchmarkController < ApplicationController
       logger.debug "Cassandra Node IP in the region #{region_counter}:"
       puts hosts
       
-=begin
       bootstrap_array = []
       for j in 0..(ycsb_node_ip_array.size - 1) do
         tmp_array = []
@@ -1173,12 +1172,9 @@ class BenchmarkController < ApplicationController
       logger.debug "---------------------------------------------------------"
       system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
       logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
-=end
 
       region_counter += 1
     end
-    
-    exit 0
     
     logger.debug "Deleting zoo.cfg..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
