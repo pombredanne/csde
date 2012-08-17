@@ -181,5 +181,6 @@
 #Chef::Log.info "The tests are currently running on the machine."
 #Chef::Log.info "The stats files will be located at #{node[:setup][:home]}/DataStax*.stats."
 
-# test
-execute "touch /home/ubuntu/ok.txt" 
+# install ZooKeeper
+include_recipe "ycsb::install_zookeeper"
+

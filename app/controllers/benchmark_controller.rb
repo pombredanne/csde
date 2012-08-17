@@ -557,10 +557,6 @@ class BenchmarkController < ApplicationController
   # SERVICE_ID: 2
   private
   def service_cassandra cassandra_config_hash
-    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
-    #logger.debug "::: Service: Cassandra is being deployed..."
-    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
-    
     logger.debug "--------------------------"
     logger.debug "::: Cassandra Config Hash:"
     logger.debug "--------------------------"
@@ -569,14 +565,10 @@ class BenchmarkController < ApplicationController
     # calculate the tokens for nodes in single/multiple regions
     # SERVICE_ID: 2.1
     cassandra_config_hash = calculate_token_position cassandra_config_hash
-    # logger.debug "Cassandra Config Hash (incl. Tokens)"
-    # puts cassandra_config_hash
 
     # calculate the seeds for nodes in single/multiple regions
     # SERVICE_ID: 2.2
     cassandra_config_hash = calculate_seed_list cassandra_config_hash    
-    # logger.debug "Cassandra Config Hash (incl. Tokens and Seeds)"
-    # puts cassandra_config_hash
     
     # fetch the attributes for nodes
     # SERVICE_ID: 2.3
@@ -599,7 +591,7 @@ class BenchmarkController < ApplicationController
     default_rb_hash = cassandra_config_hash['attributes'].merge single_region_hash    
     update_default_rb_of_cookbooks default_rb_hash
         
-    # deploy cassandra
+    # deploy Cassandra
     # SERVICE_ID: 2.5
     deploy_cassandra cassandra_config_hash
     
@@ -612,10 +604,6 @@ class BenchmarkController < ApplicationController
     # configure cassandra via cassandra-cli
     # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
-    
-    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
-    #logger.debug "::: Service: Cassandra is being deployed... [OK]"
-    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"    
   end
   
   # token positions for all node in single/multiple regions
@@ -973,7 +961,6 @@ class BenchmarkController < ApplicationController
     puts cmd
     
     system cmd
-    # system "rvmsudo knife ssh name:cassandra-node-1 --config #{Rails.root}/chef-repo/.chef/conf/knife.rb -x #{ssh_user} -i #{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem -a ec2.public_hostname 'sudo chef-client'"
   end
   # -------------------------------------------------------------------------------------------- #
  
