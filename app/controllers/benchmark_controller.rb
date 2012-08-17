@@ -867,6 +867,14 @@ class BenchmarkController < ApplicationController
       zoo_cfg_file = "#{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"  
       system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{zoo_cfg_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"     
     end
+    
+    if File.exist? "#{Rails.root}/chef-repo/.chef/tmp/barrier_size.txt"
+      logger.debug "---------------------------------------------"
+      logger.debug "::: Uploading barrier_size.txt to the node: #{node}..."
+      logger.debug "---------------------------------------------"
+      barrier_size_file = "#{Rails.root}/chef-repo/.chef/tmp/barrier_size.txt"  
+      system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{barrier_size_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"     
+    end
 
     knife_bootstrap_string = ""
        
@@ -1054,11 +1062,6 @@ class BenchmarkController < ApplicationController
   #   workload_model: hotspot  
   private
   def deploy_ycsb ycsb_config_hash
-    logger.debug "--------------------------------"
-    logger.debug "Deploying YCSB in each region..."
-    logger.debug "--------------------------------"
-    recipe = 'recipe[ycsb]'
-
     logger.debug "-------------------------"
     logger.debug "::: Generating zoo.cfg..."
     logger.debug "-------------------------"
@@ -1097,11 +1100,26 @@ class BenchmarkController < ApplicationController
       end
     end
     
+    logger.debug "-------------------------------"
+    logger.debug "::: Generating barrier_size.txt"
+    logger.debug "-------------------------------"
+    barrier_size_file = "#{Rails.root}/chef-repo/.chef/tmp/barrier_size.txt"
+    File.open(barrier_size_file,'w') do |file|
+      file << ycsb_node_array.size
+    end
+    
+    logger.debug "--------------------------------"
+    logger.debug "Deploying YCSB in each region..."
+    logger.debug "--------------------------------"
+    recipe = 'recipe[ycsb]'
+    
     # iterate each region in ycsb_config_hash
     region_counter = 1
     ycsb_node_counter = 1
     until ! ycsb_config_hash.has_key? "region#{region_counter}" do
+      logger.debug "-----------------------------------------------"
       logger.debug "::: Deploying YCSB in region: #{region_counter}"
+      logger.debug "-----------------------------------------------"
       
       ycsb_current_region = ycsb_config_hash["region#{region_counter}"]
       cassandra_current_region = @db_regions["region#{region_counter}"]
@@ -1167,6 +1185,11 @@ class BenchmarkController < ApplicationController
     
     logger.debug "Deleting zoo.cfg..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
+    
+    logger.debug "Deleting barrier_size.txt..."
+    system "rm #{Rails.root}/chef-repo/.chef/tmp/barrier_size.txt"
+    
+    
   end
   
   # --------------------------------------------------------------------------------------------#
