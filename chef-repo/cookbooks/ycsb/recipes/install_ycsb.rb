@@ -20,6 +20,7 @@ execute "tar -xf $HOME/ycsb.tar.gz --strip-components=1 -C #{node[:ycsb][:ycsb_h
 # second, update hosts parameter in workload properties file
 ruby_block "update_hosts" do
   block do
+    hosts = ""
     File.open("/home/ubuntu/hosts.txt","r").each do |line| 
       hosts = line.to_s.strip
     end
