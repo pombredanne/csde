@@ -938,6 +938,15 @@ class BenchmarkController < ApplicationController
     end
     replication_factor = replication_factor[0..-2] # delete the last comma
     
+    # bug fix
+    # http://stackoverflow.com/questions/11024042/how-to-configure-cassandra-to-work-across-multiple-ec2-regions-with-ec2multiregi
+    # for the issue
+    # https://issues.apache.org/jira/browse/CASSANDRA-4026
+    replication_factor.gsub!(/us-east-1/,"us-east")
+    replication_factor.gsub!(/us-west-1/,"us-west")
+    replication_factor.gsub!(/us-west-2/,"us-west2")
+    replication_factor.gsub!(/eu-west-1/,"eu-west")
+    
     rep_fac_hash = Hash.new
     rep_fac_hash['replication_factor'] = replication_factor
     
