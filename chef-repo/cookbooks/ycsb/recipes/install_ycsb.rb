@@ -20,14 +20,32 @@ execute "tar -xf $HOME/ycsb.tar.gz --strip-components=1 -C #{node[:ycsb][:ycsb_h
 # second, update hosts parameter in workload properties file
 ruby_block "update_hosts" do
   block do
+    
+    # read hosts from hosts.txt
     hosts = ""
     File.open("/home/ubuntu/hosts.txt","r").each do |line| 
       hosts = line.to_s.strip
     end
+    
+    # properties file for loading phase
     workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_load"
     workload_properties_file = File.read workload_properties_file_name
     workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
     File.open(workload_properties_file_name,'w'){|f| f.write workload_properties_file}
+    
+    # properties file for transaction phase
+    workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_transaction"
+    workload_properties_file = File.read workload_properties_file_name
+    workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
+    File.open(workload_properties_file_name,'w'){|f| f.write workload_properties_file}
+  end
+  action :create
+end
+
+# step 5: loading phase
+ruby_block "loading_phase" do
+  block do
+    system "#{node[:ycsb][:ycsb_home]}/bin/ycsb load cassandra-10 -P #{node[:ycsb][:ycsb_home]}/workloads/workload_multiple_load > $HOME/ycsb.log"
   end
   action :create
 end

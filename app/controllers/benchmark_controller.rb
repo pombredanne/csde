@@ -145,18 +145,18 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-      # logger.debug "-----------------------------------------------------------"
-      # logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
-      # logger.debug "-----------------------------------------------------------"
-#       
-      # if profile['regions']['region1']['template'].to_s.include? "cassandra"
-        # service 'cassandra', @db_regions, nil
-      # elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
-        # service 'mongodb', @db_regions, nil
-      # else
-        # logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
-        # exit 0  
-      # end      
+      logger.debug "-----------------------------------------------------------"
+      logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
+      logger.debug "-----------------------------------------------------------"
+       
+      if profile['regions']['region1']['template'].to_s.include? "cassandra"
+        service 'cassandra', @db_regions, nil
+      elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
+        service 'mongodb', @db_regions, nil
+      else
+        logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
+        exit 0  
+      end      
       
       logger.debug "-------------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [Provision] for Benchmark Cluster..."
@@ -1011,7 +1011,6 @@ class BenchmarkController < ApplicationController
     
     # deploy ycsb for each region in parallel mode
     deploy_ycsb ycsb_config_hash
-    
   end
   
   # fetch attributes from definitions
