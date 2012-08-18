@@ -439,7 +439,7 @@ class BenchmarkController < ApplicationController
       logger.debug "Node names: " ; puts node_name_array ;
       logger.debug "-------------------------"
       
-      beginning_time = Time.now
+      # beginning_time = Time.now
 
       # BEFORE, @nodes contains nothing
       @nodes = [] # shared variable, used to contain all node IP in each region
@@ -450,7 +450,7 @@ class BenchmarkController < ApplicationController
       results = Parallel.map(node_name_array, in_threads: node_name_array.size) do |node_name|
         provision_ec2_machine region_name, machine_ami, machine_flavor, key_pair, security_group, node_name
       end
-      provisioning_time = Time.now
+      # provisioning_time = Time.now
       
       # AFTER, @nodes contains IPs, filled by provision_ec2_machine
       ips = Hash.new
@@ -465,7 +465,7 @@ class BenchmarkController < ApplicationController
       #   name: us-east-1
       #   ips: [1,2,3]
     
-      logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
+      # logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
   end
   
@@ -1012,6 +1012,8 @@ class BenchmarkController < ApplicationController
     
     # deploy ycsb for each region in parallel mode
     deploy_ycsb ycsb_config_hash
+    
+    # start all YCSB clients in all regions
   end
   
   # fetch attributes from definitions
@@ -1171,8 +1173,51 @@ class BenchmarkController < ApplicationController
     
     logger.debug "Deleting barrier_size.txt..."
     system "rm #{Rails.root}/chef-repo/.chef/tmp/barrier_size.txt"
-    
   end
+
+  # start all YCSB clients via ssh
+  #
+  # --- ycsb_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  # attributes:
+  #   workload_model: hotspot  
+  private
+  def start_all_ycsb_clients ycsb_config_hash
+    para_map = []
+    region_counter = 1
+    
+    state = get_state
+    key_pair = state['key_pair_name']
+    
+    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    
+    until ! ycsb_config_hash.has_key? "region#{region_counter}" do
+      current_region = ycsb_config_hash["region#{region_counter}"]
+      current_region['ips'].each do |ip|
+        tmp_arr = []
+        
+        # private key
+        tmp_arr << "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{current_region['name']}.pem"
+        
+        # ip
+        tmp_arr << ip
+        
+        para_map << tmp_arr  
+      end
+    end
+    
+    # ssh
+    logger.debug "Invoking YCSB client..."
+    results = Parallel.map(para_map, in_threads: para_map.size) do |block|
+      system "rvmsudo ssh -i #{block[0]} ubuntu@#{block[1]} '/home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load > /home/ubuntu/ycsb.log'"
+    end
+  end
+
   
   # --------------------------------------------------------------------------------------------#
   
