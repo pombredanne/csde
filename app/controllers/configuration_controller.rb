@@ -74,7 +74,7 @@ class ConfigurationController < ApplicationController
         logger.debug "--- The security group #{security_group_name} in AWS EC2: [OK]"
       else
         logger.debug "--- Creating a new security group #{security_group_name} in AWS EC2..."
-        ec2.create_security_group(security_group_name,'Security Group for KCSD')
+        ec2.create_security_group(security_group_name,'Security Group for KCSDB')
         
         # TODO
         # too much open security group
