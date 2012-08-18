@@ -23,8 +23,6 @@ module Helper
   # Create Fog Object EC2
   private
   def create_fog_object_ec2 state, region
-    # logger.debug "::: Creating an Fog EC2 object..."
-    
     # standard region
     if region.nil?
       region = 'us-east-1'   
@@ -36,7 +34,6 @@ module Helper
       aws_secret_access_key: state['aws_secret_access_key'],
       region: region
     )
-    # logger.debug "::: Creating an Fog EC2 object... [OK]"
     ec2
   end
   
@@ -44,33 +41,13 @@ module Helper
   # TODO: each region in Rackspace is assigned a different account
   private
   def create_fog_object_rackspace state, region
-    logger.debug "::: Creating an Fog Rackspace object..."
     rackspace = Fog::Compute.new(
       provider: 'Rackspace',
       rackspace_api_key: state['rackspace_api_key'],
       rackspace_username: state['rackspace_username'],
     )
-    logger.debug "::: Creating an Fog Rackspace object... [OK]"
     rackspace
   end
-
-  # get AWS credentials from state.yml
-  # and create an EC2 object
-  # KCSDB uses this object to send/receive API requests/responses to EC2
-  # TODO: Garbage Collector in Ruby??
-  # def create_ec2
-    # state = get_state
-# 
-    # logger.debug "::: Creating an EC2 object..."
-    # ec2 = Fog::Compute.new(
-      # provider: 'AWS',
-      # aws_access_key_id: state['aws_access_key_id'],
-      # aws_secret_access_key: state['aws_secret_access_key'],
-      # region: state['region']
-    # )
-    # logger.debug "::: Creating an EC2 object... [OK]"
-    # ec2
-  # end
 
   # ============================================================ #
   # state.yml contains all related information for KCSD
@@ -79,18 +56,14 @@ module Helper
   
   # return state as a YAML object
   def get_state
-    # logger.debug "::: Loading state.yml..."
     state = YAML.load(File.open("#{Rails.root}/chef-repo/.chef/conf/state.yml"))
-    # logger.debug "::: Loading state.yml... [OK]"
     state
   end
 
   # update state.yml
   # input as a YAML object
   def update_state state
-    # logger.debug "::: Updating state.yml..."
     File.open("#{Rails.root}/chef-repo/.chef/conf/state.yml","w") {|file| YAML.dump(state,file)}
-    # logger.debug "::: Updating state.yml... [OK]"
   end
     
   # check if sshd is ready in the remote machine

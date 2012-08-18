@@ -59,7 +59,7 @@ class ConfigurationController < ApplicationController
       File.open(private_key_path,'w') {|file| file << private_key}
       logger.debug "Saving #{key_pair_name}-#{region}.pem... [OK]"
   
-        # only user can read/write
+      # only user can read/write
       logger.debug "--- Setting mode 600 for the #{key_pair_name}-#{region}.pem..."
       File.chmod(0600,private_key_path)
       logger.debug "Setting mode 600 for the #{key_pair_name}-#{region}.pem... [OK]"
@@ -79,7 +79,8 @@ class ConfigurationController < ApplicationController
         # TODO
         # too much open security group
         group = ec2.security_groups.get security_group_name
-        group.authorize_port_range(0..65535)
+        group.authorize_port_range(0..65535,:ip_protocol => 'tcp') # all TCP connections from all sources
+        group.authorize_port_range(0..65535,:ip_protocol => 'udp') # all UDP connections from all sources
         logger.debug "Creating a new security group #{security_group_name} in AWS EC2... [OK]"
       end  
     end

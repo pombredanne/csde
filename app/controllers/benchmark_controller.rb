@@ -335,10 +335,6 @@ class BenchmarkController < ApplicationController
   # SERVICE_ID: 1
   private
   def service_provision cloud_config_hash, flag
-    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
-    #logger.debug "::: Service: Provision is being deployed..."
-    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::"
-    
     provider = cloud_config_hash['provider']
     region_hash = cloud_config_hash['regions']
     
@@ -353,10 +349,6 @@ class BenchmarkController < ApplicationController
       logger.debug "::: Provider: #{provider} is not supported!"
       exit 0
     end
-
-    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
-    #logger.debug "::: Service: Provision is being deployed... [OK]"
-    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::"
   end
   
   # provision EC2 machine for database service and benchmark service
@@ -365,10 +357,6 @@ class BenchmarkController < ApplicationController
   # SERVICE_ID: 1.1
   private
   def service_provision_ec2 cloud_config_hash, flag
-    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
-    #logger.debug "::: Service: Provision EC2 is being deployed..."
-    #logger.debug ":::::::::::::::::::::::::::::::::::::::::::::::"
-    
     # @db_regions = Hash.new 
     # shared variable, used to contain all fog objects in each region
     # relevant information for DATABASE NODES and the GMOND AGENTS which are installed in these nodes 
@@ -479,10 +467,6 @@ class BenchmarkController < ApplicationController
     
       logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
     end  
-    
-    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
-    #logger.debug "::: Service: Provision EC2 is being deployed... [OK]"
-    #logger.debug "::::::::::::::::::::::::::::::::::::::::::::::::::::"
   end
   
   # provision a new EC2 machine
