@@ -66,6 +66,7 @@ end
 # step 5: loading phase
 ruby_block "loading_phase" do
   block do
+    sleep Random.rand(10) # sleep in random x seconds
     system "#{node[:ycsb][:ycsb_home]}/bin/ycsb load cassandra-10 -P #{node[:ycsb][:ycsb_home]}/workloads/workload_multiple_load > $HOME/ycsb.log"
   end
   action :create
