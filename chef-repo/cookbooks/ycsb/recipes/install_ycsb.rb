@@ -64,9 +64,9 @@ ruby_block "update_properties_file" do
 end
 
 # step 5: loading phase
-ruby_block "loading_phase" do
-  block do
-    system "#{node[:ycsb][:ycsb_home]}/bin/ycsb load cassandra-10 -P #{node[:ycsb][:ycsb_home]}/workloads/workload_multiple_load > $HOME/ycsb.log"
-  end
-  action :create
-end
+# ruby_block "loading_phase" do
+  # block do
+    # system "#{node[:ycsb][:ycsb_home]}/bin/ycsb load cassandra-10 -P #{node[:ycsb][:ycsb_home]}/workloads/workload_multiple_load > $HOME/ycsb.log"
+  # end
+  # action :create
+# end
