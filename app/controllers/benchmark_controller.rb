@@ -192,7 +192,11 @@ class BenchmarkController < ApplicationController
       logger.debug "--------------------------------------------------------"
       service 'ycsb', @bench_regions, nil
       
+      # the next profile
       profile_counter += 1
+      
+      logger.debug "::: Deleting known_hosts for SSH..."
+      system "rvmsudo rm /home/ubuntu/.ssh/known_hosts"
     end    
   end
   
