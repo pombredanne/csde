@@ -1014,6 +1014,7 @@ class BenchmarkController < ApplicationController
     deploy_ycsb ycsb_config_hash
     
     # start all YCSB clients in all regions
+    start_all_ycsb_clients ycsb_config_hash
   end
   
   # fetch attributes from definitions
