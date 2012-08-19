@@ -24,6 +24,9 @@ execute "tar -xf $HOME/ycsb.tar.gz --strip-components=1 -C #{node[:ycsb][:ycsb_h
 # update barrier-size
 ruby_block "update_properties_file" do
   block do
+    
+    sleep 10
+    
     # read hosts from hosts.txt
     hosts = ""
     File.open("/home/ubuntu/hosts.txt","r").each do |line| 
@@ -56,8 +59,8 @@ end
 # step 5: loading phase
 ruby_block "loading_phase" do
   block do
-    puts "Sleeping..."
-    sleep Random.rand(10) # sleep in random x seconds
+    #puts "Sleeping..."
+    #sleep Random.rand(10) # sleep in random x seconds
     system "sudo #{node[:ycsb][:ycsb_home]}/bin/ycsb load cassandra-10 -P #{node[:ycsb][:ycsb_home]}/workloads/workload_multiple_load"
   end
   action :create
