@@ -30,18 +30,6 @@ ruby_block "update_properties_file" do
       hosts = line.to_s.strip
     end
     
-    # properties file for loading phase
-    workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_load"
-    workload_properties_file = File.read workload_properties_file_name
-    workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
-    File.open(workload_properties_file_name,'w'){|f| f.write workload_properties_file}
-    
-    # properties file for transaction phase
-    workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_transaction"
-    workload_properties_file = File.read workload_properties_file_name
-    workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
-    File.open(workload_properties_file_name,'w'){|f| f.write workload_properties_file}
-    
     # read barrier_size from barrier_size.txt
     barrier_size = ""
     File.open("/home/ubuntu/barrier_size.txt","r").each do |line|
@@ -51,12 +39,14 @@ ruby_block "update_properties_file" do
     # properties file for loading phase
     workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_load"
     workload_properties_file = File.read workload_properties_file_name
+    workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
     workload_properties_file.gsub!(/barrier-size=dummy/, "barrier-size=#{barrier_size}")
     File.open(workload_properties_file_name,'w'){|f| f.write workload_properties_file}
     
     # properties file for transaction phase
     workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_transaction"
     workload_properties_file = File.read workload_properties_file_name
+    workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
     workload_properties_file.gsub!(/barrier-size=dummy/, "barrier-size=#{barrier_size}")
     File.open(workload_properties_file_name,'w'){|f| f.write workload_properties_file}
   end
