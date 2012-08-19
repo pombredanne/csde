@@ -1195,8 +1195,17 @@ class BenchmarkController < ApplicationController
     state = get_state
     key_pair = state['key_pair_name']
 
+    logger.debug ":::::::::::::::"
+    logger.debug "---> DEBUG <---"
+    logger.debug ":::::::::::::::"
+    logger.debug "YCSB Config Hash:"
+    puts ycsb_config_hash
+
     until ! ycsb_config_hash.has_key? "region#{region_counter}" do
       current_region = ycsb_config_hash["region#{region_counter}"]
+      puts "Current region:"
+      puts current_region
+      
       current_region['ips'].each do |ip|
         tmp_arr = []
         
@@ -1209,6 +1218,10 @@ class BenchmarkController < ApplicationController
         para_map << tmp_arr  
       end
     end
+    
+    puts "Para_map:"
+    puts para_map
+    
     
     # ssh
     logger.debug "Invoking YCSB client..."
