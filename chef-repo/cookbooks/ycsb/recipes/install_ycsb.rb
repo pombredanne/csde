@@ -59,8 +59,8 @@ end
 # step 5: loading phase
 ruby_block "loading_phase" do
   block do
-    #puts "Sleeping..."
-    #sleep Random.rand(10) # sleep in random x seconds
+    puts "Sleeping..."
+    sleep Random.rand(10) # sleep in random x seconds
     system "sudo #{node[:ycsb][:ycsb_home]}/bin/ycsb load cassandra-10 -P #{node[:ycsb][:ycsb_home]}/workloads/workload_multiple_load"
   end
   action :create
