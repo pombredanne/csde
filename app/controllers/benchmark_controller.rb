@@ -1247,6 +1247,8 @@ class BenchmarkController < ApplicationController
       logger.debug "Command:"
       puts cmd
       system cmd
+      puts "Sleep 5 seconds..."
+      sleep 5
     end
   end
 
