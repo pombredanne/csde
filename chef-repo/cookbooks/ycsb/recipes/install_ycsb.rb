@@ -24,7 +24,7 @@ execute "tar -xf $HOME/ycsb.tar.gz --strip-components=1 -C #{node[:ycsb][:ycsb_h
 # update barrier-size
 ruby_block "update_properties_file" do
   block do
-    
+    # waiting for the ZooKeeper Servers are ready on all YCSB nodes
     sleep 10
     
     # read hosts from hosts.txt
