@@ -1243,7 +1243,7 @@ class BenchmarkController < ApplicationController
     # end
     
     para_map.each do |block|
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load > /home/ubuntu/ycsb.log'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load'"
       logger.debug "Command:"
       puts cmd
       system cmd
