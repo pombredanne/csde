@@ -1233,23 +1233,25 @@ class BenchmarkController < ApplicationController
     
     # ssh
     logger.debug "Invoking YCSB client..."
-    # results = Parallel.map(para_map, in_threads: para_map.size) do |block|
-      # cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load > /home/ubuntu/ycsb.log'"
-#       
-      # logger.debug "Command:"
-      # puts cmd
-#       
-      # system cmd
-    # end
-    
-    para_map.each do |block|
+    results = Parallel.map(para_map, in_threads: para_map.size) do |block|
+      sleep Random.rand(10)
+      
       cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load'"
+      
       logger.debug "Command:"
       puts cmd
+      
       system cmd
-      puts "Sleep 5 seconds..."
-      sleep 5
     end
+    
+    # para_map.each do |block|
+      # cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load'"
+      # logger.debug "Command:"
+      # puts cmd
+      # system cmd
+      # puts "Sleep 5 seconds..."
+      # sleep 5
+    # end
   end
 
   
