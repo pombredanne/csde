@@ -1194,9 +1194,7 @@ class BenchmarkController < ApplicationController
     
     state = get_state
     key_pair = state['key_pair_name']
-    
-    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
-    
+
     until ! ycsb_config_hash.has_key? "region#{region_counter}" do
       current_region = ycsb_config_hash["region#{region_counter}"]
       current_region['ips'].each do |ip|
