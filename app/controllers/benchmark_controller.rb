@@ -1225,11 +1225,12 @@ class BenchmarkController < ApplicationController
     puts "Para_map:"
     puts para_map
     
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
     
     # ssh
     logger.debug "Invoking YCSB client..."
     results = Parallel.map(para_map, in_threads: para_map.size) do |block|
-      cmd = "rvmsudo ssh -i #{block[0]} ubuntu@#{block[1]} '/home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load > /home/ubuntu/ycsb.log'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} '/home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load > /home/ubuntu/ycsb.log'"
       
       logger.debug "Command:"
       puts cmd
