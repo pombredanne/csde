@@ -1217,6 +1217,9 @@ class BenchmarkController < ApplicationController
         
         para_map << tmp_arr  
       end
+      
+      # the next region
+      region_counter += 1
     end
     
     puts "Para_map:"
