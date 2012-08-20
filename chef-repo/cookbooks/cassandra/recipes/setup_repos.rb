@@ -1,18 +1,3 @@
-#
-# Cookbook Name:: cassandra
-# Recipe:: setup_repos
-#
-# Copyright 2011, DataStax
-#
-# Apache License
-#
-
-###################################################
-# 
-# Setup Repositories
-# 
-###################################################
-
 include_recipe "apt"
 
 # Find package codenames

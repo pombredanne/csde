@@ -225,14 +225,12 @@
   },
   "recipes": {
     "cassandra::restart_service": "Restarts the Cassandra service.",
-    "cassandra::setup_repos": "Sets up the Apache Cassandra and DataStax Repos.",
+    "cassandra::setup_repos": "Sets up the Apache Cassandra",
     "cassandra::default": "Runs the full list of scripts needed.",
-    "cassandra::optional_packages": "Installs extra tools for Cassandra maintenance.",
-    "cassandra::token_generation": "Generates the token positions for the cluster.",
     "cassandra::additional_settings": "Additional settings for optimal performance for the cluster.",
     "cassandra::install": "Installs the actual Cassandra package.",
     "cassandra::write_configs": "Writes the configurations for Cassandra.",
-    "cassandra::required_packages": "Installs required packages, primarily sun-java-sdk."
+    "cassandra::configure_cluster": "Configure the replication factor for the cluster"
   },
   "groupings": {
   },

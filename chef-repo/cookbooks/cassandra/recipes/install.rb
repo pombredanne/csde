@@ -1,20 +1,5 @@
-#
-# Cookbook Name:: cassandra
-# Recipe:: install
-#
-# Copyright 2011, DataStax
-#
-# Apache License
-#
-
-###################################################
-# 
-# Install Cassandra
-# 
-###################################################
-
 # Used to clear any system information that may have
-# been created when the service autostarts
+# been created when the service auto starts
 execute "clear-data" do
   command "rm -rf /var/lib/cassandra/data/system"
   action :nothing
@@ -28,8 +13,6 @@ package "cassandra" do
 end
 
 service "cassandra" do 
-  # supports :status => true, :restart => true, :reload => true
   supports :status => true, :restart => true, :reload => true, :stop => true, :start => true
-  # action [ :enable, :start ]
   action [ :enable, :stop ]
 end

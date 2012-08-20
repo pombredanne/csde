@@ -6,17 +6,11 @@ long_description IO.read(File.join(File.dirname(__FILE__), 'README.rdoc'))
 version          "0.1.4"
 depends          "apt"
 recipe           "cassandra::default", "Runs the full list of scripts needed."
-recipe           "cassandra::setup_repos", "Sets up the Apache Cassandra and DataStax Repos."
-recipe           "cassandra::required_packages", "Installs required packages, primarily sun-java-sdk."
-recipe           "cassandra::optional_packages", "Installs extra tools for Cassandra maintenance."
+recipe           "cassandra::setup_repos", "Sets up the Apache Cassandra"
 recipe           "cassandra::install", "Installs the actual Cassandra package."
 recipe           "cassandra::additional_settings", "Additional settings for optimal performance for the cluster."
-recipe           "cassandra::token_generation", "Generates the token positions for the cluster."
-#recipe           "cassandra::create_seed_list", "Generates the seed lists for the cluster."
 recipe           "cassandra::write_configs", "Writes the configurations for Cassandra."
 recipe           "cassandra::restart_service", "Restarts the Cassandra service."
-
-# LHA
 recipe           "cassandra::configure_cluster", "Configure the Cassandra cluster via Cassandra CLI"
 
 attribute "setup",
