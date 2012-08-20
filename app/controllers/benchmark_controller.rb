@@ -1293,7 +1293,7 @@ class BenchmarkController < ApplicationController
     deploy_ycsb ycsb_config_hash
     
     # start all YCSB clients in all regions
-    # start_all_ycsb_clients ycsb_config_hash
+    start_all_ycsb_clients ycsb_config_hash
   end
   
   # ============================================================================================ #
@@ -1456,6 +1456,8 @@ class BenchmarkController < ApplicationController
     system "rm #{Rails.root}/chef-repo/.chef/tmp/barrier_size.txt"
   end
 
+  # ============================================================================================ #
+  # SERVICE_ID: 3.3
   # start all YCSB clients via ssh
   #
   # --- ycsb_config_hash ---
@@ -1467,19 +1469,14 @@ class BenchmarkController < ApplicationController
   #   ips: [4,5]
   # attributes:
   #   workload_model: hotspot  
+  # ============================================================================================ #
   private
   def start_all_ycsb_clients ycsb_config_hash
-    para_map = []
+    parallel_array = []
     region_counter = 1
     
     state = get_state
     key_pair = state['key_pair_name']
-
-    logger.debug ":::::::::::::::"
-    logger.debug "---> DEBUG <---"
-    logger.debug ":::::::::::::::"
-    logger.debug "YCSB Config Hash:"
-    puts ycsb_config_hash
 
     until ! ycsb_config_hash.has_key? "region#{region_counter}" do
       current_region = ycsb_config_hash["region#{region_counter}"]
@@ -1495,39 +1492,44 @@ class BenchmarkController < ApplicationController
         # ip
         tmp_arr << ip
         
-        para_map << tmp_arr  
+        parallel_array << tmp_arr  
       end
       
       # the next region
       region_counter += 1
     end
     
-    puts "Para_map:"
-    puts para_map
-    
     no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
     
     # ssh
-    logger.debug "Invoking YCSB client..."
-    results = Parallel.map(para_map, in_threads: para_map.size) do |block|
-      sleep Random.rand(10)
+    logger.debug "Invoking ALL YCSB clients..."
+    @sleep_array = []
+    for s in 0..(parallel_array.size - 1) do
+      @sleep_array << (s * 5)
+    end
+    # @sleep_array = [0,5,10,..]
+    
+    @sleep_array = @sleep_array.reverse
+    # @sleep_array = [..,10,5,0]
+    
+    puts @sleep_array
+    
+    logger.debug "Invoking ALL YCSB clients..."
+    results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |block|
+      sleep_time = 0
+      @mutex.synchronize do
+        sleep_time = @sleep_array.pop # first come, first has to wait less  
+      end
       
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load'"
+      sleep sleep_time
+      
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load -s -p timeseries.granularity=10000'"
       
       logger.debug "Command:"
       puts cmd
       
       system cmd
     end
-    
-    # para_map.each do |block|
-      # cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load'"
-      # logger.debug "Command:"
-      # puts cmd
-      # system cmd
-      # puts "Sleep 5 seconds..."
-      # sleep 5
-    # end
   end
 
   
