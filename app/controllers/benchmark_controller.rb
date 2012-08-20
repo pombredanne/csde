@@ -1502,7 +1502,6 @@ class BenchmarkController < ApplicationController
     no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
     
     # ssh
-    logger.debug "Invoking ALL YCSB clients..."
     @sleep_array = []
     for s in 0..(parallel_array.size - 1) do
       @sleep_array << (s * 5)
@@ -1511,8 +1510,6 @@ class BenchmarkController < ApplicationController
     
     @sleep_array = @sleep_array.reverse
     # @sleep_array = [..,10,5,0]
-    
-    puts @sleep_array
     
     logger.debug "Invoking ALL YCSB clients..."
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |block|
