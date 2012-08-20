@@ -609,7 +609,7 @@ class BenchmarkController < ApplicationController
     #end
     
     # now provision machines
-    results = Parallel.map(parallel_array, in_threads: parallel.array.size) do |arr|
+    results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
       provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
     end
     
