@@ -57,6 +57,7 @@ ruby_block "update_properties_file" do
 end
 
 # step 5: loading phase
+=begin
 ruby_block "loading_phase" do
   block do
     #puts "Sleeping..."
@@ -68,3 +69,4 @@ ruby_block "loading_phase" do
   end
   action :create
 end
+=end
