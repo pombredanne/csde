@@ -1,18 +1,3 @@
-#
-# Cookbook Name:: cassandra
-# Recipe:: write_configs
-#
-# Copyright 2011, DataStax
-#
-# Apache License
-#
-
-###################################################
-# 
-# Write Configs and Start Services
-# 
-###################################################
-
 # create data directory
 # create log directory
 execute "sudo mkdir -p #{node[:cassandra][:data_dir]}"

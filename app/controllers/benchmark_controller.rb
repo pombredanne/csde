@@ -13,7 +13,7 @@ class BenchmarkController < ApplicationController
     logger.debug "::: #{benchmark_profile_url}"
     logger.debug "---------------------------------------------------------------"
     benchmark_profile_path = "#{Rails.root}/chef-repo/.chef/tmp/benchmark_profiles.yaml"
-    system "curl -L #{benchmark_profile_url} -o #{benchmark_profile_path}"
+    system "curl --location #{benchmark_profile_url} --output #{benchmark_profile_path} --silent"
     
     logger.debug "------------------------------------"
     logger.debug "::: Parsing the benchmark profile..."

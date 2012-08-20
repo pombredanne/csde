@@ -20,13 +20,17 @@ class ConfigurationController < ApplicationController
     supported_regions << "us-west-1" # US WEST N. California
     supported_regions << "us-west-2" # US WEST Oregon
     supported_regions << "eu-west-1" # EU WEST Ireland
+    logger.debug "--------------------------"
     logger.debug "::: AWS supported regions:"
+    logger.debug "--------------------------"
     puts supported_regions
 
     key_pair_name = params[:key_pair_and_group]
     security_group_name = params[:key_pair_and_group]
 
+    logger.debug "--------------------------------------------------------------"
     logger.debug "::: Creating a key pair and a security group in each region..."
+    logger.debug "--------------------------------------------------------------"
     
     supported_regions.each do |region|
       logger.debug "------------------------------------"

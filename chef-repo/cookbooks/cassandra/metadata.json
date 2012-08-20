@@ -232,8 +232,7 @@
     "cassandra::additional_settings": "Additional settings for optimal performance for the cluster.",
     "cassandra::install": "Installs the actual Cassandra package.",
     "cassandra::write_configs": "Writes the configurations for Cassandra.",
-    "cassandra::required_packages": "Installs required packages, primarily sun-java-sdk.",
-    "cassandra::create_seed_list": "Generates the seed lists for the cluster."
+    "cassandra::required_packages": "Installs required packages, primarily sun-java-sdk."
   },
   "groupings": {
   },
