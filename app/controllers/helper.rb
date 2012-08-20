@@ -132,7 +132,6 @@ module Helper
       file << "validation_key \'/etc/chef/validation.pem\'" << "\n"
       file << "cookbook_path \'#{Rails.root}/chef-repo/cookbooks\'"   
     end
-    logger.debug "::: Updating knife.rb... [OK]"
   end
   
   # returns the private key path for the given region
