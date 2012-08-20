@@ -1,39 +1,13 @@
 KCSD1::Application.routes.draw do
   post "benchmark/run"
   get "benchmark/run"  
-  
-  get "deployment/deploy"
-  post "deployment/deploy"
 
-  post "deployment/opscenter"
-
-  get "deployment/clean"
-
-  get "chef_node/check"
-  get "chef_node/show_all"
-  get "chef_node/stop_all"
-
-  get "chef_node/start"
-  post "chef_node/start"
-
-  get "chef_node/create"
-  post "chef_node/create"
-
-  get "chef_node/configure"
-  post "chef_node/configure"
-
-  # get "chef_server/setup"
-  # get "chef_server/check"
-  # get "chef_server/start"
-  # get "chef_server/stop"
   get "chef_server/go_to"
-
-
 
   get "dashboard/show"
   post "dashboard/show"
 
-  post "dashboard/reset"
+  #post "dashboard/reset"
 
   get "configuration/edit_aws"
   post "configuration/edit_aws"
