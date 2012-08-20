@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-rvmsudo rails server
+rvmsudo rails server thin
