@@ -175,11 +175,6 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-      
-      # test
-      puts "BREAK POINT..."
-      exit 0
-      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -192,21 +187,10 @@ class BenchmarkController < ApplicationController
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
-      
-      logger.debug "-------------------------------------------------------------"
-      logger.debug "STEP 3: Invoking Service [Provision] for Benchmark Cluster..."
-      logger.debug "-------------------------------------------------------------"
-      service 'provision', profile, 'ycsb' # provision machines with flag 'ycsb'
-      
-      
-      
-      logger.debug ":::::::::::::::"
-      logger.debug "---> DEBUG <---"
-      logger.debug ":::::::::::::::"
-      logger.debug "@db_regions:"
-      puts @db_regions
-      logger.debug "@bench_regions:"
-      puts @bench_regions
+
+      # test
+      puts "BREAK POINT..."
+      exit 0
       
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 4: Invoking Service [YCSB] for Benchmark Cluster..."
@@ -221,9 +205,11 @@ class BenchmarkController < ApplicationController
     end    
   end
   
+  # ======================================================================== #
   # used to detect how many machines should be created for DATABASE service
   # convention: first place in template
   # e.g.: 3 cassandra+gmond, 2 ycsb --> 3
+  # ======================================================================== #
   private
   def template_parse_to_find_machine_number_for_database_service template_string
     found_number = 0
@@ -232,9 +218,11 @@ class BenchmarkController < ApplicationController
     found_number
   end
 
+  # ======================================================================== #
   # used to detect how many machines should be created for BENCHMARK service
   # convention: direct after the comma
   # e.g.: 3 cassandra+gmond, 2 ycsb --> 2
+  # ======================================================================== #
   private
   def template_parse_to_find_machine_number_for_benchmark_service template_string
     found_number = 0
@@ -243,19 +231,6 @@ class BenchmarkController < ApplicationController
     found_number = test[1].to_s.split(" ")[0]
     found_number
   end
-
-  # private
-  # def template_parse_to_machine_number template_string
-    # found_number = 0
-    # test = template_string.split " "
-    # test.each do |el|
-      # # "3".to_i --> 3, "service1".to_i --> 0
-      # if el.to_i != 0
-        # found_number += el.to_i
-      # end 
-    # end
-    # found_number    
-  # end
   
   # --- template_string ---
   # 3 cassandra+gmond, 2 ycsb 
@@ -289,6 +264,7 @@ class BenchmarkController < ApplicationController
     # sub_cluster_arr[1]: benchmark sub cluster
   end
   
+  # ==================================================================================================== #
   # --------------
   # Service Facade
   # --------------
@@ -311,6 +287,7 @@ class BenchmarkController < ApplicationController
   #   Deploy a YCSB cluster to benchmark a given database cluster
   # 5.Ganglia (optional)
   #   Deploy Ganglia Agents (gmond) in each node of the given database cluster and Ganglia Central Monitoring (gmetad) in KCSDB Server  
+  # ==================================================================================================== #
   private
   def service name, attribute_hash
     # SERVICE_ID: 1
@@ -530,85 +507,12 @@ class BenchmarkController < ApplicationController
       logger.debug "-- Database cluster: " ; puts db_node_name_array ;
       logger.debug "-- Benchmark Cluster:" ; puts bench_node_name_array ;
       logger.debug "-------------------------"
-      
-=begin
-      if flag == "cassandra" or flag == "mongodb"
-        machine_number = template_parse_to_find_machine_number_for_database_service(values['template']).to_i       
-      elsif flag == "ycsb"
-        machine_number = template_parse_to_find_machine_number_for_benchmark_service(values['template']).to_i
-      end
-      
-      # region1:
-      #   name: us-east-1
-      name = Hash.new
-      name['name'] = region_name
-      
-      if flag == "cassandra" or flag == "mongodb"
-        @db_regions[region] = name
-      elsif flag == "ycsb"
-        @bench_regions[region] = name
-      end
-      
-      state = get_state
-      if region_name == 'us-east-1'
-        machine_ami = state['chef_client_ami_us_east_1']
-      elsif region_name == 'us-west-1'
-        machine_ami = state['chef_client_ami_us_west_1']
-      elsif region_name == 'us-west-2'
-        machine_ami = state['chef_client_ami_us_west_2']
-      elsif region_name == 'eu-west-1'
-        machine_ami = state['chef_client_ami_eu_west_1']
-      else
-        logger.debug "Region: #{region_name} is not supported!"
-        exit 0
-      end
-      key_pair = state['key_pair_name']
-      security_group = state['security_group_name']
-      
-      node_name_array = []
-      machine_number.times do
-        x = "#{flag}-node-" << node_counter.to_s
-        node_name_array << x
-        node_counter = node_counter + 1
-      end
-      
-      # beginning_time = Time.now
-
-      # BEFORE, @nodes contains nothing
-      @nodes = [] # shared variable, used to contain all node IP in each region
-      @mutex = Mutex.new # lock
-
-      # parallel
-      # depends on the performance of KCSDB Server
-      results = Parallel.map(node_name_array, in_threads: node_name_array.size) do |node_name|
-        provision_ec2_machine region_name, machine_ami, machine_flavor, key_pair, security_group, node_name
-      end
-      # provisioning_time = Time.now
-      
-      # AFTER, @nodes contains IPs, filled by provision_ec2_machine
-      ips = Hash.new
-      ips['ips'] = @nodes
-      if flag == "cassandra" or flag == "mongodb"
-        @db_regions[region] = @db_regions[region].merge ips
-      elsif flag == "ycsb"
-        @bench_regions[region] = @bench_regions[region].merge ips
-      end
-      
-      # region1:
-      #   name: us-east-1
-      #   ips: [1,2,3]
-=end      
-   
     end
     
-    #puts "Test"
-    #puts "Parallel Array:"
-    #parallel_array.each do |arr|
-    #  puts "Node:"
-    #  arr.each {|x| puts x}
-    #end
-    
-    # now provision machines
+    # now provision machines in parallel mode
+    logger.debug "------------------------------------------------------------------------------------------"
+    logger.debug "::: Provisioning all machines for database cluster and benchmark cluster in all regions..."
+    logger.debug "------------------------------------------------------------------------------------------"
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
       provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
     end
@@ -759,7 +663,6 @@ class BenchmarkController < ApplicationController
       
       reg_counter += 1 
     end
-      
   end
   
   # =========================================================================== #
@@ -782,6 +685,7 @@ class BenchmarkController < ApplicationController
   # =========================================================================== #
   private
   def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
+    logger.debug "::: Provisioning machine: #{name}..."
     # synchronize stdout
     $stdout.sync = true
     
@@ -798,7 +702,6 @@ class BenchmarkController < ApplicationController
     
     # create server with the tag name
     server = ec2.servers.create server_def
-    logger.debug "::: Adding tag..."
     ec2.tags.create key: 'Name', value: name, resource_id: server.id
 
     # wait until the server is ready
@@ -838,7 +741,6 @@ class BenchmarkController < ApplicationController
           @bench_nodes_eu_west_1 << ip  
         end        
       end
-      #@nodes << server.public_ip_address
     end
   end
   
