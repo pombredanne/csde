@@ -105,13 +105,13 @@ module Helper
   # capture private IP of KCSDB server and save it into kcsdb_private_ip.txt
   def capture_private_ip_of_kcsdb_server
     logger.debug "::: Capturing the private IP of KCSDB Server..."
-    system "curl --location http://169.254.169.254/latest/meta-data/local-ipv4 --silent > #{Rails.root}/chef-repo/.chef/tmp/kcsdb_private_ip.txt"
+    system "curl --location http://169.254.169.254/latest/meta-data/local-ipv4 --silent --output #{Rails.root}/chef-repo/.chef/tmp/kcsdb_private_ip.txt"
   end
 
   #capture public IP of KCSDB server and save it into kcsdb_public_ip.txt
   def capture_public_ip_of_kcsdb_server  
     logger.debug "::: Capturing the public IP of KCSDB Server..."
-    system "curl --location http://169.254.169.254/latest/meta-data/public-ipv4 --silent > #{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt"
+    system "curl --location http://169.254.169.254/latest/meta-data/public-ipv4 --silent --output #{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt"
   end
 
   # update knife.rb depends on the KCSDB Server's IP  

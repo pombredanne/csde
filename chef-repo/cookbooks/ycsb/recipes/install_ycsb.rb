@@ -7,13 +7,13 @@
 # a load together on the SUT (in this case: Cassandra cluster)
 
 # step 1: download the tar ball
-execute "wget https://s3.amazonaws.com/kcsdb-lehoanganh/ycsb-hotspot-chart-deactive-0.1.4-1.tar.gz -O $HOME/ycsb.tar.gz"
+execute "curl --location https://s3.amazonaws.com/kcsdb-lehoanganh/ycsb-hotspot-chart-deactive-0.1.4-1.tar.gz --output /home/ubuntu/ycsb.tar.gz --silent"
 
 # step 2: create an empty folder for ZooKeeper
 execute "mkdir -p #{node[:ycsb][:ycsb_home]}"
 
 # step 3: extract the YCSB tar ball into the folder
-execute "tar -xf $HOME/ycsb.tar.gz --strip-components=1 -C #{node[:ycsb][:ycsb_home]}"
+execute "tar -xf /home/ubuntu/ycsb.tar.gz --strip-components=1 -C #{node[:ycsb][:ycsb_home]}"
 
 # step 4: update properties file
 #

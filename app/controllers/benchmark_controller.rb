@@ -143,7 +143,9 @@ class BenchmarkController < ApplicationController
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0
       end
+      logger.debug "------------------------------------------------------------------------------"
       logger.debug "---> Elapsed time for Service [Provision]: #{Time.now - start_time} seconds..."
+      logger.debug "------------------------------------------------------------------------------"
 
       # --- @db_regions ---
       #   region1:
@@ -189,17 +191,23 @@ class BenchmarkController < ApplicationController
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
+      logger.debug "-----------------------------------------------------------------------------"
       logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
-  
+      logger.debug "-----------------------------------------------------------------------------"
+      
+      logger.debug "--------------------------------------------------------"
+      logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
+      logger.debug "--------------------------------------------------------"
+      start_time = Time.now
+      service 'ycsb', @bench_regions
+      logger.debug "-------------------------------------------------------------------------"
+      logger.debug "---> Elapsed time for Service [YCSB]: #{Time.now - start_time} seconds..."
+      logger.debug "-------------------------------------------------------------------------"
+
       # test
       puts "BREAK POINT..."
       exit 0
-      
-      
-      logger.debug "--------------------------------------------------------"
-      logger.debug "STEP 4: Invoking Service [YCSB] for Benchmark Cluster..."
-      logger.debug "--------------------------------------------------------"
-      service 'ycsb', @bench_regions, nil
+
       
       # the next profile
       profile_counter += 1
@@ -268,7 +276,7 @@ class BenchmarkController < ApplicationController
     # sub_cluster_arr[1]: benchmark sub cluster
   end
   
-  # ==================================================================================================== #
+  # ============================================================================================ #
   # --------------
   # Service Facade
   # --------------
@@ -291,7 +299,7 @@ class BenchmarkController < ApplicationController
   #   Deploy a YCSB cluster to benchmark a given database cluster
   # 5.Ganglia (optional)
   #   Deploy Ganglia Agents (gmond) in each node of the given database cluster and Ganglia Central Monitoring (gmetad) in KCSDB Server  
-  # ==================================================================================================== #
+  # ============================================================================================ #
   private
   def service name, attribute_hash
     # SERVICE_ID: 1
@@ -316,8 +324,8 @@ class BenchmarkController < ApplicationController
       exit 0  
     end
   end
-  
-  # ============================================================================================ #
+
+  # ============================================================================================ #  
   # SERVICE_ID: 1
   # Service Provision
   # used to provision machines in parallel mode
@@ -357,7 +365,7 @@ class BenchmarkController < ApplicationController
     end
   end
   
-  # =========================================================================== #
+  # ============================================================================================ #
   # SERVICE_ID: 1.1
   # provision EC2 machine for database service and benchmark service in parallel mode
   # each thread is a provision_ec2_machine call
@@ -390,7 +398,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [9,10]
-  # =========================================================================== #
+  # ============================================================================================ #
   private
   def service_provision_ec2 cloud_config_hash
     # contains all needed meta info for invoking parallel function later
@@ -515,7 +523,7 @@ class BenchmarkController < ApplicationController
     
     # now provision machines in parallel mode
     logger.debug "------------------------------------------------------------------------------------------"
-    logger.debug "::: Provisioning all machines for database cluster and benchmark cluster in all regions..."
+    logger.debug "::: Provisioning ALL machines for DATABASE cluster and BENCHMARK cluster in ALL regions..."
     logger.debug "------------------------------------------------------------------------------------------"
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
       provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
@@ -668,8 +676,8 @@ class BenchmarkController < ApplicationController
       reg_counter += 1 
     end
   end
-  
-  # =========================================================================== #
+
+  # ============================================================================================ #  
   # core function
   # provision a new EC2 machine
   # used for each thread
@@ -686,7 +694,7 @@ class BenchmarkController < ApplicationController
   # OUTPUT:
   # the IP of the newly created EC2 machine will be added into the corresponding
   # shared variable, e.g. @db_nodes_us_east_1
-  # =========================================================================== #
+  # ============================================================================================ #
   private
   def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
     logger.debug "::: Provisioning machine: #{name}..."
@@ -749,21 +757,24 @@ class BenchmarkController < ApplicationController
     end
   end
   
+  # ============================================================================================ #
   # SERVICE_ID: 1.2
+  # ============================================================================================ #
   private
   def service_provision_rackspace cloud_config_hash, flag
     
   end
   
+  # ============================================================================================ #
   # provision a new Rackspace machine
   # used for each thread
+  # ============================================================================================ #
   private
   def provision_rackspace_machine
     
   end
-  # -------------------------------------------------------------------------------------------- #
-  
-  # =============================================================================== #
+
+  # ============================================================================================ #  
   # SERVICE_ID: 2
   # Service Cassandra
   # database service
@@ -785,7 +796,7 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234] (will be calculated)
   # attributes:
   #   replication_factor: 2,2 (will be fetched)
-  # =============================================================================== #
+  # ============================================================================================ #
   private
   def service_cassandra cassandra_config_hash
     logger.debug "--------------------------"
@@ -837,7 +848,7 @@ class BenchmarkController < ApplicationController
     configure_cassandra cassandra_config_hash
   end
   
-  # ======================================================= #
+  # ============================================================================================ #
   # SERVICE_ID: 2.1
   # token positions for all node in single/multiple regions
   #
@@ -848,7 +859,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  # ======================================================= #  
+  # ============================================================================================ #
   private
   def calculate_token_position cassandra_config_hash 
     logger.debug "-------------------------"
@@ -858,7 +869,6 @@ class BenchmarkController < ApplicationController
     # generate parameter for tokentool.py
     param = ""
     cassandra_config_hash.each do |key, values|
-      logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
       param << values['ips'].size.to_s << " "
     end  
 
@@ -890,8 +900,8 @@ class BenchmarkController < ApplicationController
 
     cassandra_config_hash
   end
-  
-  # ======================================================= #
+
+  # ============================================================================================ #  
   # SERVICE_ID: 2.2
   # seed list for each region
   #
@@ -902,7 +912,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  # ======================================================= #
+  # ============================================================================================ #
   private
   def calculate_seed_list cassandra_config_hash
     # 50% nodes are seeds in each region
@@ -914,8 +924,6 @@ class BenchmarkController < ApplicationController
     logger.debug "------------------------"
     seeds = ""
     cassandra_config_hash.each do |key, values|
-      logger.debug "Region: #{values['name']} / Nodes: #{values['ips'].size}"
-      
       if values['ips'].size == 1 # only one node, this node is seed 
         seeds << values['ips'][0] << ","
       else # more than one node
@@ -936,7 +944,7 @@ class BenchmarkController < ApplicationController
     cassandra_config_hash
   end
   
-  # ================================= #
+  # ============================================================================================ #
   # SERVICE_ID: 2.3
   # fetch attributes from definitions
   #
@@ -947,7 +955,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  # ================================= #
+  # ============================================================================================ #
   private
   def fetch_attributes_for_cassandra cassandra_config_hash
     @service_array.each do |service|
@@ -958,7 +966,7 @@ class BenchmarkController < ApplicationController
     cassandra_config_hash  
   end
   
-  # =================================================================================== #
+  # ============================================================================================ #
   # SERVICE_ID: 2.4
   # update the parameters that are written in cookbooks/cassandra/attributes/default.rb
   # and upload cookbooks once again
@@ -966,7 +974,7 @@ class BenchmarkController < ApplicationController
   # --- param_hash ---
   # seeds: 1,2,3
   # ...
-  # =================================================================================== #  
+  # ============================================================================================ #
   private
   def update_default_rb_of_cookbooks param_hash
     logger.debug "------------------------------------------------"
@@ -985,7 +993,7 @@ class BenchmarkController < ApplicationController
     system "rvmsudo knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
   end
   
-  # ================================================================== #
+  # ============================================================================================ #
   # SERVICE_ID: 2.5
   # deploy cassandra in all region in parallel mode
   #
@@ -1002,7 +1010,7 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234]
   # attributes:
   #   replication_factor: 2,2  
-  # ================================================================== #
+  # ============================================================================================ #
   private
   def deploy_cassandra cassandra_config_hash
     recipe = "recipe[cassandra]"
@@ -1057,7 +1065,7 @@ class BenchmarkController < ApplicationController
     end
 
     logger.debug "-------------------------------------------"
-    logger.debug "::: Deploying Cassandra #{parallel_array.size} nodes in all regions..."
+    logger.debug "::: Deploying #{parallel_array.size} CASSANDRA nodes in ALL regions..."
     logger.debug "-------------------------------------------"
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
       system(knife_bootstrap arr[0], arr[1], arr[2], arr[3], arr[4])
@@ -1149,6 +1157,8 @@ class BenchmarkController < ApplicationController
     knife_bootstrap_string
   end
   
+  # ============================================================================================ #
+  # SERVICE_ID: 2.6
   # configure cassandra via cassandra-cli
   #
   # --- cassandra_config_hash ---
@@ -1164,7 +1174,7 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234]
   # attributes:
   #   replication_factor: 2,1
-  # SERVICE_ID: 2.6
+  # ============================================================================================ #
   private
   def configure_cassandra cassandra_config_hash
     logger.debug "------------------------------------"
@@ -1230,9 +1240,9 @@ class BenchmarkController < ApplicationController
     
     system cmd
   end
-  # -------------------------------------------------------------------------------------------- #
- 
-  # -------------------------------------------------------------------------------------------- # 
+
+  # ============================================================================================ # 
+  # SERVICE_ID: 3 
   # install ycsb cluster in each region
   #
   # uses 2 shared hash maps
@@ -1258,18 +1268,16 @@ class BenchmarkController < ApplicationController
   #   ips: [4,5]
   # attributes:
   #   workload_model: hotspot
+  # ============================================================================================ #
   private
   def service_ycsb ycsb_config_hash
-    logger.debug "--------------------------------------"
-    logger.debug "::: Service: YCSB is being deployed..."
-    logger.debug "--------------------------------------"
-        
     logger.debug "-----------------"    
     logger.debug "YCSB Config Hash:"
     logger.debug "-----------------"
     puts ycsb_config_hash
     
     # fetch attributes
+    # SERVICE_ID: 3.1
     ycsb_config_hash = fetch_attributes_for_ycsb ycsb_config_hash
     
     logger.debug "------------------------------------"    
@@ -1278,12 +1286,15 @@ class BenchmarkController < ApplicationController
     puts ycsb_config_hash
     
     # deploy ycsb for each region in parallel mode
+    # SERVICE_ID: 3.2
     deploy_ycsb ycsb_config_hash
     
     # start all YCSB clients in all regions
     # start_all_ycsb_clients ycsb_config_hash
   end
   
+  # ============================================================================================ #
+  # SERVICE_ID: 3.1
   # fetch attributes from definitions
   #
   # --- ycsb_config_hash ---
@@ -1293,6 +1304,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
+  # ============================================================================================ #
   private
   def fetch_attributes_for_ycsb ycsb_config_hash
     @service_array.each do |service|
@@ -1303,6 +1315,8 @@ class BenchmarkController < ApplicationController
     ycsb_config_hash  
   end
   
+  # ============================================================================================ #
+  # SERVICE_ID: 3.2
   # deploy ycsb in each region in parallel mode (for each region)
   #
   # --- ycsb_config_hash ---
@@ -1314,6 +1328,7 @@ class BenchmarkController < ApplicationController
   #   ips: [4,5]
   # attributes:
   #   workload_model: hotspot  
+  # ============================================================================================ #
   private
   def deploy_ycsb ycsb_config_hash
     logger.debug "-------------------------"
@@ -1334,13 +1349,7 @@ class BenchmarkController < ApplicationController
        
       region_counter += 1  
     end
-    
-    logger.debug ":::::::::::::::"
-    logger.debug "---> DEBUG <---"
-    logger.debug ":::::::::::::::"
-    logger.debug "YCSB Node IP Array for all Regions:"
-    puts ycsb_node_array
-    
+
     # write zoo.cfg
     zoo_cfg_file = "#{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
     File.open(zoo_cfg_file,"w") do |file|
@@ -1362,19 +1371,13 @@ class BenchmarkController < ApplicationController
       file << ycsb_node_array.size
     end
     
-    logger.debug "--------------------------------"
-    logger.debug "Deploying YCSB in each region..."
-    logger.debug "--------------------------------"
-    recipe = 'recipe[ycsb]'
-    
     # iterate each region in ycsb_config_hash
+    # build parallel_array
+    recipe = 'recipe[ycsb]'
     region_counter = 1
     ycsb_node_counter = 1
+    parallel_array = []
     until ! ycsb_config_hash.has_key? "region#{region_counter}" do
-      logger.debug "-----------------------------------------------"
-      logger.debug "::: Deploying YCSB in region: #{region_counter}"
-      logger.debug "-----------------------------------------------"
-      
       ycsb_current_region = ycsb_config_hash["region#{region_counter}"]
       cassandra_current_region = @db_regions["region#{region_counter}"]
       
@@ -1388,21 +1391,19 @@ class BenchmarkController < ApplicationController
       end
       hosts = hosts[0..-2] # delete the last comma
       
-      logger.debug ":::::::::::::::"
-      logger.debug "---> DEBUG <---"
-      logger.debug ":::::::::::::::"
-      logger.debug "Cassandra Node IP in the region #{region_counter}:"
-      puts hosts
+      logger.debug "--------------------------------------"
+      logger.debug "Region: #{ycsb_current_region['name']}"
       
-      bootstrap_array = []
       for j in 0..(ycsb_node_ip_array.size - 1) do
         tmp_array = []
         
         ycsb_node_ip = ycsb_node_ip_array[j] # IP of YCSB node
-        puts "YCSB Node IP: #{ycsb_node_ip}"
+        logger.debug "YCSB Node IP: #{ycsb_node_ip}"
+        
+        logger.debug "--- YCSB ID: #{ycsb_node_counter}"
         
         ycsb_node_name = "ycsb-node-" << ycsb_node_counter.to_s
-        puts "YCSB Node Name: #{ycsb_node_name}"
+        logger.debug "--- YCSB Node Name: #{ycsb_node_name}"
         
         ycsb_id_file = "#{Rails.root}/chef-repo/.chef/tmp/#{ycsb_node_counter}.sh"
         File.open(ycsb_id_file,"w") do |file|
@@ -1414,32 +1415,41 @@ class BenchmarkController < ApplicationController
         tmp_array << ycsb_node_ip
         tmp_array << ycsb_node_counter
         tmp_array << ycsb_node_name
-        bootstrap_array << tmp_array
+        tmp_array << recipe
+        tmp_array << ycsb_current_region['name']
+        
+        parallel_array << tmp_array
         
         ycsb_node_counter += 1
       end
 
-      logger.debug "-------------------------------------------------------"
-      logger.debug "::: Knife Bootstrap #{bootstrap_array.size} machines..."
-      logger.debug "-------------------------------------------------------"
-      results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
-        system(knife_bootstrap block[0], block[1], block[2], recipe, ycsb_current_region['name'])
-      end
-      logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
-      
-      logger.debug "---------------------------------------------------------"
-      logger.debug "::: Deleting all token temporary files in KCSDB Server..."
-      logger.debug "---------------------------------------------------------"
-      system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
-      logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
+      logger.debug "Target Database IPs: #{hosts}"
+      logger.debug "All YCSB Node IPs: #{ycsb_node_array}"
+      logger.debug "--------------------------------------"
 
       region_counter += 1
     end
-    
-    logger.debug "Deleting zoo.cfg..."
+
+    logger.debug "----------------------------------"
+    logger.debug "::: Deploying #{parallel_array.size} YCSB nodes in ALL regions..."
+    logger.debug "----------------------------------"
+    results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
+      system(knife_bootstrap arr[0], arr[1], arr[2], arr[3], arr[4])
+    end
+      
+    logger.debug "---------------------------------------------------------"
+    logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+    logger.debug "---------------------------------------------------------"
+    system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
+
+    logger.debug "-----------------------"
+    logger.debug "::: Deleting zoo.cfg..."
+    logger.debug "-----------------------"
     system "rm #{Rails.root}/chef-repo/.chef/tmp/zoo.cfg"
     
-    logger.debug "Deleting barrier_size.txt..."
+    logger.debug "--------------------------------"
+    logger.debug "::: Deleting barrier_size.txt..."
+    logger.debug "--------------------------------"
     system "rm #{Rails.root}/chef-repo/.chef/tmp/barrier_size.txt"
   end
 
