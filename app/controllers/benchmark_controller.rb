@@ -175,6 +175,10 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
+      # test
+      puts "BREAK POINT..."
+      exit 0
+      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -188,9 +192,6 @@ class BenchmarkController < ApplicationController
         exit 0  
       end      
 
-      # test
-      puts "BREAK POINT..."
-      exit 0
       
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 4: Invoking Service [YCSB] for Benchmark Cluster..."
