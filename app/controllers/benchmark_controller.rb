@@ -136,12 +136,14 @@ class BenchmarkController < ApplicationController
       logger.debug "----------------------------------------------------------------------------------"
       logger.debug "STEP 1: Invoking Service [Provision] for Database Cluster and Benchmark Cluster..."
       logger.debug "----------------------------------------------------------------------------------"
+      start_time = Time.now
       if profile['regions']['region1']['template'].to_s.include? "cassandra" or profile['regions']['region1']['template'].to_s.include? "mongodb"
         service 'provision', profile 
       else
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0
       end
+      logger.debug "---> Elapsed time for Service [Provision]: #{Time.now - start_time} seconds..."
 
       # --- @db_regions ---
       #   region1:
@@ -175,23 +177,24 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-      # test
-      puts "BREAK POINT..."
-      exit 0
-      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
-       
+      start_time = Time.now
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
-        service 'cassandra', @db_regions, nil
+        service 'cassandra', @db_regions
       elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
-        service 'mongodb', @db_regions, nil
+        service 'mongodb', @db_regions
       else
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0  
       end      
-
+      logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
+  
+      # test
+      puts "BREAK POINT..."
+      exit 0
+      
       
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 4: Invoking Service [YCSB] for Benchmark Cluster..."
@@ -759,7 +762,8 @@ class BenchmarkController < ApplicationController
   end
   # -------------------------------------------------------------------------------------------- #
   
-  # -------------------------------------------------------------------------------------------- #
+  # =============================================================================== #
+  # SERVICE_ID: 2
   # Service Cassandra
   # database service
   # used to deploy a database cluster in single/multiple region(s) in parallel mode
@@ -780,7 +784,7 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234] (will be calculated)
   # attributes:
   #   replication_factor: 2,2 (will be fetched)
-  # SERVICE_ID: 2
+  # =============================================================================== #
   private
   def service_cassandra cassandra_config_hash
     logger.debug "--------------------------"
@@ -832,6 +836,8 @@ class BenchmarkController < ApplicationController
     configure_cassandra cassandra_config_hash
   end
   
+  # ======================================================= #
+  # SERVICE_ID: 2.1
   # token positions for all node in single/multiple regions
   #
   # --- cassandra_config_hash ---
@@ -841,7 +847,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  # SERVICE_ID: 2.1
+  # ======================================================= #  
   private
   def calculate_token_position cassandra_config_hash 
     logger.debug "-------------------------"
@@ -884,6 +890,8 @@ class BenchmarkController < ApplicationController
     cassandra_config_hash
   end
   
+  # ======================================================= #
+  # SERVICE_ID: 2.2
   # seed list for each region
   #
   # --- cassandra_config_hash ---
@@ -893,7 +901,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  # SERVICE_ID: 2.2
+  # ======================================================= #
   private
   def calculate_seed_list cassandra_config_hash
     # 50% nodes are seeds in each region
@@ -927,6 +935,8 @@ class BenchmarkController < ApplicationController
     cassandra_config_hash
   end
   
+  # ================================= #
+  # SERVICE_ID: 2.3
   # fetch attributes from definitions
   #
   # --- cassandra_config_hash ---
@@ -936,7 +946,7 @@ class BenchmarkController < ApplicationController
   # region2:
   #   name: us-west-1
   #   ips: [4,5]
-  # SERVICE_ID: 2.3
+  # ================================= #
   private
   def fetch_attributes_for_cassandra cassandra_config_hash
     @service_array.each do |service|
@@ -947,13 +957,15 @@ class BenchmarkController < ApplicationController
     cassandra_config_hash  
   end
   
+  # =================================================================================== #
+  # SERVICE_ID: 2.4
   # update the parameters that are written in cookbooks/cassandra/attributes/default.rb
   # and upload cookbooks once again
   #
   # --- param_hash ---
   # seeds: 1,2,3
   # ...
-  # SERVICE_ID: 2.4
+  # =================================================================================== #  
   private
   def update_default_rb_of_cookbooks param_hash
     logger.debug "------------------------------------------------"
@@ -972,7 +984,9 @@ class BenchmarkController < ApplicationController
     system "rvmsudo knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
   end
   
-  # deploy cassandra in each region in parallel mode (for each region)
+  # ================================================================== #
+  # SERVICE_ID: 2.5
+  # deploy cassandra in all region in parallel mode
   #
   # --- cassandra_config_hash ---
   # region1:
@@ -987,38 +1001,37 @@ class BenchmarkController < ApplicationController
   #   tokens: [4545, 32412341234]
   # attributes:
   #   replication_factor: 2,2  
-  # SERVICE_ID: 2.5
+  # ================================================================== #
   private
   def deploy_cassandra cassandra_config_hash
-    logger.debug "-----------------------------------------"
-    logger.debug "::: Deploying Cassandra in each region..."
-    logger.debug "-----------------------------------------"
     recipe = "recipe[cassandra]"
     region_counter = 1
     cassandra_node_counter = 1
+    parallel_array = []
+    
+    # build parallel_array
     until ! cassandra_config_hash.has_key? "region#{region_counter}" do
-      logger.debug "-------------------------------------"
-      logger.debug "::: Deploying Cassandra in region #{region_counter}"
-      logger.debug "-------------------------------------"
       current_region = cassandra_config_hash["region#{region_counter}"]
       
       node_ip_array = current_region['ips']
       token_array = current_region['tokens']
       seeds = current_region['seeds']
       
-      bootstrap_array = []
+      logger.debug "---------------------------------"
+      logger.debug "Region: #{current_region['name']}"
+      
       for j in 0..(node_ip_array.size - 1) do
         tmp_array = []
         
         node_ip = node_ip_array[j] # for which node
-        puts "Node IP: #{node_ip}"
+        logger.debug "Node IP: #{node_ip}"
       
         token = token_array[j] # which token position
-        puts "Token: #{token}"
+        logger.debug "--- Token: #{token}"
         
         node_name = "cassandra-node-" << cassandra_node_counter.to_s
         cassandra_node_counter += 1
-        puts "Node Name: #{node_name}"
+        logger.debug "--- Node Name: #{node_name}"
         
         token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
         File.open(token_file,"w") do |file|
@@ -1030,34 +1043,45 @@ class BenchmarkController < ApplicationController
         tmp_array << node_ip
         tmp_array << token
         tmp_array << node_name
-        bootstrap_array << tmp_array
+        tmp_array << recipe
+        tmp_array << current_region['name']
+        
+        parallel_array << tmp_array
       end
       
-      logger.debug "-------------------------------------------------------"
-      logger.debug "::: Knife Bootstrap #{bootstrap_array.size} machines..."
-      logger.debug "-------------------------------------------------------"
-      results = Parallel.map(bootstrap_array, in_threads: bootstrap_array.size) do |block|
-        system(knife_bootstrap block[0], block[1], block[2], recipe, current_region['name'])
-      end
-      logger.debug "Knife Bootstrap #{bootstrap_array.size} machines... [OK]"
-      
-      logger.debug "---------------------------------------------------------"
-      logger.debug "::: Deleting all token temporary files in KCSDB Server..."
-      logger.debug "---------------------------------------------------------"
-      system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
-      logger.debug "Deleting all token temporary files in KCSDB Server... [OK]"
-      
+      logger.debug "Seeds: #{seeds}"
+      logger.debug "---------------------------------"
+
       region_counter += 1
     end
+
+    logger.debug "-------------------------------------------"
+    logger.debug "::: Deploying Cassandra #{parallel_array.size} nodes in all regions..."
+    logger.debug "-------------------------------------------"
+    results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
+      system(knife_bootstrap arr[0], arr[1], arr[2], arr[3], arr[4])
+    end
+
+    logger.debug "---------------------------------------------------------"
+    logger.debug "::: Deleting all token temporary files in KCSDB Server..."
+    logger.debug "---------------------------------------------------------"
+    system "rm #{Rails.root}/chef-repo/.chef/tmp/*.sh"
   end
   
-  # knife bootstrap
+  # =================================================================================================== #
+  # SERVICE_ID: 2.5.1
+  # knife bootstrap command string
+  #
+  # INPUT:
   # node: the IP address of the machine to be bootstrapped
   # token: which token position should the node have, the token is passed by KCSDB Server in form of a script for EC2
   # name: name of the node in Chef Server
   # recipe: which recipe should be used: cassandra or ycsb
   # region: which region --> find the corresponding private key
-  # SERVICE_ID: 2.5.1
+  #
+  # OUTPUT:
+  # a command string for knife bootstrap
+  # =================================================================================================== #
   private
   def knife_bootstrap node, token, name, recipe, region
     $stdout.sync = true
