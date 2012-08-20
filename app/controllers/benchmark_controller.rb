@@ -604,6 +604,9 @@ class BenchmarkController < ApplicationController
       reg_counter += 1 
     end
     
+    # update @bench_regions
+    reg_counter = 1
+    
     # us-east-1
     if ! @bench_nodes_us_east_1.empty?
       reg_name = Hash.new
