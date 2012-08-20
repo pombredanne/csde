@@ -3,16 +3,17 @@ class BenchmarkController < ApplicationController
   include Helper
   
   def run
-    @status = ""
-    
+    # get the url for benchmark profile, given by the user
     benchmark_profile_url = params[:benchmark_profile_url]
     
-    logger.debug "----------------------------------------------------------"
-    logger.debug "::: Getting the benchmark profile from the given source..."
-    logger.debug "----------------------------------------------------------"
+    logger.debug "***************************************************************"
+    
+    logger.debug "---------------------------------------------------------------"
+    logger.debug "::: Downloading the benchmark profile from the given source:..."
+    logger.debug "::: #{benchmark_profile_url}"
+    logger.debug "---------------------------------------------------------------"
     benchmark_profile_path = "#{Rails.root}/chef-repo/.chef/tmp/benchmark_profiles.yaml"
     system "curl -L #{benchmark_profile_url} -o #{benchmark_profile_path}"
-    logger.debug "Getting the benchmark profile from the given source... [OK]"
     
     logger.debug "------------------------------------"
     logger.debug "::: Parsing the benchmark profile..."
@@ -24,9 +25,9 @@ class BenchmarkController < ApplicationController
     # service key: service1, service2, etc...
     # profile key: profile1, profile2, etc...
     key_array = benchmark_profiles.keys
-    logger.debug "---------"
-    logger.debug "::: Keys:"
-    logger.debug "---------"
+    logger.debug "------"
+    logger.debug " Keys:"
+    logger.debug "------"
     puts key_array
     
     # contain service1, service2, etc..
@@ -48,17 +49,21 @@ class BenchmarkController < ApplicationController
       end
     end
     
-    logger.debug "-------------"
-    logger.debug "::: Services:"
-    logger.debug "-------------"
+    logger.debug "----------"
+    logger.debug " Services:"
+    logger.debug "----------"
     puts @service_array
     
-    logger.debug "-------------"
-    logger.debug "::: Profiles:"
-    logger.debug "-------------"
+    logger.debug "----------"
+    logger.debug " Profiles:"
+    logger.debug "----------"
     puts profile_array
-    
-    logger.debug "Parsing the benchmark profile... [OK]"
+
+    logger.debug "***************************************************************"
+
+    logger.debug "-----------------------"
+    logger.debug "::: RUNNING PROFILES..."
+    logger.debug "-----------------------"
 
     profile_counter = 1
     profile_array.each do |profile| # each profile is a hash
@@ -75,17 +80,14 @@ class BenchmarkController < ApplicationController
       #     machine_type: small
       #     template: 5 cassandra+gmond, 4 ycsb
       # ...     
-      logger.debug "-----------------------"
-      logger.debug "::: RUNNING PROFILE #{profile_counter}..."
-      logger.debug "-----------------------"
-      
       logger.debug "-------------------------------------"
+      logger.debug "::: RUNNING PROFILE: #{profile_counter}..."
       logger.debug "::: The profile we'are running now..."
       logger.debug "-------------------------------------"
       puts profile
       
       @db_regions = Hash.new 
-      # shared variable, used to contain all fog objects in each region
+      # shared variable, used to contain all IPs in each region
       # relevant information for DATABASE NODES and GMOND AGENTS which are installed in these nodes 
       # --- @db_regions ---
       # region1:
@@ -102,7 +104,7 @@ class BenchmarkController < ApplicationController
       #   replication_factor: 2,2
       
       @bench_regions = Hash.new
-      # shared variable, used to contain all fog objects in each region
+      # shared variable, used to contain all IPs in each region
       # relevant information for BENCHMARK NODES and GMOND AGENTS which are installed in these nodes
       # ---@bench_regions ---
       # region1:
@@ -114,20 +116,38 @@ class BenchmarkController < ApplicationController
       # attributes:
       #   workload_model: hotspot
       
+      # temporary shared variable to store IPs of Database nodes or Benchmark nodes in each region
+      # used by concurrent threads
+      @db_nodes_us_east_1 = []
+      @db_nodes_us_west_1 = []
+      @db_nodes_us_west_2 = []
+      @db_nodes_eu_west_1 = []
+      @bench_nodes_us_east_1 = []
+      @bench_nodes_us_west_1 = []
+      @bench_nodes_us_west_2 = []
+      @bench_nodes_eu_west_1 = []
+      
+      # lock for shared temporary varibales
+      @mutex = Mutex.new
+      
       # Service Provision has to be called at first
       # to provision machines in cloud infrastructure
       # profile hash is used to fill @db_regions hash
-      logger.debug "-----------------------------------------------------------"
-      logger.debug "STEP 1: Invoking Service [Provision] for Database Cluster..."
-      logger.debug "-----------------------------------------------------------"
-      if profile['regions']['region1']['template'].to_s.include? "cassandra"
-        service 'provision', profile, 'cassandra' # provision machines with flag 'cassandra' 
-      elsif profile['regions']['region1']['template'].to_s.include? "mongodb"
-        service 'provision', profile, 'mongodb'
+      logger.debug "----------------------------------------------------------------------------------"
+      logger.debug "STEP 1: Invoking Service [Provision] for Database Cluster and Benchmark Cluster..."
+      logger.debug "----------------------------------------------------------------------------------"
+      if profile['regions']['region1']['template'].to_s.include? "cassandra" or profile['regions']['region1']['template'].to_s.include? "mongodb"
+        service 'provision', profile 
       else
         logger.debug "Database Service Cassandra OR MongoDB, just one of these!"
         exit 0
       end
+
+      # test
+      puts "BREAK POINT..."
+      exit 0
+
+
 
       # --- @db_regions ---
       #   region1:
@@ -274,7 +294,6 @@ class BenchmarkController < ApplicationController
   # used to invoke the corresponding service
   # name: the service to be invoked
   # atribute_hash: contains all needed attributes for the service
-  # flag: optional for service calls
   # 
   # ------------------
   # Supported Services
@@ -292,10 +311,10 @@ class BenchmarkController < ApplicationController
   # 5.Ganglia (optional)
   #   Deploy Ganglia Agents (gmond) in each node of the given database cluster and Ganglia Central Monitoring (gmetad) in KCSDB Server  
   private
-  def service name, attribute_hash, flag
+  def service name, attribute_hash
     # SERVICE_ID: 1
     if name == 'provision'
-      service_provision attribute_hash, flag
+      service_provision attribute_hash
 
     # SERVICE_ID: 2    
     elsif name == 'cassandra'
@@ -338,61 +357,179 @@ class BenchmarkController < ApplicationController
   # .....    
   # SERVICE_ID: 1
   private
-  def service_provision cloud_config_hash, flag
+  def service_provision cloud_config_hash
     provider = cloud_config_hash['provider']
     region_hash = cloud_config_hash['regions']
     
     # SERVICE_ID: 1.1
     if provider == 'aws'
-      service_provision_ec2 region_hash, flag      
+      service_provision_ec2 region_hash 
     
     # SERVICE_ID: 1.2
     elsif provider == 'rackspace'
-      service_provision_rackspace region_hash, flag
+      service_provision_rackspace region_hash
     else
       logger.debug "::: Provider: #{provider} is not supported!"
       exit 0
     end
   end
   
-  # provision EC2 machine for database service and benchmark service
-  # --> defined via the flag variable
-  #
+  # =========================================================================== #
   # SERVICE_ID: 1.1
+  # provision EC2 machine for database service and benchmark service in parallel mode
+  # each thread is a provision_ec2_machine call
+  #
+  # INPUT:
+  #   region1: 
+  #     name: us-east-1
+  #     machine_type: small     
+  #     template: 3 cassandra, 2 ycsb
+  #     
+  #   region2:
+  #     name: us-weast-1
+  #     machine_type: small     
+  #     template: 2 cassandra
+  #
+  # OUTPUT:
+  # fill the two shared variables
+  # --- @db_regions ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]  
+  #
+  # ---@bench_regions ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [6,7,8]
+  # region2:
+  #   name: us-west-1
+  #   ips: [9,10]
+  # =========================================================================== #
   private
-  def service_provision_ec2 cloud_config_hash, flag
-    # @db_regions = Hash.new 
-    # shared variable, used to contain all fog objects in each region
-    # relevant information for DATABASE NODES and the GMOND AGENTS which are installed in these nodes 
-    # --- @db_regions ---
-    # region1:
-    #   name: us-east-1
-    #   ips: [1,2,3]
-    # region2:
-    #   name: us-west-1
-    #   ips: [4,5]
-    #....
+  def service_provision_ec2 cloud_config_hash
+    # contains all needed meta info for invoking parallel function later
+    parallel_array = []
     
-    # @bench_regions = Hash.new
-    # shared variable, used to contain all fog objects in each region
-    # relevant information for BENCHMARK NODES
-    # ---@bench_regions ---
-    # region1:
-    #   name: us-east-1
-    #   ips: [1,2,3]
-    # region2:
-    #   name: us-west-1
-    #   ips: [4,5]
-    #....
-
-    node_counter = 1
+    # build the parallel_array
+    # each element of parallel_array is a array once again with following parameters
+    # region: e.g. us-east-1
+    # ami: e.g. ami-123456
+    # flavor: e.g. small
+    # key_pair: e.g. KCSDB
+    # security_group: e.g. KCSDB
+    # name: e.g. cassandra-node-1
+    state = get_state
+    db_node_counter = 1
+    bench_node_counter = 1
     cloud_config_hash.each do |region, values|
+      # region
       region_name = values['name']
+      
+      # ami
+      if region_name == 'us-east-1'
+        machine_ami = state['chef_client_ami_us_east_1']
+      elsif region_name == 'us-west-1'
+        machine_ami = state['chef_client_ami_us_west_1']
+      elsif region_name == 'us-west-2'
+        machine_ami = state['chef_client_ami_us_west_2']
+      elsif region_name == 'eu-west-1'
+        machine_ami = state['chef_client_ami_eu_west_1']
+      else
+        logger.debug "Region: #{region_name} is not supported!"
+        exit 0
+      end
+      
+      # flavor
       machine_flavor = "m1." + values['machine_type']
       
-      # calculate the machine number for this region from template
-      # depends on the flag
-      machine_number = 0
+      # key pair
+      key_pair = state['key_pair_name']
+      
+      # security group
+      security_group = state['security_group_name']
+
+      template = values['template']
+
+      # now is the name
+      # FIRST, for DATABASE cluster
+      base_name = ""
+      if template.to_s.include? "cassandra"
+        base_name = "cassandra" 
+      elsif template.to_s.include? "mongodb"
+        base_name = "mongodb"
+      else
+        logger.debug "Do NOT find database nodes like cassandra or mongodb"
+        exit 0
+      end
+      
+      # calculate the machine number of this region for DATABASE from template
+      machine_number_for_db = template_parse_to_find_machine_number_for_database_service(template).to_i
+      
+      # update parallel array
+      db_node_name_array = []
+      machine_number_for_db.times do
+        tmp_array = []
+
+        tmp_array << region_name
+        tmp_array << machine_ami
+        tmp_array << machine_flavor
+        tmp_array << key_pair
+        tmp_array << security_group
+        tmp_array << "#{base_name}-node-" + db_node_counter.to_s
+        
+        parallel_array << tmp_array
+
+        db_node_name_array << "#{base_name}-node-" + db_node_counter.to_s
+        
+        db_node_counter += 1
+      end
+
+      # SECOND, for BENCHMARK cluster
+      # optional
+      base_name = ""
+      machine_number_for_bench = 0
+      bench_node_name_array = []
+      if template.to_s.include? "ycsb"
+        base_name = "ycsb" 
+        
+        # calculate the machine number of this region for DATABASE from template
+        machine_number_for_bench = template_parse_to_find_machine_number_for_benchmark_service(template).to_i
+        
+        # update parallel array
+        machine_number_for_bench.times do
+          tmp_array = []
+  
+          tmp_array << region_name
+          tmp_array << machine_ami
+          tmp_array << machine_flavor
+          tmp_array << key_pair
+          tmp_array << security_group
+          tmp_array << "#{base_name}-node-" + bench_node_counter.to_s
+  
+          parallel_array << tmp_array
+          
+          bench_node_name_array << "#{base_name}-node-" + bench_node_counter.to_s
+          
+          bench_node_counter += 1
+        end
+      end
+      
+      logger.debug "-------------------------"
+      logger.debug "Region: #{region_name}"
+      logger.debug "Machine number: #{machine_number_for_db + machine_number_for_bench}"
+      logger.debug "Machine flavor: #{machine_flavor}"
+      logger.debug "Machine image: #{machine_ami}"
+      logger.debug "Key pair: #{key_pair}"
+      logger.debug "Security group: #{security_group}"
+      logger.debug "Node names: "
+      logger.debug "-- Database cluster: " ; puts db_node_name_array ;
+      logger.debug "-- Benchmark Cluster:" ; puts bench_node_name_array ;
+      logger.debug "-------------------------"
+      
+=begin
       if flag == "cassandra" or flag == "mongodb"
         machine_number = template_parse_to_find_machine_number_for_database_service(values['template']).to_i       
       elsif flag == "ycsb"
@@ -433,16 +570,6 @@ class BenchmarkController < ApplicationController
         node_counter = node_counter + 1
       end
       
-      logger.debug "-------------------------"
-      logger.debug "Region: #{region_name}"
-      logger.debug "Machine number: #{machine_number}"
-      logger.debug "Machine flavor: #{machine_flavor}"
-      logger.debug "Machine image: #{machine_ami}"
-      logger.debug "Key pair: #{key_pair}"
-      logger.debug "Security group: #{security_group}"
-      logger.debug "Node names: " ; puts node_name_array ;
-      logger.debug "-------------------------"
-      
       # beginning_time = Time.now
 
       # BEFORE, @nodes contains nothing
@@ -468,19 +595,46 @@ class BenchmarkController < ApplicationController
       # region1:
       #   name: us-east-1
       #   ips: [1,2,3]
+=end      
+   
+    end
     
-      # logger.debug "::: PROVISIONING TIME for Region #{region_name}: #{provisioning_time - beginning_time} seconds"
-    end  
+    puts "Test"
+    puts "Parallel Array:"
+    parallel_array.each do |arr|
+      puts "Node:"
+      arr.each {|x| puts x}
+    end
+      
   end
   
+  # =========================================================================== #
+  # core function
   # provision a new EC2 machine
   # used for each thread
+  # a dedicated fog object is responsible for creating a machine
+  # 
+  # INPUT:
+  # region: e.g. us-east-1
+  # ami: ami-123456
+  # flavor: small
+  # key_pair: KCSDB
+  # security_group: KCSDB
+  # name: cassandra-node-1
+  #
+  # OUTPUT:
+  # the IP of the newly created EC2 machine will be added into the corresponding
+  # shared variable, e.g. @db_nodes_us_east_1
+  # =========================================================================== #
   private
   def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
+    # synchronize stdout
     $stdout.sync = true
     
+    # create a fog object in the given region with the corresponding provider (aws, rackspace)
     ec2 = create_fog_object 'aws', region
     
+    # server definition
     server_def = {
       image_id: ami,
       flavor_id: flavor,
@@ -488,22 +642,49 @@ class BenchmarkController < ApplicationController
       groups: security_group
     }
     
+    # create server with the tag name
     server = ec2.servers.create server_def
     logger.debug "::: Adding tag..."
     ec2.tags.create key: 'Name', value: name, resource_id: server.id
 
+    # wait until the server is ready
     logger.debug "::: Waiting for machine: #{server.id}..."
     server.wait_for { print "."; ready? }
     # the machine is updated with public IP address
     puts "\n"
-    logger.debug "::: Waiting for machine: #{server.id}... [OK]"
 
+    # check sshd in the server
     print "." until tcp_test_ssh(server.public_ip_address) { sleep 1 }
 
+    # public IPv4 of the newly created server
+    ip = server.public_ip_address
+    
     # Adding a newly created server to the nodes list
+    # depends on region and cluster type (database or benchmark)
     # lock    
     @mutex.synchronize do
-      @nodes << server.public_ip_address
+      if name.to_s.include? "cassandra" or name.to_s.include? "mongodb" # add to database cluster
+        if region == "us-east-1" # in us-east-1
+          @db_nodes_us_east_1 << ip
+        elsif region == "us-west-1" # in us-west-1
+          @db_nodes_us_west_1 << ip
+        elsif region == "us-west-2" # in us-west-2
+          @db_nodes_us_west_2 << ip
+        elsif region == "eu-west-1" # in eu-west-1
+          @db_nodes_eu_west_1 << ip  
+        end
+      elsif name.to_s.include? "ycsb" # add to benchmark cluster
+        if region == "us-east-1" # in us-east-1
+          @bench_nodes_us_east_1 << ip
+        elsif region == "us-west-1" # in us-west-1
+          @bench_nodes_us_west_1 << ip
+        elsif region == "us-west-2" # in us-west-2
+          @bench_nodes_us_west_2 << ip
+        elsif region == "eu-west-1" # in eu-west-1
+          @bench_nodes_eu_west_1 << ip  
+        end        
+      end
+      #@nodes << server.public_ip_address
     end
   end
   
