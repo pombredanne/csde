@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # update apt-get
-sudo apt-get update -y
+sudo apt-get update -qq
 
 # install needed packages
 sudo apt-get install nodejs openjdk-6-jdk build-essential openssl libreadline6 libreadline6-dev curl git-core \
 										 zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev \
-										 autoconf libc6-dev ncurses-dev automake libtool bison subversion -y
+										 autoconf libc6-dev ncurses-dev automake libtool bison subversion -qq
 
 # load the install bash script
 curl -L https://get.rvm.io | bash -s stable
