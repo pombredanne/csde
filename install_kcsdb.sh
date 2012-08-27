@@ -79,7 +79,7 @@ no_strict_host_key_checking(){
 
 install_gmetad(){
 	echo "::: Installing Gmetad..."
-	sudo apt-get install ganglia-webfrontend
+	sudo apt-get install ganglia-webfrontend -qq
 	sudo cp /etc/ganglia-webfrontend/apache.conf /etc/apache2/sites-enabled
 	sudo /etc/init.d/apache2 restart
 }
