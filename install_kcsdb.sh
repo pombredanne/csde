@@ -77,6 +77,13 @@ no_strict_host_key_checking(){
 	echo -e "Host *\n\tStrictHostKeyChecking no" > /home/ubuntu/.ssh/config
 }
 
+install_gmetad(){
+	echo "::: Installing Gmetad..."
+	sudo apt-get install ganglia-webfrontend
+	sudo cp /etc/ganglia-webfrontend/apache.conf /etc/apache2/sites-enabled
+	sudo /etc/init.d/apache2 restart
+}
+
 bye(){
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: KCSDB installed successfully!!! Please run 'bash start.sh' in 'kcsdb' home folder to start KCSDB Server :::"
