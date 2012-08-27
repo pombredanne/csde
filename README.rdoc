@@ -31,7 +31,7 @@ OS: Ubuntu 11.10 x64
  $ rvm --default use 1.9.3
 * Install KCSDB
  $ curl --location https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh --silent | rvmsudo bash
- # Always accept 'yes's by installing Gmetad
+ # Always accept 'yes' by installing Gmetad
 
 = USEFUL
 * Oracle does not support direct download of JDK from the officical site any more. You have to read and agree Oracle's rules.
