@@ -230,7 +230,8 @@
     "cassandra::additional_settings": "Additional settings for optimal performance for the cluster.",
     "cassandra::install": "Installs the actual Cassandra package.",
     "cassandra::write_configs": "Writes the configurations for Cassandra.",
-    "cassandra::configure_cluster": "Configure the replication factor for the cluster"
+    "cassandra::configure_cluster": "Configure the replication factor for the cluster",
+    "cassandra::install_gmond": "Install and configure Gmond in this Cassandra node"
   },
   "groupings": {
   },

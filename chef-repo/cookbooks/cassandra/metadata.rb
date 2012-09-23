@@ -12,6 +12,7 @@ recipe           "cassandra::additional_settings", "Additional settings for opti
 recipe           "cassandra::write_configs", "Writes the configurations for Cassandra."
 recipe           "cassandra::restart_service", "Restarts the Cassandra service."
 recipe           "cassandra::configure_cluster", "Configure the Cassandra cluster via Cassandra CLI"
+recipe           "cassandra::install_gmond", "Install Gmond in this Cassandra node"
 
 attribute "setup",
   :display_name => "Setup Configurations",

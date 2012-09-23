@@ -831,9 +831,15 @@ class BenchmarkController < ApplicationController
       single_region_hash['single_region'] = 'true'
     end
     
+    
+    # the first node of Cassandra cluster is the collector of the whole cluster
+    gmond_collector_hash = Hash.new
+    gmond_collector_hash['gmond_collector'] = @db_regions['region1']['ips'][0]
+    
     # update default.rb
     # SERVICE_ID: 2.4
-    default_rb_hash = cassandra_config_hash['attributes'].merge single_region_hash    
+    default_rb_hash = cassandra_config_hash['attributes'].merge single_region_hash
+    default_rb_hash = default_rb_hash.merge default_rb_hash    
     update_default_rb_of_cookbooks default_rb_hash
         
     # deploy Cassandra

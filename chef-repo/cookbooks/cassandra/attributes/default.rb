@@ -7,6 +7,9 @@ default[:internal][:prime] = true
 # true | false
 default[:cassandra][:single_region] = "dummy"
 
+# the Gmond collector node among all Gmond nodes
+default[:cassandra][:gmond_collector] = "dummy"
+
 # =============================================== #
 # Configuration via Cassandra YAML (cassandra.yaml)
 # =============================================== #
