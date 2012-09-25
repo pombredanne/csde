@@ -1,5 +1,5 @@
 # Needed for the Chef script to function properly
-default[:setup][:deployment] = "11x"    # Choices are "07x", or "08x"
+default[:setup][:deployment] = "11x" # Cassandra 1.1.5
 
 # Advanced Cassandra settings
 default[:internal][:prime] = true
