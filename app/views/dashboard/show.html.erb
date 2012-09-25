@@ -248,9 +248,9 @@
 										</td>
 										<td>
 											recommended value of Cassandra</br>
-											--> 1/2 RAM if RAM <= 2GB</br>
-											--> 1 GB if 2GB < RAM < 4GB</br>
-											--> 1/4 RAM if RAM >= 4GB 
+											1/2 RAM if RAM <= 2GB</br>
+											1 GB if 2GB < RAM < 4GB</br>
+											1/4 RAM if RAM >= 4GB 
 										</td>
 										<td>
 											double of the recommended value
@@ -259,6 +259,73 @@
 											&nbsp;
 										</td>
 									</tr>
+									
+									<tr>
+										<td>
+											<%= label_tag "Key Cache Size", "Key Cache Size"%>
+										</td>
+										<td>
+											<%= check_box_tag 'key_cache_low', 'low', false %>
+											<em>low</em>
+										</td>
+										<td>
+											<%= check_box_tag 'key_cache_medium', 'high', false %>
+											<em>medium</em>
+										</td>
+										<td>
+											<%= check_box_tag 'key_cache_high', 'high', false %>
+											<em>high</em>
+										</td>
+									</tr>
+									
+									<tr>
+										<td>
+											&nbsp;
+										</td>
+										<td>
+											5% of Heap Size
+										</td>
+										<td>
+											10% of Heap Size
+										</td>
+										<td>
+											20% of Heap Size
+										</td>
+									</tr>
+									
+									<tr>
+										<td>
+											<%= label_tag "Row Cache Size", "Row Cache Size"%>
+										</td>
+										<td>
+											<%= check_box_tag 'row_cache_low', 'low', false %>
+											<em>low</em>
+										</td>
+										<td>
+											<%= check_box_tag 'row_cache_medium', 'high', false %>
+											<em>medium</em>
+										</td>
+										<td>
+											<%= check_box_tag 'row_cache_high', 'high', false %>
+											<em>high</em>
+										</td>
+									</tr>
+									
+									<tr>
+										<td>
+											&nbsp;
+										</td>
+										<td>
+											5% of Heap Size
+										</td>
+										<td>
+											10% of Heap Size
+										</td>
+										<td>
+											20% of Heap Size
+										</td>
+									</tr>
+									
 									
 									
 									<tr>
