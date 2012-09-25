@@ -111,11 +111,11 @@
 			
 			<div id="tabs">
 				<ul>
-			  	<li><a href="#tabs-1">Configuration</a></li>
+				  	<li><a href="#tabs-1">Configuration</a></li>
 					<li><a href="#tabs-2">Monitoring</a></li>
-	  			<li><a href="#tabs-3">Benchmark</a></li>
-	  			<li><a href="#tabs-4">Credentials</a></li>
-	  			<li><a href="#tabs-5">About</a></li>
+		  			<li><a href="#tabs-3">Benchmark</a></li>
+		  			<li><a href="#tabs-4">Credentials</a></li>
+		  			<li><a href="#tabs-5">About</a></li>
 				</ul>
 				
 				<!-- Configuration Management -->
@@ -149,21 +149,21 @@
 		          </script>
 	      		</div>
 					<% else %> -->
-						<div style="color: green;">
-		          <p>Chef Server is now <strong>ready</strong>. Click the button below to go to Chef Server.</p>
-		          <button id="go_to_chef_server">Go to Chef Server</button>
-		          <script>
-		          	var button_go_to_chef_server_opts = {
-				        	icons:{
-				       			primary:"ui-icon-home"
-				        	}
-				        };
-				        $("#go_to_chef_server").button(button_go_to_chef_server_opts);
-				        $("#go_to_chef_server").click(function () {
-				        	window.open("/chef_server/go_to");
-				        });
-		          </script>
-	      		</div>
+					<div style="color: green;">
+		          		<p>Chef Server is now <strong>ready</strong>. Click the button below to go to Chef Server.</p>
+		          		<button id="go_to_chef_server">Go to Chef Server</button>
+				        <script>
+				        	var button_go_to_chef_server_opts = {
+						    	icons:{
+						       		primary:"ui-icon-home"
+						        }
+						    };
+						    $("#go_to_chef_server").button(button_go_to_chef_server_opts);
+						    $("#go_to_chef_server").click(function () {
+						    	window.open("/chef_server/go_to");
+						    });
+				        </script>
+	      			</div>
 					<!-- <% end %> -->
 				</div>
 				
@@ -180,6 +180,35 @@
 				
 				<!-- Automated Benchmark -->
 				<div id="tabs-3">
+					<div id="experiment_profile_generator_accordion">
+						<h2><a href="#">Experiment Profile Generator - Caching Experiment</a></h2>
+						Hello
+					</div>	
+					<script>
+						$("#experiment_profile_generator_accordion").accordion();
+					</script>
+					
+					<div id="benchmark_execution_accordion">
+						<h2><a href="#">Benchmark Execution</a></h2>
+						<%= form_tag('benchmark/run') do %>
+					 		<%= label_tag "Benchmark Profile URL", "Benchmark Profile URL: "%></br>				 		
+							<%= text_field_tag "benchmark_profile_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml", size: 100%></br>
+							<button id="submit_benchmark_profile" type="submit" data-confirm="Are you sure?">Run</button>
+							<script>
+						    	var button_benchmark_profile_opts = {
+								  	icons:{
+								    	primary:"ui-icon-play"
+								    }
+							    };
+							    $("#submit_benchmark_profile").button(button_benchmark_profile_opts);
+		          			</script>				 		
+				 		<% end %>
+					</div>	
+					<script>
+						$("#benchmark_execution_accordion").accordion();
+					</script>
+					
+					
 		 			<!-- <%= form_tag('/chef_node/create') do %>
 				  	<%= label_tag "Flavor Create", "Choose a machine type:" %>
 				    <input type="radio" name="flavor_create" id="small_create" value="small_create"><label for="small_create">Small</label></input>
@@ -210,21 +239,6 @@
 				
 					  <button id="configureChefNodes" type="submit">Configure</button>
 				 	<% end %> -->
-				 	
-				 	<%= form_tag('benchmark/run') do %>
-				 		<%= label_tag "Benchmark Profile URL", "Benchmark Profile URL: "%></br>				 		
-						<%= text_field_tag "benchmark_profile_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml", size: 100%></br>
-						<button id="submit_benchmark_profile" type="submit" data-confirm="Are you sure?">Run</button>
-						<script>
-				    	var button_benchmark_profile_opts = {
-						  	icons:{
-						    	primary:"ui-icon-play"
-						    }
-					    };
-					    $("#submit_benchmark_profile").button(button_benchmark_profile_opts);
-	          </script>				 		
-				 	<% end %>
-				 	
 				</div>
 				
 				<!-- Credentials -->
@@ -234,42 +248,42 @@
 						<div id="aws_credentials">
 							<div id="aws_credentials_status_dialog"></div>
 							<%= form_tag('/configuration/edit_aws', :remote => true) do %>
-				        <table>
-				        	<tr>
-				          	<td><%= label_tag "Access Key ID", "Access Key ID" %></td>
-				            <td><%= text_field_tag "aws_access_key_id", @aws_access_key_id, size: 55 %></td>
-				          </tr>
-				        	<tr>
-				          	<td><%= label_tag "Secret Key Access", "Secret Key Access" %></td>
-				            <td><%= text_field_tag "aws_secret_access_key", @aws_secret_access_key, size: 55 %></td>
-				          </tr>
-				          <tr>
-				          	<td><%= label_tag "Key Pair and Security Group", "Key Pair and Security Group" %></td>
-				            <td><%= text_field_tag "key_pair_and_group", @key_pair_name, size: 55 %></td>
-				          </tr>
-				          <tr>
-				          	<td><button id="submit_aws" type="submit">Submit</button></td>
-				          	<td>&nbsp;</td>
-				          </tr>
-				          <script>
-				          	var button_aws_credentials_opts = {
-						        	icons:{
-						       			primary:"ui-icon-key"
-						        	}
-					      		};
-					      		$("#submit_aws").button(button_aws_credentials_opts);
+					        	<table>
+						        	<tr>
+							          	<td><%= label_tag "Access Key ID", "Access Key ID" %></td>
+							            <td><%= text_field_tag "aws_access_key_id", @aws_access_key_id, size: 55 %></td>
+					          		</tr>
+					        		<tr>
+							          	<td><%= label_tag "Secret Key Access", "Secret Key Access" %></td>
+							            <td><%= text_field_tag "aws_secret_access_key", @aws_secret_access_key, size: 55 %></td>
+					          		</tr>
+					          		<tr>
+							          	<td><%= label_tag "Key Pair and Security Group", "Key Pair and Security Group" %></td>
+							            <td><%= text_field_tag "key_pair_and_group", @key_pair_name, size: 55 %></td>
+					          		</tr>
+					          		<tr>
+							          	<td><button id="submit_aws" type="submit">Submit</button></td>
+							          	<td>&nbsp;</td>
+					          		</tr>
+					          		<script>
+						          		var button_aws_credentials_opts = {
+								        	icons:{
+								       			primary:"ui-icon-key"
+								        	}
+							      		};
+							      		$("#submit_aws").button(button_aws_credentials_opts);
 										$("#submit_aws").click(function () {
-					          	$("#aws_credentials_status_dialog").dialog({
-					              title: "AWS Credentials are already updated. Please ensure they are correct!",
-					              show: "slide",
-					              hide: "puff",
-					              height: "0",
-					              resizable: false
-					          	});
-					      		});
-				          </script>
-				        </table>
-				      <% end %>
+								          	$("#aws_credentials_status_dialog").dialog({
+								              title: "AWS Credentials are already updated. Please ensure they are correct!",
+								              show: "slide",
+								              hide: "puff",
+								              height: "0",
+								              resizable: false
+								          	});
+							      		});
+					          		</script>
+					        	</table>
+				      		<% end %>
 						</div>
 						<script>
 							$("#aws_credentials_accordion").accordion();
