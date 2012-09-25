@@ -24,19 +24,19 @@ OS: Ubuntu 11.10 x64
 
 * Lauch a virtual machine and login via ssh
 * Download and execute install_ruby_via_rvm.sh script to install ruby 1.9.3
- $ curl --location https://raw.github.com/lehoanganh/kcsdb/master/install_ruby_via_rvm.sh --silent | bash
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_ruby_via_rvm.sh | bash
 * Load rvm into shell
  $ . $HOME/.bashrc
 * Set ruby 1.9.3 as default
  $ rvm --default use 1.9.3
 * Install KCSDB
- $ curl --location https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh --silent | rvmsudo bash
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh | rvmsudo bash
  # Always accept 'yes' by installing Gmetad
 
 = USEFUL
 * Oracle does not support direct download of JDK from the officical site any more. You have to read and agree Oracle's rules.
 Thus, use another way to install Sun JDK
- $ curl --location https://github.com/flexiondotorg/oab-java6/raw/0.2.4/oab-java.sh --silent | sudo bash
+ $ curl -L https://raw.github.com/flexiondotorg/oab-java6/master/oab-java.sh | sudo bash
  $ sudo apt-get install sun-java6-jdk
  $ export JAVA_HOME=/usr/lib/jvm/java-6-sun
 
