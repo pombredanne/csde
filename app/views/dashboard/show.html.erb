@@ -107,12 +107,14 @@
 			  <h1>KIT Cloud Serving Deployment and Benchmark</h1>
 			  <h2>You&rsquo;re building the cloud. With KCSDB.</h2>
 			</div>
+			
 			<div id="separator"></div>
 			
 			<div id="tabs">
 				<ul>
 				  	<li><a href="#tabs-1">Configuration</a></li>
 					<li><a href="#tabs-2">Monitoring</a></li>
+					<li><a href="#tabs-6">Generator</li>
 		  			<li><a href="#tabs-3">Benchmark</a></li>
 		  			<li><a href="#tabs-4">Credentials</a></li>
 		  			<li><a href="#tabs-5">About</a></li>
@@ -178,33 +180,46 @@
 					<!-- <% end %> -->
 				</div>
 				
-				<!-- Automated Benchmark -->
-				<div id="tabs-3">
+				
+				
+				<!-- Experiment Profile Generator -->
+				<div id="#tabs-6">
 					<div id="experiment_profile_generator_accordion">
 						<h2><a href="#">Experiment Profile Generator - Caching Experiment</a></h2>
 						<div id="t1">
 							Hello
 						</div>
-					</div>	
-					
+					</div>
+					<script>
+						$("#experiment_profile_generator_accordion").accordion();
+					</script>
+				</div>
+
+
+				
+				<!-- Automated Benchmark -->
+				<div id="tabs-3">
 					<div id="benchmark_execution_accordion">
 						<h2><a href="#">Benchmark Execution</a></h2>
 						<div id="t2">
 							<%= form_tag('benchmark/run') do %>
-					 		<%= label_tag "Benchmark Profile URL", "Benchmark Profile URL: "%></br>				 		
-							<%= text_field_tag "benchmark_profile_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml", size: 100%></br>
-							<button id="submit_benchmark_profile" type="submit" data-confirm="Are you sure?">Run</button>
-							<script>
-						    	var button_benchmark_profile_opts = {
-								  	icons:{
-								    	primary:"ui-icon-play"
-								    }
-							    };
-							    $("#submit_benchmark_profile").button(button_benchmark_profile_opts);
-		          			</script>				 		
-				 		<% end %>
+						 		<%= label_tag "Benchmark Profile URL", "Benchmark Profile URL: "%></br>				 		
+								<%= text_field_tag "benchmark_profile_url", "https://raw.github.com/lehoanganh/kcsdb/master/benchmark_profiles.yaml", size: 100%></br>
+								<button id="submit_benchmark_profile" type="submit" data-confirm="Are you sure?">Run</button>
+								<script>
+							    	var button_benchmark_profile_opts = {
+									  	icons:{
+									    	primary:"ui-icon-play"
+									    }
+								    };
+								    $("#submit_benchmark_profile").button(button_benchmark_profile_opts);
+			          			</script>				 		
+				 			<% end %>
 						</div>
 					</div>	
+					<script>
+						$("#benchmark_execution_accordion").accordion();
+					</script>
 					
 		 			<!-- <%= form_tag('/chef_node/create') do %>
 				  	<%= label_tag "Flavor Create", "Choose a machine type:" %>
@@ -217,7 +232,7 @@
 				    <%= text_field_tag "number_create", "dummy" %>
 				    </br>
 				
-					  <button id="createChefNodes" type="submit">Create</button>
+					<button id="createChefNodes" type="submit">Create</button>
 				 	<% end %>
 				 	</br>
 				 	
@@ -237,10 +252,6 @@
 					  <button id="configureChefNodes" type="submit">Configure</button>
 				 	<% end %> -->
 				</div>
-				<script>
-					$("#experiment_profile_generator_accordion").accordion();
-					$("#benchmark_execution_accordion").accordion();
-				</script>
 				
 				
 				<!-- Credentials -->
@@ -299,9 +310,9 @@
 				</div>
 				
 				<!--jQuery Functions-->
-		  	<script>
-		      $("#tabs").tabs();
-		  	</script>
+			  	<script>
+			      $("#tabs").tabs();
+			  	</script>
 		  	
 			  <!-- <% if @chef_server_state == 'not_setup' %>
 			      <div id="state_status_dialog">
