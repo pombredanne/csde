@@ -2,6 +2,15 @@ require 'helper'
 class BenchmarkController < ApplicationController
   include Helper
   
+  def generate
+    
+  end
+  
+  
+  
+  
+  
+  
   def run
     # get the url for benchmark profile, given by the user
     benchmark_profile_url = params[:benchmark_profile_url]
