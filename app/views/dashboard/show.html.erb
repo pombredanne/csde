@@ -185,6 +185,9 @@
 						<div id="t1">
 							Hello
 						</div>
+						<script>
+							$("#experiment_profile_generator_accordion").accordion();
+						</script>
 					</div>	
 					
 					<div id="benchmark_execution_accordion">
@@ -204,13 +207,11 @@
 		          			</script>				 		
 				 		<% end %>
 						</div>
-						
+						<script>
+							$("#benchmark_execution_accordion").accordion();
+						</script>
 					</div>	
 					
-					<script>
-						$("#experiment_profile_generator_accordion").accordion();
-						$("#benchmark_execution_accordion").accordion();
-					</script>
 		 			<!-- <%= form_tag('/chef_node/create') do %>
 				  	<%= label_tag "Flavor Create", "Choose a machine type:" %>
 				    <input type="radio" name="flavor_create" id="small_create" value="small_create"><label for="small_create">Small</label></input>
