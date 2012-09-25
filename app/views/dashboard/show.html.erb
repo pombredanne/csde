@@ -206,21 +206,57 @@
 											<em>large</em>
 										</td>
 									</tr>
+									
 									<tr>
 										<td>
 											&nbsp;
 										</td>
 										<td>
-											<p>RAM: 1700 MB</p>
-											<p>Core(s): 1</p>
+											RAM: 1700 MB</br>
+											Core(s): 1
 										</td>
 										<td>
-											<p>RAM: 3750 MB</p>
-											<p>Core(s): 1</p>
+											RAM: 3750 MB</br>
+											Core(s): 1
 										</td>
 										<td>
-											<p>RAM: 7450 MB</p>
-											<p>Core(s): 2</p>
+											RAM: 7450 MB</br>
+											Core(s): 2
+										</td>
+									</tr>
+									
+									<tr>
+										<td>
+											<%= label_tag "Heap Size", "Heap Size"%>
+										</td>
+										<td>
+											<%= check_box_tag 'heap_low', 'low', false %>
+											<em>low</em>
+										</td>
+										<td>
+											<%= check_box_tag 'heap_high', 'high', false %>
+											<em>high</em>
+										</td>
+										<td>
+											&nbsp;
+										</td>
+									</tr>
+									
+									<tr>
+										<td>
+											&nbsp;
+										</td>
+										<td>
+											recommended value of Cassandra</br>
+											--> 1/2 RAM if RAM <= 2GB</br>
+											--> 1 GB if 2GB < RAM < 4GB</br>
+											--> 1/4 RAM if RAM >= 4GB 
+										</td>
+										<td>
+											double of the recommended value
+										</td>
+										<td>
+											&nbsp;
 										</td>
 									</tr>
 									
