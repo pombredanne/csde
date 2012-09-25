@@ -1,6 +1,9 @@
 KCSD1::Application.routes.draw do
   post "benchmark/run"
-  get "benchmark/run"  
+  get "benchmark/run"
+  
+  post "benchmark/generate"
+  get "benchmark/generate"  
 
   get "chef_server/go_to"
 
