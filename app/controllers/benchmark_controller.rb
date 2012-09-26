@@ -184,13 +184,115 @@ class BenchmarkController < ApplicationController
         end
       end
       
-      puts "Key Cache Profiles"
-      puts profile_matrix_for_key_cache
+      profile_counter = 1
       
-      puts "Row Cache Profiles"
-      puts profile_matrix_for_row_cache
-
+      if profile_matrix_for_key_cache.size > 0
+        logger.debug "--------------------------------------"
+        logger.debug "::: Profiles for Key Cache Experiment"
+        logger.debug "--------------------------------------"
+        @status << "-------------------------------------\n"
+        @status << "<strong>::: Profiles for Key Cache Experiment<strong>\n"
+        @status << "-------------------------------------\n"
         
+        profile_matrix_for_key_cache.each do |profile|
+          logger.debug "Profile #{profile_counter}:"
+          @status << "<strong>Profile #{profile_counter}:</strong>\n"
+          
+          tmp_arr = profile.to_s.split"-"
+          
+          logger.debug "Instance Type:"
+          @status << "Instance Type:\n"
+          if tmp_arr[0] == 0
+            logger.debug "Small"
+            @status << "Small\n"
+          elsif tmp_arr[0] == 1
+            logger.debug "Medium"
+            @status << "Medium\n"
+          elsif tmp_arr[0] == 2
+            logger.debug "Large"
+            @status << "Large\n"
+          end
+          
+          logger.debug "Java Heap Size:"
+          @status << "Java Heap Size:\n"          
+          if tmp_arr[1] == 0
+            logger.debug "Low"
+            @status << "Low\n"
+          elsif tmp_arr[1] == 1
+            logger.debug "High"
+            @status << "High\n"
+          end
+          
+          logger.debug "Key Cache Size:"
+          @status << "Key Cache Size:\n"
+          if tmp_arr[2] == 0
+            logger.debug "Low"
+            @status << "Low\n"
+          elsif tmp_arr[2] == 1
+            logger.debug "Medium"
+            @status << "Medium\n"
+          elsif tmp_arr[2] == 2
+            logger.debug "High"
+            @status << "High\n"
+          end
+          
+          profile_counter += 1 
+        end
+      end
+        
+      if profile_matrix_for_row_cache.size > 0
+        logger.debug "--------------------------------------"
+        logger.debug "::: Profiles for Row Cache Experiment"
+        logger.debug "--------------------------------------"
+        @status << "-------------------------------------\n"
+        @status << "<strong>::: Profiles for Row Cache Experiment<strong>\n"
+        @status << "-------------------------------------\n"
+        
+        profile_matrix_for_row_cache.each do |profile|
+          logger.debug "Profile #{profile_counter}:"
+          @status << "<strong>Profile #{profile_counter}:</strong>\n"
+          
+          tmp_arr = profile.to_s.split"-"
+          
+          logger.debug "Instance Type:"
+          @status << "Instance Type:\n"
+          if tmp_arr[0] == 0
+            logger.debug "Small"
+            @status << "Small\n"
+          elsif tmp_arr[0] == 1
+            logger.debug "Medium"
+            @status << "Medium\n"
+          elsif tmp_arr[0] == 2
+            logger.debug "Large"
+            @status << "Large\n"
+          end
+          
+          logger.debug "Java Heap Size:"
+          @status << "Java Heap Size:\n"          
+          if tmp_arr[1] == 0
+            logger.debug "Low"
+            @status << "Low\n"
+          elsif tmp_arr[1] == 1
+            logger.debug "High"
+            @status << "High\n"
+          end
+          
+          logger.debug "Row Cache Size:"
+          @status << "Row Cache Size:\n"
+          if tmp_arr[2] == 0
+            logger.debug "Low"
+            @status << "Low\n"
+          elsif tmp_arr[2] == 1
+            logger.debug "Medium"
+            @status << "Medium\n"
+          elsif tmp_arr[2] == 2
+            logger.debug "High"
+            @status << "High\n"
+          end
+          
+          profile_counter += 1 
+        end
+      end
     end
     
   end
