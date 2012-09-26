@@ -3,9 +3,16 @@ class BenchmarkController < ApplicationController
   include Helper
   
   def generate
+    
+    @status = ""
+    
     logger.debug "----------------------------------"    
     logger.debug "::: Taking values from the form..."
     logger.debug "----------------------------------"
+    @status << "-------------------------------\n"
+    @status << "<strong>::: Taking values from the form</strong>\n"
+    @status << "-------------------------------\n"
+    
     # get values from the view
     # and generate multiple profiles
     #
@@ -27,28 +34,45 @@ class BenchmarkController < ApplicationController
     # 2 --> large
     # using ternary operator, maybe for a better coding and reading hehe
     # syntax: condition ? then_branch : else_branch 
-    logger.debug "::: Selected Instance Type:"
+    logger.debug "::: Selected Instance Types:"
+    @status << "<strong>::: Selected Instance Types:</strong>\n"
     
     ! params[:instance_small].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
-    if instance_type_array[0] == 1 then logger.debug "Small" end
+    if instance_type_array[0] == 1
+      logger.debug "Small" 
+      @status << "Small\n"
+    end
      
     ! params[:instance_medium].nil? ? instance_type_array[1] = 1 : instance_type_array[1] = 0
-    if instance_type_array[1] == 1 then logger.debug "Medium" end
+    if instance_type_array[1] == 1 
+      logger.debug "Medium" 
+      @status << "Medium\n"
+    end
       
     ! params[:instance_large].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
-    if instance_type_array[2] == 1 then logger.debug "Large" end
+    if instance_type_array[2] == 1 
+      logger.debug "Large" 
+      @status << "Large\n"  
+    end
 
     # layer 2:
     # java heap size
     # 0 --> low
     # 1 --> high
-    logger.debug "::: Selected Java Heap Size:"
+    logger.debug "::: Selected Java Heap Sizes:"
+    @status << "<strong>::: Selected Java Heap Sizes:</strong>\n"
     
     ! params[:heap_low].nil? ? java_heap_size_array[0] = 1 : java_heap_size_array[0] = 0
-    if java_heap_size_array[0] == 1 then logger.debug "Low" end
+    if java_heap_size_array[0] == 1 
+      logger.debug "Low" 
+      @status << "Low\n"  
+    end
       
     ! params[:heap_high].nil? ? java_heap_size_array[1] = 1 : java_heap_size_array[1] = 0
-    if java_heap_size_array[1] == 1 then logger.debug "High" end
+    if java_heap_size_array[1] == 1 
+      logger.debug "High" 
+      @status << "High\n"  
+    end
 
 
     # layer 3:
@@ -56,32 +80,52 @@ class BenchmarkController < ApplicationController
     # 0 --> low
     # 1 --> medium
     # 2 --> high
-    logger.debug "::: Selected Key Cache Size:"
+    logger.debug "::: Selected Key Cache Sizes:"
+    @status << "<strong>::: Selected Key Cache Sizes:</strong>\n"
     
     ! params[:key_cache_low].nil? ? key_cache_size_array[0] = 1 : key_cache_size_array[0] = 0
-    if key_cache_size_array[0] == 1 then logger.debug "Low" end
+    if key_cache_size_array[0] == 1 
+      logger.debug "Low" 
+      @status << "Low\n"  
+    end
       
     ! params[:key_cache_medium].nil? ? key_cache_size_array[1] = 1 : key_cache_size_array[1] = 0
-    if key_cache_size_array[1] == 1 then logger.debug "Medium" end
+    if key_cache_size_array[1] == 1 
+      logger.debug "Medium" 
+      @status << "Medium\n"
+    end
 
     ! params[:key_cache_high].nil? ? key_cache_size_array[2] = 1 : key_cache_size_array[2] = 0
-    if key_cache_size_array[2] == 1 then logger.debug "High" end
+    if key_cache_size_array[2] == 1 
+      logger.debug "High" 
+      @status << "High\n"  
+    end
     
     # layer 4:
     # row cache size
     # 0 --> low
     # 1 --> medium
     # 2 --> high
-    logger.debug "::: Selected Row Cache Size:"
+    logger.debug "::: Selected Row Cache Sizes:"
+    @status << "<strong>::: Selected Row Cache Sizes:</strong>\n"
     
     ! params[:row_cache_low].nil? ? row_cache_size_array[0] = 1 : row_cache_size_array[0] = 0
-    if row_cache_size_array[0] == 1 then logger.debug "Low" end
+    if row_cache_size_array[0] == 1 
+      logger.debug "Low" 
+      @status << "Low\n"
+    end
       
     ! params[:row_cache_medium].nil? ? row_cache_size_array[1] = 1 : row_cache_size_array[1] = 0
-    if row_cache_size_array[1] == 1 then logger.debug "Medium" end
+    if row_cache_size_array[1] == 1 
+      logger.debug "Medium" 
+      @status << "Medium\n"
+    end
 
     ! params[:row_cache_high].nil? ? row_cache_size_array[2] = 1 : row_cache_size_array[2] = 0
-    if row_cache_size_array[2] == 1 then logger.debug "High" end
+    if row_cache_size_array[2] == 1 
+      logger.debug "High" 
+      @status << "High\n"
+    end
 
     
     
