@@ -4,6 +4,12 @@ class BenchmarkController < ApplicationController
   
   def generate
     
+    # test
+    puts "SELECTED INSTANCE TYPE:"
+    puts "Small: #{params[:instance_small]}"
+    puts "Medium: #{params[:instance_medium]}"
+    puts "High: #{params[:instance_high]}"
+    
   end
   
   
