@@ -45,10 +45,10 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Selected Java Heap Size:"
     
     ! params[:heap_low].nil? ? java_heap_size_array[0] = 1 : java_heap_size_array[0] = 0
-    if java_heap_size[0] == 1 then logger.debug "Low" end
+    if java_heap_size_array[0] == 1 then logger.debug "Low" end
       
     ! params[:heap_high].nil? ? java_heap_size_array[1] = 1 : java_heap_size_array[1] = 0
-    if java_heap_size[1] == 1 then logger.debug "High" end
+    if java_heap_size_array[1] == 1 then logger.debug "High" end
 
 
     # layer 3:
