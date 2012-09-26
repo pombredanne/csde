@@ -6,10 +6,20 @@ class BenchmarkController < ApplicationController
     
     # test
     puts "SELECTED INSTANCE TYPE:"
-    puts "Small: #{params[:instance_small]}"
-    puts "Medium: #{params[:instance_medium]}"
-    puts "High: #{params[:instance_high]}"
+    puts "Small:"
+    if ! params[:instance_small].nil? 
+      puts params[:instance_small]
+    end
     
+    puts "Meidum:"
+    if ! params[:instance_medium].nil? 
+      puts params[:instance_medium]
+    end
+    
+    puts "High:"
+    if ! params[:instance_high].nil? 
+      puts params[:instance_high]
+    end
   end
   
   
