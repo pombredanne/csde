@@ -150,7 +150,7 @@ class BenchmarkController < ApplicationController
       @status << "You have to choose at least a <strong>Key Cache size</strong> OR a <strong>Row Cache size</strong>\n"
     else
       logger.debug "Input [OK]"
-      @status << "Input <strong>[OK]</strong>"
+      @status << "Input <strong>[OK]</strong>\n"
       logger.debug "--------------------------------"
       logger.debug "::: Generating Profile Matrix..."
       logger.debug "--------------------------------"
@@ -195,46 +195,43 @@ class BenchmarkController < ApplicationController
         @status << "-------------------------------------\n"
         
         profile_matrix_for_key_cache.each do |p|
-          puts p
-          
           logger.debug "Profile #{profile_counter}:"
           @status << "<strong>Profile #{profile_counter}:</strong>\n"
           
           tmp_arr = p.to_s.split("-")
-          puts tmp_arr
           
           logger.debug "Instance Type:"
           @status << "Instance Type:\n"
-          if tmp_arr[0] == 0
+          if tmp_arr[0] == 0.to_s
             logger.debug "Small"
             @status << "Small\n"
-          elsif tmp_arr[0] == 1
+          elsif tmp_arr[0] == 1.to_s
             logger.debug "Medium"
             @status << "Medium\n"
-          elsif tmp_arr[0] == 2
+          elsif tmp_arr[0] == 2.to_s
             logger.debug "Large"
             @status << "Large\n"
           end
           
           logger.debug "Java Heap Size:"
           @status << "Java Heap Size:\n"          
-          if tmp_arr[1] == 0
+          if tmp_arr[1] == 0.to_s
             logger.debug "Low"
             @status << "Low\n"
-          elsif tmp_arr[1] == 1
+          elsif tmp_arr[1] == 1.to_s
             logger.debug "High"
             @status << "High\n"
           end
           
           logger.debug "Key Cache Size:"
           @status << "Key Cache Size:\n"
-          if tmp_arr[2] == 0
+          if tmp_arr[2] == 0.to_s
             logger.debug "Low"
             @status << "Low\n"
-          elsif tmp_arr[2] == 1
+          elsif tmp_arr[2] == 1.to_s
             logger.debug "Medium"
             @status << "Medium\n"
-          elsif tmp_arr[2] == 2
+          elsif tmp_arr[2] == 2.to_s
             logger.debug "High"
             @status << "High\n"
           end
@@ -251,47 +248,44 @@ class BenchmarkController < ApplicationController
         @status << "<strong>::: Profiles for Row Cache Experiment<strong>\n"
         @status << "-------------------------------------\n"
         
-        profile_matrix_for_row_cache.each do |profile|
-          puts profile
-          
+        profile_matrix_for_row_cache.each do |p|
           logger.debug "Profile #{profile_counter}:"
           @status << "<strong>Profile #{profile_counter}:</strong>\n"
           
-          tmp_arr = profile.to_s.split("-")
-          puts tmp_arr
+          tmp_arr = p.to_s.split("-")
           
           logger.debug "Instance Type:"
           @status << "Instance Type:\n"
-          if tmp_arr[0] == 0
+          if tmp_arr[0] == 0.to_s
             logger.debug "Small"
             @status << "Small\n"
-          elsif tmp_arr[0] == 1
+          elsif tmp_arr[0] == 1.to_s
             logger.debug "Medium"
             @status << "Medium\n"
-          elsif tmp_arr[0] == 2
+          elsif tmp_arr[0] == 2.to_s
             logger.debug "Large"
             @status << "Large\n"
           end
           
           logger.debug "Java Heap Size:"
           @status << "Java Heap Size:\n"          
-          if tmp_arr[1] == 0
+          if tmp_arr[1] == 0.to_s
             logger.debug "Low"
             @status << "Low\n"
-          elsif tmp_arr[1] == 1
+          elsif tmp_arr[1] == 1.to_s
             logger.debug "High"
             @status << "High\n"
           end
           
           logger.debug "Row Cache Size:"
           @status << "Row Cache Size:\n"
-          if tmp_arr[2] == 0
+          if tmp_arr[2] == 0.to_s
             logger.debug "Low"
             @status << "Low\n"
-          elsif tmp_arr[2] == 1
+          elsif tmp_arr[2] == 1.to_s
             logger.debug "Medium"
             @status << "Medium\n"
-          elsif tmp_arr[2] == 2
+          elsif tmp_arr[2] == 2.to_s
             logger.debug "High"
             @status << "High\n"
           end
