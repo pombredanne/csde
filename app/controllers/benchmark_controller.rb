@@ -18,8 +18,8 @@ class BenchmarkController < ApplicationController
     #
     # layer 1: instance type [small/medium/large]
     # layer 2: java heap size [low/high]
-    # layer 3: key cache size [small/medium/high]
-    # layer 4: row cache size [small/medium/high]
+    # layer 3.1: key cache size [small/medium/high]
+    # layer 3.2: row cache size [small/medium/high]
     #
     # each layer is represented as an array    
     instance_type_array = []
@@ -75,7 +75,7 @@ class BenchmarkController < ApplicationController
     end
 
 
-    # layer 3:
+    # layer 3.1:
     # key cache size
     # 0 --> low
     # 1 --> medium
@@ -101,7 +101,7 @@ class BenchmarkController < ApplicationController
       @status << "High\n"  
     end
     
-    # layer 4:
+    # layer 3.2:
     # row cache size
     # 0 --> low
     # 1 --> medium
@@ -126,6 +126,27 @@ class BenchmarkController < ApplicationController
       logger.debug "High" 
       @status << "High\n"
     end
+
+    logger.debug "--------------------"
+    logger.debug ":: Checking Input..."
+    logger.debug "--------------------"
+    if ! instance_type_array.include? 1
+      logger.debug "You have to choose at least an instance type!"
+      @status << "You have to choose at least an <strong>instance type!</strong>\n"
+    elsif ! java_heap_size_array.include? 1
+      logger.debug "You have to choose at least a Java heap size!"
+      @status << "You have to choose at least a <strong>Java heap size!</strong>\n"
+    elsif (! key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1)
+      logger.debug "You have to choose at least a Key Cache size OR a Row Cache size!"
+      @status << "You have to choose at least a <strong>Key Cache size</strong> OR a <strong>Row Cache size</strong>\n"
+    else
+      logger.debug "--------------------------------"
+      logger.debug "::: Generating Profile Matrix..."
+      logger.debug "--------------------------------"  
+    end
+      
+    end
+     
 
     
     
