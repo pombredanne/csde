@@ -25,7 +25,7 @@ class BenchmarkController < ApplicationController
     # syntax: condition ? then_branch : else_branch 
     ! params[:instance_small].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
     ! params[:instance_medium].nil? ? instance_type_array[1] = 1 : instance_type_array[1] = 0
-    ! params[:instance_high].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
+    ! params[:instance_large].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
     
     puts instance_type_array
   end
