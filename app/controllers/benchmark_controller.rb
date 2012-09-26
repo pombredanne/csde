@@ -166,7 +166,7 @@ class BenchmarkController < ApplicationController
               if key_cache_size_array.size > 0
                 for k in 0..(key_cache_size_array.size - 1)
                   if key_cache_size_array[k] != 0
-                    profile_matrix_for_key_cache << i + "-" + j + "-" + k
+                    profile_matrix_for_key_cache << i.to_s + "-" + j.to_s + "-" + k.to_s
                   end
                 end
               end
@@ -174,7 +174,7 @@ class BenchmarkController < ApplicationController
               if row_cache_size_array.size > 0
                 for l in 0..(row_cache_size_array.size - 1)
                   if row_cache_size_array[k] != 0
-                    profile_matrix_for_row_cache << i + "-" + j + "-" + l
+                    profile_matrix_for_row_cache << i.to_s + "-" + j.to_s + "-" + l.to_s
                   end
                 end
               end
