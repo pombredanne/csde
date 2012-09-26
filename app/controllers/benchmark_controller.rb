@@ -145,7 +145,6 @@ class BenchmarkController < ApplicationController
       logger.debug "--------------------------------"  
     end
       
-    end
      
 
     
