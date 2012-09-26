@@ -16,10 +16,11 @@ class BenchmarkController < ApplicationController
     #
     # each layer is represented as an array    
     instance_type_array = []
-    java_heap_size = []
-    key_cache_size = []
-    row_cache_size = []
+    java_heap_size_array = []
+    key_cache_size_array = []
+    row_cache_size_array = []
     
+    # layer 1:
     # instance type array
     # 0 --> small
     # 1 --> medium
@@ -27,6 +28,7 @@ class BenchmarkController < ApplicationController
     # using ternary operator, maybe for a better coding and reading hehe
     # syntax: condition ? then_branch : else_branch 
     logger.debug "::: Selected Instance Type:"
+    
     ! params[:instance_small].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
     if instance_type_array[0] == 1 then logger.debug "Small" end
      
@@ -36,11 +38,52 @@ class BenchmarkController < ApplicationController
     ! params[:instance_large].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
     if instance_type_array[2] == 1 then logger.debug "Large" end
 
+    # layer 2:
     # java heap size
     # 0 --> low
     # 1 --> high
+    logger.debug "::: Selected Java Heap Size:"
     
+    ! params[:heap_low].nil? ? java_heap_size_array[0] = 1 : java_heap_size_array[0] = 0
+    if java_heap_size[0] == 1 then logger.debug "Low" end
+      
+    ! params[:heap_high].nil? ? java_heap_size_array[1] = 1 : java_heap_size_array[1] = 0
+    if java_heap_size[1] == 1 then logger.debug "High" end
 
+
+    # layer 3:
+    # key cache size
+    # 0 --> low
+    # 1 --> medium
+    # 2 --> high
+    logger.debug "::: Selected Key Cache Size:"
+    
+    ! params[:key_cache_low].nil? ? key_cache_size_array[0] = 1 : key_cache_size_array[0] = 0
+    if key_cache_size_array[0] == 1 then logger.debug "Low" end
+      
+    ! params[:key_cache_medium].nil? ? key_cache_size_array[1] = 1 : key_cache_size_array[1] = 0
+    if key_cache_size_array[1] == 1 then logger.debug "Medium" end
+
+    ! params[:key_cache_high].nil? ? key_cache_size_array[2] = 1 : key_cache_size_array[2] = 0
+    if key_cache_size_array[2] == 1 then logger.debug "High" end
+    
+    # layer 4:
+    # row cache size
+    # 0 --> low
+    # 1 --> medium
+    # 2 --> high
+    logger.debug "::: Selected Row Cache Size:"
+    
+    ! params[:row_cache_low].nil? ? row_cache_size_array[0] = 1 : row_cache_size_array[0] = 0
+    if row_cache_size_array[0] == 1 then logger.debug "Low" end
+      
+    ! params[:row_cache_medium].nil? ? row_cache_size_array[1] = 1 : row_cache_size_array[1] = 0
+    if row_cache_size_array[1] == 1 then logger.debug "Medium" end
+
+    ! params[:row_cache_high].nil? ? row_cache_size_array[2] = 1 : row_cache_size_array[2] = 0
+    if row_cache_size_array[2] == 1 then logger.debug "High" end
+
+    
     
   end
   
