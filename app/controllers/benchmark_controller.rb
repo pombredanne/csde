@@ -3,6 +3,9 @@ class BenchmarkController < ApplicationController
   include Helper
   
   def generate
+    logger.debug "----------------------------------"    
+    logger.debug "::: Taking values from the form..."
+    logger.debug "----------------------------------"
     # get values from the view
     # and generate multiple profiles
     #
@@ -23,11 +26,22 @@ class BenchmarkController < ApplicationController
     # 2 --> large
     # using ternary operator, maybe for a better coding and reading hehe
     # syntax: condition ? then_branch : else_branch 
+    logger.debug "::: Selected Instance Type:"
     ! params[:instance_small].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
+    if instance_type_array[0] == 1 then logger.debug "Small"
+     
     ! params[:instance_medium].nil? ? instance_type_array[1] = 1 : instance_type_array[1] = 0
+    if instance_type_array[1] == 1 then logger.debug "Medium"
+      
     ! params[:instance_large].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
+    if instance_type_array[2] == 1 then logger.debug "Large"
+
+    # java heap size
+    # 0 --> low
+    # 1 --> high
     
-    puts instance_type_array
+
+    
   end
   
   
