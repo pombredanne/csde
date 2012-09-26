@@ -3,23 +3,31 @@ class BenchmarkController < ApplicationController
   include Helper
   
   def generate
+    # get values from the view
+    # and generate multiple profiles
+    #
+    # layer 1: instance type [small/medium/large]
+    # layer 2: java heap size [low/high]
+    # layer 3: key cache size [small/medium/high]
+    # layer 4: row cache size [small/medium/high]
+    #
+    # each layer is represented as an array    
+    instance_type_array = []
+    java_heap_size = []
+    key_cache_size = []
+    row_cache_size = []
     
-    # test
-    puts "SELECTED INSTANCE TYPE:"
-    puts "Small:"
-    if ! params[:instance_small].nil? 
-      puts params[:instance_small]
-    end
+    # instance type array
+    # 0 --> small
+    # 1 --> medium
+    # 2 --> large
+    # using ternary operator, maybe for a better coding and reading hehe
+    # syntax: condition ? then_branch : else_branch 
+    ! params[:instance_small].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
+    ! params[:instance_medium].nil? ? instance_type_array[1] = 1 : instance_type_array[1] = 0
+    ! params[:instance_high].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
     
-    puts "Meidum:"
-    if ! params[:instance_medium].nil? 
-      puts params[:instance_medium]
-    end
-    
-    puts "High:"
-    if ! params[:instance_high].nil? 
-      puts params[:instance_high]
-    end
+    puts instance_type_array
   end
   
   
