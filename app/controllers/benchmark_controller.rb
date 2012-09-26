@@ -28,13 +28,13 @@ class BenchmarkController < ApplicationController
     # syntax: condition ? then_branch : else_branch 
     logger.debug "::: Selected Instance Type:"
     ! params[:instance_small].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
-    if instance_type_array[0] == 1 then logger.debug "Small"
+    if instance_type_array[0] == 1 then logger.debug "Small" end
      
     ! params[:instance_medium].nil? ? instance_type_array[1] = 1 : instance_type_array[1] = 0
-    if instance_type_array[1] == 1 then logger.debug "Medium"
+    if instance_type_array[1] == 1 then logger.debug "Medium" end
       
     ! params[:instance_large].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
-    if instance_type_array[2] == 1 then logger.debug "Large"
+    if instance_type_array[2] == 1 then logger.debug "Large" end
 
     # java heap size
     # 0 --> low
