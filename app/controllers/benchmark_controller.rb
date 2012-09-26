@@ -128,26 +128,70 @@ class BenchmarkController < ApplicationController
     end
 
     logger.debug "--------------------"
-    logger.debug ":: Checking Input..."
+    logger.debug "::: Checking Input..."
     logger.debug "--------------------"
+    @status << "------------------\n"
+    @status << "<strong>::: Checking Input</strong>\n"
+    @status << "------------------\n"
     if ! instance_type_array.include? 1
+      logger.debug "Input [NOT OK]"
+      @status << "Input <strong>[NOT OK]</strong>"
       logger.debug "You have to choose at least an instance type!"
       @status << "You have to choose at least an <strong>instance type!</strong>\n"
     elsif ! java_heap_size_array.include? 1
+      logger.debug "Input [NOT OK]"
+      @status << "Input <strong>[NOT OK]</strong>"
       logger.debug "You have to choose at least a Java heap size!"
       @status << "You have to choose at least a <strong>Java heap size!</strong>\n"
     elsif (! key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1)
+      logger.debug "Input [NOT OK]"
+      @status << "Input <strong>[NOT OK]</strong>"
       logger.debug "You have to choose at least a Key Cache size OR a Row Cache size!"
       @status << "You have to choose at least a <strong>Key Cache size</strong> OR a <strong>Row Cache size</strong>\n"
     else
+      logger.debug "Input [OK]"
+      @status << "Input <strong>[OK]</strong>"
       logger.debug "--------------------------------"
       logger.debug "::: Generating Profile Matrix..."
-      logger.debug "--------------------------------"  
-    end
+      logger.debug "--------------------------------"
       
-     
+      profile_matrix_for_key_cache = []
+      profile_matrix_for_row_cache = []
+      
+      for i in 0..(instance_type_array.size - 1)
+        if instance_type_array[i] != 0
+          for j in 0..(java_heap_size_array.size - 1)
+            if java_heap_size_array[j] != 0
+              
+              if key_cache_size_array.size > 0
+                for k in 0..(key_cache_size_array.size - 1)
+                  if key_cache_size_array[k] != 0
+                    profile_matrix_for_key_cache << i + "-" + j + "-" + k
+                  end
+                end
+              end
+              
+              if row_cache_size_array.size > 0
+                for l in 0..(row_cache_size_array.size - 1)
+                  if row_cache_size_array[k] != 0
+                    profile_matrix_for_row_cache << i + "-" + j + "-" + l
+                  end
+                end
+              end
 
-    
+            end
+          end  
+        end
+      end
+      
+      puts "Key Cache Profiles"
+      puts profile_matrix_for_key_cache
+      
+      puts "Row Cache Profiles"
+      puts profile_matrix_for_row_cache
+
+        
+    end
     
   end
   
