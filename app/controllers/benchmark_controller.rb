@@ -249,10 +249,13 @@ class BenchmarkController < ApplicationController
         @status << "-------------------------------------\n"
         
         profile_matrix_for_row_cache.each do |profile|
+          puts profile
+          
           logger.debug "Profile #{profile_counter}:"
           @status << "<strong>Profile #{profile_counter}:</strong>\n"
           
-          tmp_arr = profile.to_s.split"-"
+          tmp_arr = profile.to_s.split("-")
+          puts tmp_arr
           
           logger.debug "Instance Type:"
           @status << "Instance Type:\n"
