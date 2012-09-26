@@ -194,11 +194,14 @@ class BenchmarkController < ApplicationController
         @status << "<strong>::: Profiles for Key Cache Experiment<strong>\n"
         @status << "-------------------------------------\n"
         
-        profile_matrix_for_key_cache.each do |profile|
+        profile_matrix_for_key_cache.each do |p|
+          puts p
+          
           logger.debug "Profile #{profile_counter}:"
           @status << "<strong>Profile #{profile_counter}:</strong>\n"
           
-          tmp_arr = profile.to_s.split"-"
+          tmp_arr = p.to_s.split("-")
+          puts tmp_arr
           
           logger.debug "Instance Type:"
           @status << "Instance Type:\n"
