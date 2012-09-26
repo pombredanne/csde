@@ -191,7 +191,7 @@ class BenchmarkController < ApplicationController
         logger.debug "::: Profiles for Key Cache Experiment"
         logger.debug "--------------------------------------"
         @status << "-------------------------------------\n"
-        @status << "<strong>::: Profiles for Key Cache Experiment<strong>\n"
+        @status << "<strong>::: Profiles for Key Cache Experiment</strong>\n"
         @status << "-------------------------------------\n"
         
         profile_matrix_for_key_cache.each do |p|
@@ -245,7 +245,7 @@ class BenchmarkController < ApplicationController
         logger.debug "::: Profiles for Row Cache Experiment"
         logger.debug "--------------------------------------"
         @status << "-------------------------------------\n"
-        @status << "<strong>::: Profiles for Row Cache Experiment<strong>\n"
+        @status << "<strong>::: Profiles for Row Cache Experiment</strong>\n"
         @status << "-------------------------------------\n"
         
         profile_matrix_for_row_cache.each do |p|
