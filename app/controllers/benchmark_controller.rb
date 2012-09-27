@@ -155,7 +155,7 @@ class BenchmarkController < ApplicationController
       logger.debug "------------------------------------------------------------------------------"
       logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
       logger.debug "------------------------------------------------------------------------------"
-      s3 = create_fog_object_s3 'aws', nil
+      s3 = create_fog_object 'aws', nil, 'storage'
       
       # check if a bucket called 'kcsdb-profiles' already exists
       dirs = s3.directories
@@ -1027,7 +1027,7 @@ class BenchmarkController < ApplicationController
     $stdout.sync = true
     
     # create a fog object in the given region with the corresponding provider (aws, rackspace)
-    ec2 = create_fog_object 'aws', region
+    ec2 = create_fog_object 'aws', region, 'compute'
     
     # server definition
     server_def = {

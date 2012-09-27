@@ -1,17 +1,21 @@
 # follow the DRY principle
 # share code among controllers
 
+require "forwardable"
+
 module Helper
 
   # Create Fob Object Facade
   # create a fog object in order to send/receive API requests/responses from/to cloud provider
   # supported providers: aws | rackspace
   # regions are corresponding to the provider: e.g. us-east-1 for aws
-  def create_fog_object provider, region 
+  # services are compute | storage
+  def create_fog_object provider, region, service
     fog_object = nil
     state = get_state
     if provider == 'aws'
-      fog_object = create_fog_object_ec2 state, region
+      if service == 'compute' then fog_object = create_fog_object_ec2 state, region end
+      if service == 'storage' then fog_object = create_fog_object_s3 state, region end 
     elsif provider == 'rackspace'
       fog_object = create_fog_object_rackspace state, region
     else

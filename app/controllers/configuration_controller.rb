@@ -37,7 +37,7 @@ class ConfigurationController < ApplicationController
       logger.debug "Checking AWS in region: #{region}..."
       logger.debug "------------------------------------"
       
-      ec2 = create_fog_object 'aws', region
+      ec2 = create_fog_object 'aws', region, 'compute'
       
       logger.debug "::: Checking the key pair"
   
