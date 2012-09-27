@@ -120,6 +120,13 @@ class BenchmarkController < ApplicationController
       @status << "High\n"
     end
 
+    # test
+    puts "Key Cache Size Array:"
+    puts key_cache_size_array
+    
+    puts "Row Cache Size Array:"
+    puts row_cache_size_array
+
     logger.debug "--------------------"
     logger.debug "::: Checking Input..."
     logger.debug "--------------------"
