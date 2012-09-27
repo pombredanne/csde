@@ -155,7 +155,7 @@ class BenchmarkController < ApplicationController
       logger.debug "------------------------------------------------------------------------------"
       logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
       logger.debug "------------------------------------------------------------------------------"
-      s3 = create_fog_object_s3
+      s3 = create_fog_object_s3 'aws', nil
       
       # check if a bucket called 'kcsdb-profiles' already exists
       dirs = s3.directories
