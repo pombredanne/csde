@@ -29,28 +29,21 @@ class BenchmarkController < ApplicationController
     
     # layer 1:
     # instance type array
-    # 0 --> small
-    # 1 --> medium
-    # 2 --> large
+    # 0 --> medium
+    # 1 --> large
     # using ternary operator, maybe for a better coding and reading hehe
     # syntax: condition ? then_branch : else_branch 
     logger.debug "::: Selected Instance Types:"
     @status << "<strong>::: Selected Instance Types:</strong>\n"
-    
-    ! params[:instance_small].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
-    if instance_type_array[0] == 1
-      logger.debug "Small" 
-      @status << "Small\n"
-    end
-     
-    ! params[:instance_medium].nil? ? instance_type_array[1] = 1 : instance_type_array[1] = 0
-    if instance_type_array[1] == 1 
+         
+    ! params[:instance_medium].nil? ? instance_type_array[0] = 1 : instance_type_array[0] = 0
+    if instance_type_array[0] == 1 
       logger.debug "Medium" 
       @status << "Medium\n"
     end
       
-    ! params[:instance_large].nil? ? instance_type_array[2] = 1 : instance_type_array[2] = 0      
-    if instance_type_array[2] == 1 
+    ! params[:instance_large].nil? ? instance_type_array[1] = 1 : instance_type_array[1] = 0      
+    if instance_type_array[1] == 1 
       logger.debug "Large" 
       @status << "Large\n"  
     end
@@ -184,6 +177,13 @@ class BenchmarkController < ApplicationController
         end
       end
       
+      # test
+      puts "Profile Matrix for Key Cache"
+      puts profile_matrix_for_key_cache
+      
+      puts "Profile Matrix for Row Cache"
+      puts profile_matrix_for_row_cache
+      
       profile_counter = 1
       
       if profile_matrix_for_key_cache.size > 0
@@ -195,45 +195,38 @@ class BenchmarkController < ApplicationController
         @status << "-------------------------------------\n"
         
         profile_matrix_for_key_cache.each do |p|
+          puts "Profile: #{p}"
+          
           logger.debug "Profile #{profile_counter}:"
           @status << "<strong>Profile #{profile_counter}:</strong>\n"
           
           tmp_arr = p.to_s.split("-")
           
-          logger.debug "Instance Type:"
-          @status << "Instance Type:\n"
           if tmp_arr[0] == 0.to_s
-            logger.debug "Small"
-            @status << "Small\n"
+            logger.debug "Instance Type: Medium"
+            @status << "Instance Type: Medium\n"
           elsif tmp_arr[0] == 1.to_s
-            logger.debug "Medium"
-            @status << "Medium\n"
-          elsif tmp_arr[0] == 2.to_s
-            logger.debug "Large"
-            @status << "Large\n"
+            logger.debug "Instance Type: Large"
+            @status << "Instance Type: Large\n"
           end
           
-          logger.debug "Java Heap Size:"
-          @status << "Java Heap Size:\n"          
           if tmp_arr[1] == 0.to_s
-            logger.debug "Low"
-            @status << "Low\n"
+            logger.debug "Java Heap Size: Low"
+            @status << "Java Heap Size: Low\n"
           elsif tmp_arr[1] == 1.to_s
-            logger.debug "High"
-            @status << "High\n"
+            logger.debug "Java Heap Size: High"
+            @status << "Java Heap Size: High\n"
           end
           
-          logger.debug "Key Cache Size:"
-          @status << "Key Cache Size:\n"
           if tmp_arr[2] == 0.to_s
-            logger.debug "Low"
-            @status << "Low\n"
+            logger.debug "Key Cache Size: Low"
+            @status << "Key Cache Size: Low\n"
           elsif tmp_arr[2] == 1.to_s
-            logger.debug "Medium"
-            @status << "Medium\n"
+            logger.debug "Key Cache Size: Medium"
+            @status << "Key Cache Size: Medium\n"
           elsif tmp_arr[2] == 2.to_s
-            logger.debug "High"
-            @status << "High\n"
+            logger.debug "Key Cache Size: High"
+            @status << "Key Cache Size: High\n"
           end
           
           profile_counter += 1 
@@ -249,51 +242,46 @@ class BenchmarkController < ApplicationController
         @status << "-------------------------------------\n"
         
         profile_matrix_for_row_cache.each do |p|
+          puts "Profile #{p}"
+          
           logger.debug "Profile #{profile_counter}:"
           @status << "<strong>Profile #{profile_counter}:</strong>\n"
           
           tmp_arr = p.to_s.split("-")
           
-          logger.debug "Instance Type:"
-          @status << "Instance Type:\n"
           if tmp_arr[0] == 0.to_s
-            logger.debug "Small"
-            @status << "Small\n"
+            logger.debug "Instance Type: Medium"
+            @status << "Instance Type: Medium\n"
           elsif tmp_arr[0] == 1.to_s
-            logger.debug "Medium"
-            @status << "Medium\n"
-          elsif tmp_arr[0] == 2.to_s
-            logger.debug "Large"
-            @status << "Large\n"
+            logger.debug "Instance Type: Large"
+            @status << "Instance Type: Large\n"
           end
           
-          logger.debug "Java Heap Size:"
-          @status << "Java Heap Size:\n"          
           if tmp_arr[1] == 0.to_s
-            logger.debug "Low"
-            @status << "Low\n"
+            logger.debug "Java Heap Size: Low"
+            @status << "Java Heap Size: Low\n"
           elsif tmp_arr[1] == 1.to_s
-            logger.debug "High"
-            @status << "High\n"
+            logger.debug "Java Heap Size: High"
+            @status << "Java Heap Size: High\n"
           end
           
-          logger.debug "Row Cache Size:"
-          @status << "Row Cache Size:\n"
           if tmp_arr[2] == 0.to_s
-            logger.debug "Low"
-            @status << "Low\n"
+            logger.debug "Row Cache Size: Low"
+            @status << "Row Cache Size: Low\n"
           elsif tmp_arr[2] == 1.to_s
-            logger.debug "Medium"
-            @status << "Medium\n"
+            logger.debug "Row Cache Size: Medium"
+            @status << "Row Cache Size: Medium\n"
           elsif tmp_arr[2] == 2.to_s
-            logger.debug "High"
-            @status << "High\n"
+            logger.debug "Row Cache Size: High"
+            @status << "Row Cache Size: High\n"
           end
           
           profile_counter += 1 
         end
       end
     end
+    
+    
     
   end
   

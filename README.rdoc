@@ -1,6 +1,6 @@
 = KIT Cloud Serving Deployment and Benchmark
 
-= DESCRIPTION:
+= DESCRIPTION
 
 KIT Cloud Serving Deployment and Benchmark (KCSDB), which is currently developed by AIFB(KIT) and FZI, is a web based tool to help you do following tasks
 
@@ -10,7 +10,7 @@ KIT Cloud Serving Deployment and Benchmark (KCSDB), which is currently developed
 With KCSDB, you can concentrate on your work with the databases, not dealing with setup and configuration. KCSD automates it already for you.
 However, like any software on the earth, written by human, there may be bugs and issues. Therefore, please read the description below carefully.
   
-= INSTALLATION:
+= INSTALLATION
 
 KCSDB now can be installed on Ubuntu 11.10 x64 and 12.04 x64. Please use the EBS AMIs of Canonical in AWS EC2
 For example
@@ -40,7 +40,7 @@ Thus, use another way to install Sun JDK
  $ sudo apt-get install sun-java6-jdk
  $ export JAVA_HOME=/usr/lib/jvm/java-6-sun
 
-= LICENSE:
+= LICENSE
 
 Author:: Hoang Anh Le [me@lehoanganh.de] | Markus Klems [Markus.Klems@aifb.uni-karlsruhe.de]
 Copyright:: Copyright (c) 2012
