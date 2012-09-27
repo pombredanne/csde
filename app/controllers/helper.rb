@@ -37,6 +37,24 @@ module Helper
     ec2
   end
   
+  # Create Fog Object S3
+  private
+  def create_fog_object_s3 state, region
+    # standard region
+    if region.nil?
+      region = 'us-east-1'   
+    end
+    
+    s3 = Fog::Storage.new(
+      provider: 'AWS',
+      aws_access_key_id: state['aws_access_key_id'],
+      aws_secret_access_key: state['aws_secret_access_key'],
+      region: region
+    )
+    s3
+  end
+  
+  
   # Create Fog Object Rackspace
   # TODO: each region in Rackspace is assigned a different account
   private

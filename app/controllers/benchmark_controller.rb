@@ -151,6 +151,25 @@ class BenchmarkController < ApplicationController
     else
       logger.debug "Input [OK]"
       @status << "Input <strong>[OK]</strong>\n"
+      
+      logger.debug "------------------------------------------------------------------------------"
+      logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
+      logger.debug "------------------------------------------------------------------------------"
+      s3 = create_fog_object_s3
+      
+      # check if a bucket called 'kcsdb-profiles' already exists
+      dirs = s3.directories
+      check = false
+      dirs.each {|dir| if dir.key == "kcsdb-profiles" then check = true end}
+      
+      # if this bucket does not exist than create a new one
+      if ! check
+        kcsdb_profiles = s3.directories.create(
+          :key => "kcsdb-profiles",
+          :public => true
+        )
+      end        
+      
       logger.debug "--------------------------------"
       logger.debug "::: Generating Profile Matrix..."
       logger.debug "--------------------------------"
@@ -236,7 +255,9 @@ class BenchmarkController < ApplicationController
             @status << "Key Cache Size: High\n"
           end
           
-          profile_counter += 1 
+          profile_counter += 1
+          
+           
         end
       end
         
@@ -286,11 +307,17 @@ class BenchmarkController < ApplicationController
           profile_counter += 1 
         end
       end
-    end
+    
+      
+      
+      
+
+    
+    end # end of checking input
     
     
     
-  end
+  end # end of generate action
   
   
   

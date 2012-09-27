@@ -12,7 +12,7 @@ gem 'logger', '1.2.8'
 # Fog
 # Universal API for many infrastructure cloud provider
 # good supported for AWS EC2, Rackspace
-gem 'fog', '1.5.0'
+gem 'fog', '1.6.0'
 
 # Chef
 gem 'chef', '10.12.0'
