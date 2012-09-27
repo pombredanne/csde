@@ -163,11 +163,16 @@ class BenchmarkController < ApplicationController
       dirs.each {|dir| if dir.key == "kcsdb-profiles" then check = true end}
       
       # if this bucket does not exist than create a new one
+      kcsdb_profiles = nil
       if ! check
+        logger.debug "Bucket 'kcsdb-profiles' does NOT exist, create a new one..."
         kcsdb_profiles = s3.directories.create(
           :key => "kcsdb-profiles",
           :public => true
         )
+      else
+        logger.debug "Bucket 'kcsdb-profiles' EXIST, get the bucket..."
+        kcsdb_profiles = s3.directories.get 'kcsdb-profiles'
       end        
       
       logger.debug "--------------------------------"
@@ -228,35 +233,140 @@ class BenchmarkController < ApplicationController
           
           tmp_arr = p.to_s.split("-")
           
+          tmpl_file = File.read "#{Rails.root}/key_cache_exp_profile_tmpl.yaml"
+          profile_name = ""
+          
+          # check instance type: MEDIUM
           if tmp_arr[0] == 0.to_s
             logger.debug "Instance Type: Medium"
             @status << "Instance Type: Medium\n"
+            profile_name << "ins.med-"
+            tmpl_file.gsub!(/machine_type: dummy/, "machine_type: medium")
+            # check java heap size: LOW
+            if tmp_arr[1] == 0.to_s
+              logger.debug "Java Heap Size: Low"
+              @status << "Java Heap Size: Low\n"
+              profile_name << "heap.low-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: dummy") # don't change
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: dummy") # don't change
+              # check key cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "Key Cache Size: Low"
+                @status << "Key Cache Size: Low\n"
+                profile_name << "key.low.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: ") # don't change
+              # check key cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "Key Cache Size: Medium"
+                @status << "Key Cache Size: Medium\n"
+                profile_name << "key.med.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 102")
+              # check key cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "Key Cache Size: High"
+                @status << "Key Cache Size: High\n"
+                profile_name << "key.high.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 204")
+              end
+            # check java heap size: HIGH  
+            elsif tmp_arr[1] == 1.to_s
+              logger.debug "Java Heap Size: High"
+              @status << "Java Heap Size: High\n"
+              profile_name << "heap.high-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: 1536")
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: 100")
+              # check key cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "Key Cache Size: Low"
+                @status << "Key Cache Size: Low\n"
+                profile_name << "key.low.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: ") # don't change
+              # check key cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "Key Cache Size: Medium"
+                @status << "Key Cache Size: Medium\n"
+                profile_name << "key.med.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 154")
+              # check key cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "Key Cache Size: High"
+                @status << "Key Cache Size: High\n"
+                profile_name << "key.high.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 307")
+              end
+            end
+          # check instance type: LARGE
           elsif tmp_arr[0] == 1.to_s
             logger.debug "Instance Type: Large"
             @status << "Instance Type: Large\n"
+            profile_name << "ins.lar-"
+            tmpl_file.gsub!(/machine_type: dummy/, "machine_type: large")
+            # check java heap size: LOW
+            if tmp_arr[1] == 0.to_s
+              logger.debug "Java Heap Size: Low"
+              @status << "Java Heap Size: Low\n"
+              profile_name << "heap.low-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: dummy") # don't change
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: dummy") # don't change
+              # check key cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "Key Cache Size: Low"
+                @status << "Key Cache Size: Low\n"
+                profile_name << "key.low.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: ") # don't change
+              # check key cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "Key Cache Size: Medium"
+                @status << "Key Cache Size: Medium\n"
+                profile_name << "key.med.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 186")
+              # check key cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "Key Cache Size: High"
+                @status << "Key Cache Size: High\n"
+                profile_name << "key.high.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 372")
+              end
+            # check java heap size: HIGH  
+            elsif tmp_arr[1] == 1.to_s
+              logger.debug "Java Heap Size: High"
+              @status << "Java Heap Size: High\n"
+              profile_name << "heap.high-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: 2793")
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: 200")
+              # check key cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "Key Cache Size: Low"
+                @status << "Key Cache Size: Low\n"
+                profile_name << "key.low.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: ") # don't change
+              # check key cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "Key Cache Size: Medium"
+                @status << "Key Cache Size: Medium\n"
+                profile_name << "key.med.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 279")
+              # check key cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "Key Cache Size: High"
+                @status << "Key Cache Size: High\n"
+                profile_name << "key.high.yaml"
+                tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 558")
+              end
+            end
           end
           
-          if tmp_arr[1] == 0.to_s
-            logger.debug "Java Heap Size: Low"
-            @status << "Java Heap Size: Low\n"
-          elsif tmp_arr[1] == 1.to_s
-            logger.debug "Java Heap Size: High"
-            @status << "Java Heap Size: High\n"
-          end
-          
-          if tmp_arr[2] == 0.to_s
-            logger.debug "Key Cache Size: Low"
-            @status << "Key Cache Size: Low\n"
-          elsif tmp_arr[2] == 1.to_s
-            logger.debug "Key Cache Size: Medium"
-            @status << "Key Cache Size: Medium\n"
-          elsif tmp_arr[2] == 2.to_s
-            logger.debug "Key Cache Size: High"
-            @status << "Key Cache Size: High\n"
-          end
+          logger.debug "Writting profile: #{profile_counter} in localhost..."
+          File.open("#{Rails.root}/#{profile_name}",'w') {|f| f.write tmpl_file}
+
+          logger.debug "Uploading profile: #{profile_counter} to S3..."
+          file = kcsdb_profiles.files.create(
+            :key    => profile_name,
+            :body   => File.open("#{Rails.root}/#{profile_name}"),
+            :public => true
+          )          
           
           profile_counter += 1
-          
            
         end
       end

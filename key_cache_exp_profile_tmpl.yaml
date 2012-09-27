@@ -4,6 +4,7 @@ service1:
     replication_factor: 2
     partitioner: RandomPartitioner
     heap_size: dummy
+    heap_new_size: dummy
     key_cache_size_in_mb: dummy
 service2:
   name: ycsb
