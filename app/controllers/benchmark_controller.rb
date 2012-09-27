@@ -370,7 +370,172 @@ class BenchmarkController < ApplicationController
            
         end
       end
+      
+      
+      
+      if profile_matrix_for_row_cache.size > 0
+        logger.debug "--------------------------------------"
+        logger.debug "::: Profiles for row Cache Experiment"
+        logger.debug "--------------------------------------"
+        @status << "-------------------------------------\n"
+        @status << "<strong>::: Profiles for row Cache Experiment</strong>\n"
+        @status << "-------------------------------------\n"
         
+        profile_matrix_for_row_cache.each do |p|
+          puts "Profile: #{p}"
+          
+          logger.debug "Profile #{profile_counter}:"
+          @status << "<strong>Profile #{profile_counter}:</strong>\n"
+          
+          tmp_arr = p.to_s.split("-")
+          
+          tmpl_file = File.read "#{Rails.root}/row_cache_exp_profile_tmpl.yaml"
+          profile_name = ""
+          
+          # check instance type: MEDIUM
+          if tmp_arr[0] == 0.to_s
+            logger.debug "Instance Type: Medium"
+            @status << "Instance Type: Medium\n"
+            profile_name << "ins.med-"
+            tmpl_file.gsub!(/machine_type: dummy/, "machine_type: medium")
+            # check java heap size: LOW
+            if tmp_arr[1] == 0.to_s
+              logger.debug "Java Heap Size: Low"
+              @status << "Java Heap Size: Low\n"
+              profile_name << "heap.low-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: dummy") # don't change
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: dummy") # don't change
+              # check row cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "row Cache Size: Low"
+                @status << "row Cache Size: Low\n"
+                profile_name << "row.low.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+              # check row cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "row Cache Size: Medium"
+                @status << "row Cache Size: Medium\n"
+                profile_name << "row.med.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 102")
+              # check row cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "row Cache Size: High"
+                @status << "row Cache Size: High\n"
+                profile_name << "row.high.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 204")
+              end
+            # check java heap size: HIGH  
+            elsif tmp_arr[1] == 1.to_s
+              logger.debug "Java Heap Size: High"
+              @status << "Java Heap Size: High\n"
+              profile_name << "heap.high-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: 1536")
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: 100")
+              # check row cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "row Cache Size: Low"
+                @status << "row Cache Size: Low\n"
+                profile_name << "row.low.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+              # check row cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "row Cache Size: Medium"
+                @status << "row Cache Size: Medium\n"
+                profile_name << "row.med.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 154")
+              # check row cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "row Cache Size: High"
+                @status << "row Cache Size: High\n"
+                profile_name << "row.high.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 307")
+              end
+            end
+          # check instance type: LARGE
+          elsif tmp_arr[0] == 1.to_s
+            logger.debug "Instance Type: Large"
+            @status << "Instance Type: Large\n"
+            profile_name << "ins.lar-"
+            tmpl_file.gsub!(/machine_type: dummy/, "machine_type: large")
+            # check java heap size: LOW
+            if tmp_arr[1] == 0.to_s
+              logger.debug "Java Heap Size: Low"
+              @status << "Java Heap Size: Low\n"
+              profile_name << "heap.low-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: dummy") # don't change
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: dummy") # don't change
+              # check row cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "row Cache Size: Low"
+                @status << "row Cache Size: Low\n"
+                profile_name << "row.low.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+              # check row cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "row Cache Size: Medium"
+                @status << "row Cache Size: Medium\n"
+                profile_name << "row.med.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 186")
+              # check row cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "row Cache Size: High"
+                @status << "row Cache Size: High\n"
+                profile_name << "row.high.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 372")
+              end
+            # check java heap size: HIGH  
+            elsif tmp_arr[1] == 1.to_s
+              logger.debug "Java Heap Size: High"
+              @status << "Java Heap Size: High\n"
+              profile_name << "heap.high-"
+              tmpl_file.gsub!(/heap_size: dummy/, "heap_size: 2793")
+              tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: 200")
+              # check row cache size: LOW
+              if tmp_arr[2] == 0.to_s
+                logger.debug "row Cache Size: Low"
+                @status << "row Cache Size: Low\n"
+                profile_name << "row.low.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+              # check row cache size: MEDIUM
+              elsif tmp_arr[2] == 1.to_s
+                logger.debug "row Cache Size: Medium"
+                @status << "row Cache Size: Medium\n"
+                profile_name << "row.med.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 279")
+              # check row cache size: HIGH
+              elsif tmp_arr[2] == 2.to_s
+                logger.debug "row Cache Size: High"
+                @status << "row Cache Size: High\n"
+                profile_name << "row.high.yaml"
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 558")
+              end
+            end
+          end
+          
+          logger.debug "Writting profile: #{profile_counter} in localhost..."
+          File.open("#{Rails.root}/#{profile_name}",'w') {|f| f.write tmpl_file}
+
+          logger.debug "Uploading profile: #{profile_counter} to S3..."
+          file = kcsdb_profiles.files.create(
+            :key    => profile_name,
+            :body   => File.open("#{Rails.root}/#{profile_name}"),
+            :public => true
+          )          
+          
+          profile_counter += 1
+           
+        end
+      end
+      
+      
+      
+      
+      
+      
+      
+      
+      
+       
       if profile_matrix_for_row_cache.size > 0
         logger.debug "--------------------------------------"
         logger.debug "::: Profiles for Row Cache Experiment"
