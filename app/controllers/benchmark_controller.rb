@@ -371,8 +371,6 @@ class BenchmarkController < ApplicationController
         end
       end
       
-      
-      
       if profile_matrix_for_row_cache.size > 0
         logger.debug "--------------------------------------"
         logger.debug "::: Profiles for row Cache Experiment"
@@ -526,71 +524,8 @@ class BenchmarkController < ApplicationController
            
         end
       end
-      
-      
-      
-      
-      
-      
-      
-      
-      
-       
-      if profile_matrix_for_row_cache.size > 0
-        logger.debug "--------------------------------------"
-        logger.debug "::: Profiles for Row Cache Experiment"
-        logger.debug "--------------------------------------"
-        @status << "-------------------------------------\n"
-        @status << "<strong>::: Profiles for Row Cache Experiment</strong>\n"
-        @status << "-------------------------------------\n"
-        
-        profile_matrix_for_row_cache.each do |p|
-          puts "Profile #{p}"
-          
-          logger.debug "Profile #{profile_counter}:"
-          @status << "<strong>Profile #{profile_counter}:</strong>\n"
-          
-          tmp_arr = p.to_s.split("-")
-          
-          if tmp_arr[0] == 0.to_s
-            logger.debug "Instance Type: Medium"
-            @status << "Instance Type: Medium\n"
-          elsif tmp_arr[0] == 1.to_s
-            logger.debug "Instance Type: Large"
-            @status << "Instance Type: Large\n"
-          end
-          
-          if tmp_arr[1] == 0.to_s
-            logger.debug "Java Heap Size: Low"
-            @status << "Java Heap Size: Low\n"
-          elsif tmp_arr[1] == 1.to_s
-            logger.debug "Java Heap Size: High"
-            @status << "Java Heap Size: High\n"
-          end
-          
-          if tmp_arr[2] == 0.to_s
-            logger.debug "Row Cache Size: Low"
-            @status << "Row Cache Size: Low\n"
-          elsif tmp_arr[2] == 1.to_s
-            logger.debug "Row Cache Size: Medium"
-            @status << "Row Cache Size: Medium\n"
-          elsif tmp_arr[2] == 2.to_s
-            logger.debug "Row Cache Size: High"
-            @status << "Row Cache Size: High\n"
-          end
-          
-          profile_counter += 1 
-        end
-      end
-    
-      
-      
-      
-
     
     end # end of checking input
-    
-    
     
   end # end of generate action
   
@@ -2113,6 +2048,13 @@ class BenchmarkController < ApplicationController
     
     @sleep_array = @sleep_array.reverse
     # @sleep_array = [..,10,5,0]
+
+    # getting all workload attributes that are defined in profile
+    attributes = ycsb_config_hash['attributes']
+    attributes_string = ""
+    attributes.each do |key, value|
+      attributes_string << "-p #{key}=#{value} "
+    end  
     
     logger.debug "Invoking ALL YCSB clients..."
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |block|
@@ -2123,12 +2065,12 @@ class BenchmarkController < ApplicationController
       
       sleep sleep_time
       
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load -s -p timeseries.granularity=10000'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load -s -p timeseries.granularity=10000 #{attributes_string}'"
       
       logger.debug "Command:"
       puts cmd
       
-      system cmd
+      system cmd # invoke A YCSB client
     end
   end
 

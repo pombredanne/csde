@@ -1,0 +1,37 @@
+service1:
+  name: cassandra
+  attributes:
+    replication_factor: 2
+    partitioner: RandomPartitioner
+service2:
+  name: ycsb
+  attributes:
+    recordcount: 30000000 # 10 Mio rows pro node
+    fieldcount: 10 # 10 columns pro row
+    filedlength: 10 # a column is 10 byte
+    threadcount: 20
+service3:
+  name: gmond
+  attributes:
+    send_metadata_interval: 60
+profile1:
+  provider: aws
+  regions:
+    region1:
+      name: us-east-1
+      machine_type: dummy
+      template: 3 cassandra, 1 ycsb
+    #region2:
+      #name: us-west-1
+      #machine_type: small
+      #template: 3 cassandra, 2 ycsb
+    # region3:
+      # name: us-west-2
+      # machine_type: small
+      # template: 1 cassandra
+    # region4:
+      # name: eu-west-1
+      # machine_type: small
+      # template: 1 cassandra       
+
+    
