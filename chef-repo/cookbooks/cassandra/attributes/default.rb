@@ -83,6 +83,7 @@ default[:cassandra][:reduce_cache_capacity_to] = "0.6"
 # Configuration via Cassandra ENV (cassandra-env.sh)
 # =============================================== #
 default[:cassandra][:heap_size] = "dummy"
+default[:cassandra][:heap_new_size] = "dummy"
 
 
 # ============================================= #

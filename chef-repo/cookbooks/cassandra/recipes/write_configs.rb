@@ -22,11 +22,17 @@ end
 
 # overwrite cassandra-env.sh
 # cassandra-env.sh
+
+# update: JVM_OPTS
+# update: MAX_HEAP_SIZE (if needed)
+# update: HEAP_NEWSIZE (if needed)
 ruby_block "build_cassandra_evn" do
   block do
     filename = node[:cassandra][:conf_path] + "cassandra-env.sh"
     cassandra_env = File.read filename
     cassandra_env.gsub!(/# JVM_OPTS="\$JVM_OPTS -Djava.rmi.server.hostname=<public name>"/, "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=#{node[:cloud][:private_ips].first}\"")
+    if node[:cassandra][:heap_size] != "dummy" then cassandra_env.gsub!(/#MAX_HEAP_SIZE=.*/, "MAX_HEAP_SIZE=\"#{node[:cassandra][:heap_size]}M\"") end
+    if node[:cassandra][:heap_new_size] != "dummy" then cassandra_env.gsub!(/#HEAP_NEWSIZE=.*/, "HEAP_NEWSIZE=\"#{node[:cassandra][:heap_new_size]}M\"") end
     File.open(filename,'w'){|f| f.write cassandra_env }
   end
   action :create
