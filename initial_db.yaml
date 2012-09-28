@@ -19,7 +19,7 @@ profile1:
   regions:
     region1:
       name: us-east-1
-      machine_type: dummy
+      machine_type: large
       template: 3 cassandra, 1 ycsb
     #region2:
       #name: us-west-1
