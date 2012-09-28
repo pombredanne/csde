@@ -2053,7 +2053,7 @@ class BenchmarkController < ApplicationController
     attributes = ycsb_config_hash['attributes']
     attributes_string = ""
     attributes.each do |key, value|
-      attributes_string << "-p #{key}=#{value} "
+      attributes_string << "#{key}=#{value} "
     end  
     
     logger.debug "Invoking ALL YCSB clients..."
