@@ -6,6 +6,7 @@ service1:
 service2:
   name: ycsb
   attributes:
+    heap_size: 2048 # a big enough heap size has to be set in order to generate millions rows
     recordcount: 30000000 # 10 Mio rows pro node
     fieldcount: 10 # 10 columns pro row
     filedlength: 10 # a column is 10 byte

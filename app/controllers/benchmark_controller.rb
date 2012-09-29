@@ -2051,9 +2051,16 @@ class BenchmarkController < ApplicationController
 
     # getting all workload attributes that are defined in profile
     attributes = ycsb_config_hash['attributes']
+    
+    heap_size = ""
+    
     attributes_string = ""
     attributes.each do |key, value|
-      attributes_string << "-p phase1.#{key}=#{value} " # use only single phase for YCSB++
+      if key != "heap_size"
+        attributes_string << "-p phase1.#{key}=#{value} " # use only single phase for YCSB++
+      else
+        heap_size = value
+      end
     end  
     
     logger.debug "Invoking ALL YCSB clients..."
@@ -2065,7 +2072,7 @@ class BenchmarkController < ApplicationController
       
       sleep sleep_time
       
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load -s -p measurementtype=timeseries -p timeseries.granularity=10000 #{attributes_string}'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load -s -p measurementtype=timeseries -p timeseries.granularity=10000 #{attributes_string}'"
       
       logger.debug "Command:"
       puts cmd
