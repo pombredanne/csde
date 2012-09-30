@@ -6,12 +6,12 @@ service1:
 service2:
   name: ycsb
   attributes:
-    heap_size: 2048 # a big enough heap size has to be set in order to generate millions rows
+    heap_size: 3072 # a big enough heap size has to be set in order to generate millions rows
     recordcount: 3000000 # 10 Mio rows pro node
     operationcount: 3000000 # 10 Mio rows pro node
     fieldcount: 10 # 10 columns pro row
-    filedlength: 100 # a column is 10 byte
-    threadcount: 10
+    filedlength: 1000 # a column is 10 byte
+    threadcount: 20
 service3:
   name: gmond
   attributes:
