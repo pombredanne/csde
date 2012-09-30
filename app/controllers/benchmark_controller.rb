@@ -2057,7 +2057,11 @@ class BenchmarkController < ApplicationController
     attributes_string = ""
     attributes.each do |key, value|
       if key != "heap_size"
-        attributes_string << "-p phase1.#{key}=#{value} " # use only single phase for YCSB++
+        if key == "measurementtype" || key == "timeseries.granularity"
+          attributes_string << "-p #{key}=#{value} "  
+        else
+          attributes_string << "-p phase1.#{key}=#{value} " # use only single phase for YCSB++
+        end
       else
         heap_size = value
       end
