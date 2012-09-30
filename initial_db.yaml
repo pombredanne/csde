@@ -8,6 +8,7 @@ service2:
   attributes:
     heap_size: 2048 # a big enough heap size has to be set in order to generate millions rows
     recordcount: 3000000 # 10 Mio rows pro node
+    operationcount: 3000000 # 10 Mio rows pro node
     fieldcount: 10 # 10 columns pro row
     filedlength: 100 # a column is 10 byte
     threadcount: 10
