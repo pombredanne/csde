@@ -7,7 +7,7 @@ service2:
   name: ycsb
   attributes:
     measurementtype: timeseries
-    timeseries.granularity: 30000 # 30 s, one status
+    timeseries.granularity: 10000 # 30 s, one status
     heap_size: 3072 # a big enough heap size has to be set in order to generate millions rows
     recordcount: 10000000 # 10 Mio rows pro node
     operationcount: 10000000 # 10 Mio rows pro node
@@ -24,7 +24,7 @@ profile1:
     region1:
       name: us-east-1
       machine_type: large
-      template: 3 cassandra, 6 ycsb
+      template: 3 cassandra, 1 ycsb
     #region2:
       #name: us-west-1
       #machine_type: small
