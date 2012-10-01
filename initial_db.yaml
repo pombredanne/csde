@@ -1,7 +1,7 @@
 service1:
   name: cassandra
   attributes:
-    replication_factor: 2
+    replication_factor: 1
     partitioner: RandomPartitioner
 service2:
   name: ycsb
@@ -9,11 +9,11 @@ service2:
     measurementtype: timeseries
     timeseries.granularity: 10000 # 10 s, one status
     heap_size: 3072 # a big enough heap size has to be set in order to generate millions rows
-    recordcount: 1000000 # 10 Mio rows pro node
-    operationcount: 1000000 # 10 Mio rows pro node
+    recordcount: 10000000 # 10 Mio rows pro node
+    operationcount: 10000000 # 10 Mio rows pro node
     fieldcount: 10 # 10 columns pro row
     filedlength: 1000 # a column is 1000 byte
-    threadcount: 20
+    threadcount: 30
 service3:
   name: gmond
   attributes:
