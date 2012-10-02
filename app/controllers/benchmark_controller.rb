@@ -1245,7 +1245,7 @@ class BenchmarkController < ApplicationController
       flavor_id: flavor,
       key_name: key_pair,
       groups: security_group,
-      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 25 }] # big enough EBS volume for big data in Cassandra
+      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 20 }] # big enough EBS volume for big data in Cassandra
     }
     
     # create server with the tag name

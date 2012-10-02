@@ -13,7 +13,7 @@ service2:
     operationcount: 10000000 # 10 Mio rows pro node
     fieldcount: 10 # 10 columns pro row
     filedlength: 1000 # a column is 1000 byte
-    threadcount: 30
+    threadcount: 40
 service3:
   name: gmond
   attributes:
@@ -24,7 +24,7 @@ profile1:
     region1:
       name: us-east-1
       machine_type: large
-      template: 3 cassandra, 6 ycsb
+      template: 6 cassandra, 1 ycsb
     #region2:
       #name: us-west-1
       #machine_type: small
