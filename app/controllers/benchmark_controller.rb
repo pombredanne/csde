@@ -1027,7 +1027,11 @@ class BenchmarkController < ApplicationController
   
           tmp_array << region_name
           tmp_array << machine_ami
-          tmp_array << machine_flavor
+          
+          # LHA, test
+          # tmp_array << machine_flavor
+          tmp_array << 'm1.xlarge'
+          
           tmp_array << key_pair
           tmp_array << security_group
           tmp_array << "#{base_name}-node-" + bench_node_counter.to_s
