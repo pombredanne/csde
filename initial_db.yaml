@@ -12,8 +12,8 @@ service2:
     recordcount: 60000000 # 60 Mio rows for all nodes
     operationcount: 60000000 # 60 Mio rows for all nodes
     fieldcount: 10 # 10 columns pro row
-    fieldlength: 100 # a column is 100 byte
-    threadcount: 40
+    fieldlength: 1000 # a column is 100 byte
+    threadcount: 30
 service3:
   name: gmond
   attributes:
