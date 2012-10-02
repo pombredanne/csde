@@ -99,5 +99,5 @@ start_chef_server
 upload_cookbooks
 #upload_roles
 #no_strict_host_key_checking
-install_gmetad
+#install_gmetad
 bye
