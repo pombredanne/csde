@@ -727,9 +727,6 @@ class BenchmarkController < ApplicationController
       logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
       logger.debug "-----------------------------------------------------------------------------"
       
-      puts "Break point..."
-      exit 0
-      
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
@@ -1247,7 +1244,8 @@ class BenchmarkController < ApplicationController
       image_id: ami,
       flavor_id: flavor,
       key_name: key_pair,
-      groups: security_group
+      groups: security_group,
+      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 25 }] # big enough EBS volume for big data in Cassandra
     }
     
     # create server with the tag name
