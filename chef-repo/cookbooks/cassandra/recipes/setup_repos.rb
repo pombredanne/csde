@@ -10,8 +10,8 @@ if node[:setup][:deployment] == "07x" or node[:setup][:deployment] == "08x" or n
     uri "http://www.apache.org/dist/cassandra/debian"
     components [node[:setup][:deployment], "main"]
     keyserver "pgp.mit.edu"
-    # key "F758CE318D77295D"
-    key "4BD736A82B5C1B00" # for Cassandra 1.1.5
+    key "F758CE318D77295D"
+    #key "4BD736A82B5C1B00" # for Cassandra 1.1.5
     action :add
   end
 end
