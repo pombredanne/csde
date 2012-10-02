@@ -24,7 +24,7 @@ profile1:
     region1:
       name: us-east-1
       machine_type: large
-      template: 3 cassandra, 4 ycsb
+      template: 3 cassandra, 6 ycsb
     #region2:
       #name: us-west-1
       #machine_type: small
