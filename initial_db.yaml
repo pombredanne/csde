@@ -7,12 +7,12 @@ service2:
   name: ycsb
   attributes:
     measurementtype: timeseries
-    timeseries.granularity: 10000 # 10 s, one status
+    timeseries.granularity: 5000 # 5 s, one status
     heap_size: 8192 # a big enough heap size has to be set in order to generate millions rows
-    recordcount: 300000 # 3 Mio rows for all nodes
-    operationcount: 300000 # 3 Mio rows for all nodes
+    recordcount: 3000000 # 3 Mio rows for all nodes
+    operationcount: 3000000 # 3 Mio rows for all nodes
     fieldcount: 10 # 10 columns pro row
-    fieldlength: 1000 # a column is 100 byte
+    fieldlength: 1000 # a column is 1000 byte
     threadcount: 30
 service3:
   name: gmond
