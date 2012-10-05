@@ -737,8 +737,8 @@ class BenchmarkController < ApplicationController
       logger.debug "-------------------------------------------------------------------------"
 
       # test
-      puts "BREAK POINT..."
-      exit 0
+      #puts "BREAK POINT..."
+      #exit 0
 
       
       # the next profile
