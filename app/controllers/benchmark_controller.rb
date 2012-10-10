@@ -768,8 +768,11 @@ class BenchmarkController < ApplicationController
         aws_secret_access_key = state['aws_secret_access_key']
         
         results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
-          system "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{upload_snapshot_to_s3_file} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"
-          system "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/create_snapshot.sh #{node[1]} #{aws_access_key_id} #{aws_secret_access_key}'"
+          cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{upload_snapshot_to_s3_file} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"          
+          system cmd
+
+          cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/create_snapshot.sh #{node[1]} #{aws_access_key_id} #{aws_secret_access_key}'"
+          system cmd
         end
       end
       
