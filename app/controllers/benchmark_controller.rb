@@ -740,6 +740,12 @@ class BenchmarkController < ApplicationController
       #puts "BREAK POINT..."
       #exit 0
 
+      logger.debug "-------------------------------------------------"
+      logger.debug "::: Creating snapshots for all Cassandra nodes..."
+      logger.debug "-------------------------------------------------"
+      
+      
+      
       
       # the next profile
       profile_counter += 1
