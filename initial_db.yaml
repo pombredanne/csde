@@ -20,6 +20,7 @@ service3:
     send_metadata_interval: 60
 profile1:
   provider: aws
+  snapshot: true
   regions:
     region1:
       name: us-east-1
