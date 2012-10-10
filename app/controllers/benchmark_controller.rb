@@ -742,7 +742,7 @@ class BenchmarkController < ApplicationController
         logger.debug "[NOTE] Snapshot Function works in the moment only for single region, and for only us-east-1"
         logger.debug "-------------------------------------------------------------------------------------------"
         
-        ips_arr = @bench_regions['region1']['ips']
+        ips_arr = @db_regions['region1']['ips']
         para_arr = []
         
         counter = 1
