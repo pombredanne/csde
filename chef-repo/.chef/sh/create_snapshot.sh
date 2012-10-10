@@ -55,7 +55,7 @@ end
 
 puts "Uploading snapshot cassandra-$index to S3..."
 file = kcsdb_init.files.create(
-	:key    => cassandra-$index,
+	:key    => 'cassandra-$index.tar.gz',
     :body   => File.open("/home/ubuntu/cassandra-snapshot.tar.gz"),
     :public => true
 )  
