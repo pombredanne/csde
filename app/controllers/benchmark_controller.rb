@@ -747,6 +747,7 @@ class BenchmarkController < ApplicationController
         
         counter = 1
         ips_arr.each do |ip|
+          if ip.include? ',' then ip = ip.chomp ',' end
           tmp_arr = []
           tmp_arr << ip
           tmp_arr << counter
