@@ -3,7 +3,7 @@ service1:
   attributes:
     replication_factor: 1
     partitioner: RandomPartitioner
-    backup: false
+    backup: true
 service2:
   name: ycsb
   attributes:
@@ -21,7 +21,7 @@ service3:
     send_metadata_interval: 60
 profile1:
   provider: aws
-  snapshot: true
+  snapshot: false
   regions:
     region1:
       name: us-east-1
