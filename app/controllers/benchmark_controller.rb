@@ -1845,8 +1845,6 @@ class BenchmarkController < ApplicationController
     chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
     chef_client_ssh_user = state['chef_client_ssh_user']
     download_snapshot_from_s3_file = "#{Rails.root}/chef-repo/.chef/sh/backup_snapshot.sh"
-    aws_access_key_id = state['aws_access_key_id']
-    aws_secret_access_key = state['aws_secret_access_key']
         
     results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
       cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{download_snapshot_from_s3_file} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"          
