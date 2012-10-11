@@ -19,7 +19,7 @@ echo "::: Copying snapshot folder to home folder..."
 sudo cp -r /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot /home/ubuntu
 
 echo "::: Creating archive tar ball of this snapshot..."
-sudo tar -zcvpf /home/ubuntu/cassandra-snapshot.tar.gz /home/ubuntu/cassandra-snapshot
+sudo tar -zcvpf cassandra-snapshot.tar.gz /home/ubuntu/cassandra-snapshot
 
 echo "::: Creating a S3 upload Ruby script..."
 (
