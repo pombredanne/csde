@@ -727,6 +727,9 @@ class BenchmarkController < ApplicationController
       logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
       logger.debug "-----------------------------------------------------------------------------"
       
+      puts 'Break point'
+      exit 1
+      
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
@@ -741,6 +744,7 @@ class BenchmarkController < ApplicationController
         logger.debug "::: Creating snapshots for all Cassandra nodes..."
         logger.debug "[NOTE] Snapshot Function works in the moment only for single region, and for only us-east-1"
         logger.debug "-------------------------------------------------------------------------------------------"
+        start_time = Time.now
         
         ips_arr = @db_regions['region1']['ips']
         para_arr = []
@@ -775,6 +779,10 @@ class BenchmarkController < ApplicationController
           cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/create_snapshot.sh #{node[1]} #{aws_access_key_id} #{aws_secret_access_key}'"
           system cmd
         end
+        
+        logger.debug "-----------------------------------------------------------------------------"
+        logger.debug "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds..."
+        logger.debug "-----------------------------------------------------------------------------"
       end
       
       
@@ -1430,6 +1438,12 @@ class BenchmarkController < ApplicationController
     # configure cassandra via cassandra-cli
     # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
+    
+    # backup cassandra if needed
+    # SERVICE_ID: 2.7
+    if cassandra_config_hash['attributes']['backup'].to_s == 'true'
+      backup_cassandra cassandra_config_hash      
+    end
   end
   
   # ============================================================================================ #
@@ -1825,6 +1839,39 @@ class BenchmarkController < ApplicationController
     system cmd
   end
 
+  # ============================================================================================ #
+  # SERVICE_ID: 2.7
+  # backup cassandra cluster
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  # attributes:
+  #   replication_factor: 2,1
+  #   backup: true
+  # ============================================================================================ #
+  private
+  def backup_cassandra cassandra_config_hash
+    logger.debug "-----------------------------------------------------------------------------------------"
+    logger.debug "::: Backing up snapshots for all Cassandra nodes..."
+    logger.debug "[NOTE] Backup Function works in the moment only for single region, and for only us-east-1"
+    logger.debug "-----------------------------------------------------------------------------------------"
+    start_time = Time.now
+    
+    
+    
+    logger.debug "---------------------------------------------------------------------------"
+    logger.debug "---> Elapsed time for Service [Backup]: #{Time.now - start_time} seconds..."
+    logger.debug "---------------------------------------------------------------------------"
+  end
   # ============================================================================================ # 
   # SERVICE_ID: 3 
   # install ycsb cluster in each region
