@@ -23,7 +23,7 @@ echo "::Extracting the tar ball..."
 tar xvzf /home/ubuntu/cassandra-snapshot.tar.gz
 
 echo ":: Copying the db files into Cassandra folder..."
-cp /home/ubuntu/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
+cp /home/ubuntu/home/ubuntu/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
 
 echo "::: Changing user back to cassandra..."
 sudo chown -R cassandra /var/lib/cassandra

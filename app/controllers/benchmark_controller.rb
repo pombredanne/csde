@@ -740,52 +740,8 @@ class BenchmarkController < ApplicationController
       logger.debug "-------------------------------------------------------------------------"
 
       if profile['snapshot'].to_s == 'true'
-        logger.debug "-------------------------------------------------------------------------------------------"
-        logger.debug "::: Creating snapshots for all Cassandra nodes..."
-        logger.debug "[NOTE] Snapshot Function works in the moment only for single region, and for only us-east-1"
-        logger.debug "-------------------------------------------------------------------------------------------"
-        start_time = Time.now
-        
-        ips_arr = @db_regions['region1']['ips']
-        para_arr = []
-        
-        counter = 1
-        ips_arr.each do |ip|
-          if ip.include? ',' then ip = ip.chomp ',' end
-          tmp_arr = []
-          tmp_arr << ip
-          tmp_arr << counter
-          para_arr << tmp_arr
-          counter += 1
-        end
-        
-        $stdout.sync = true
-    
-        state = get_state
-
-        key_pair = state['key_pair_name']
-        region = 'us-east-1'
-        no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
-        chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
-        chef_client_ssh_user = state['chef_client_ssh_user']
-        upload_snapshot_to_s3_file = "#{Rails.root}/chef-repo/.chef/sh/create_snapshot.sh"
-        aws_access_key_id = state['aws_access_key_id']
-        aws_secret_access_key = state['aws_secret_access_key']
-        
-        results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
-          cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{upload_snapshot_to_s3_file} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"          
-          system cmd
-
-          cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/create_snapshot.sh #{node[1]} #{aws_access_key_id} #{aws_secret_access_key}'"
-          system cmd
-        end
-        
-        logger.debug "-----------------------------------------------------------------------------"
-        logger.debug "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds..."
-        logger.debug "-----------------------------------------------------------------------------"
+        create_snapshot_cassandra
       end
-      
-      
       
       # the next profile
       profile_counter += 1
@@ -1866,12 +1822,115 @@ class BenchmarkController < ApplicationController
     logger.debug "-----------------------------------------------------------------------------------------"
     start_time = Time.now
     
+    ips_arr = @db_regions['region1']['ips']
+    para_arr = []
+        
+    counter = 1
+    ips_arr.each do |ip|
+      if ip.include? ',' then ip = ip.chomp ',' end
+      tmp_arr = []
+      tmp_arr << ip
+      tmp_arr << counter
+      para_arr << tmp_arr
+      counter += 1
+    end
+        
+    $stdout.sync = true
     
+    state = get_state
+
+    key_pair = state['key_pair_name']
+    region = 'us-east-1'
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
+    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    download_snapshot_from_s3_file = "#{Rails.root}/chef-repo/.chef/sh/backup_snapshot.sh"
+    aws_access_key_id = state['aws_access_key_id']
+    aws_secret_access_key = state['aws_secret_access_key']
+        
+    results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
+      cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{download_snapshot_from_s3_file} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"          
+      puts cmd
+      system cmd
+  
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/backup_snapshot.sh #{node[1]}'"
+      puts cmd
+      system cmd
+    end
     
     logger.debug "---------------------------------------------------------------------------"
     logger.debug "---> Elapsed time for Service [Backup]: #{Time.now - start_time} seconds..."
     logger.debug "---------------------------------------------------------------------------"
   end
+  
+  # ============================================================================================ #
+  # SERVICE_ID: 2.8
+  # create snapshot for cassandra cluster
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  # attributes:
+  #   replication_factor: 2,1
+  #   backup: true
+  # ============================================================================================ #
+  private
+  def create_snapshot_cassandra
+    logger.debug "-------------------------------------------------------------------------------------------"
+    logger.debug "::: Creating snapshots for all Cassandra nodes..."
+    logger.debug "[NOTE] Snapshot Function works in the moment only for single region, and for only us-east-1"
+    logger.debug "-------------------------------------------------------------------------------------------"
+    start_time = Time.now
+        
+    ips_arr = @db_regions['region1']['ips']
+    para_arr = []
+        
+    counter = 1
+    ips_arr.each do |ip|
+      if ip.include? ',' then ip = ip.chomp ',' end
+      tmp_arr = []
+      tmp_arr << ip
+      tmp_arr << counter
+      para_arr << tmp_arr
+      counter += 1
+    end
+        
+    $stdout.sync = true
+    
+    state = get_state
+
+    key_pair = state['key_pair_name']
+    region = 'us-east-1'
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
+    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    upload_snapshot_to_s3_file = "#{Rails.root}/chef-repo/.chef/sh/create_snapshot.sh"
+    aws_access_key_id = state['aws_access_key_id']
+    aws_secret_access_key = state['aws_secret_access_key']
+        
+    results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
+      cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{upload_snapshot_to_s3_file} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"          
+      puts cmd
+      system cmd
+  
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/create_snapshot.sh #{node[1]} #{aws_access_key_id} #{aws_secret_access_key}'"
+      puts cmd
+      system cmd
+    end
+        
+    logger.debug "-----------------------------------------------------------------------------"
+    logger.debug "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds..."
+    logger.debug "-----------------------------------------------------------------------------"
+  end
+  
   # ============================================================================================ # 
   # SERVICE_ID: 3 
   # install ycsb cluster in each region
