@@ -1398,7 +1398,7 @@ class BenchmarkController < ApplicationController
     # backup cassandra if needed
     # SERVICE_ID: 2.7
     if cassandra_config_hash['attributes']['backup'].to_s == 'true'
-      backup_cassandra cassandra_config_hash      
+      backup_cassandra      
     end
   end
   
@@ -1815,7 +1815,7 @@ class BenchmarkController < ApplicationController
   #   backup: true
   # ============================================================================================ #
   private
-  def backup_cassandra cassandra_config_hash
+  def backup_cassandra
     logger.debug "-----------------------------------------------------------------------------------------"
     logger.debug "::: Backing up snapshots for all Cassandra nodes..."
     logger.debug "[NOTE] Backup Function works in the moment only for single region, and for only us-east-1"
