@@ -83,6 +83,14 @@ install_opscenter
 #install_gmetad
 install_ruby
 
+echo ":::::::::::::::::::::::::::::::::::::::::"
+echo "::: MACHINE IS READY FOR INSTALLING KCSDB"
+echo "::: Sun JDK 6"
+echo "::: Ruby 1.9.3"
+echo "::: OpsCenter"
+echo "::: Gmetad Server"
+echo ":::::::::::::::::::::::::::::::::::::::::"
+
 # Time measurement
 end=$(date +%s)
 
