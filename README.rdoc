@@ -12,8 +12,10 @@ However, like any software on the earth, written by human, there may be bugs and
   
 = INSTALLATION
 
-KCSDB now can be installed on Ubuntu 11.10 x64 and 12.04 x64. Please use the EBS AMIs of Canonical in AWS EC2
-For example
+KCSDB now can be installed on Ubuntu 11.10 x64 and 12.04 x64. 
+
+Please use the EBS AMIs of Canonical in AWS EC2. For example
+
 Region: US-EAST-1
 
 AMI: ami-3d4ff254

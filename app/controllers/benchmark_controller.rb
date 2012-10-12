@@ -1394,6 +1394,10 @@ class BenchmarkController < ApplicationController
     # configure cassandra via cassandra-cli
     # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
+
+    # install OpsCenter Agent
+    # SERVICE_ID: 2.8
+    install_opscenter_agent
     
     # backup cassandra if needed
     # SERVICE_ID: 2.7
@@ -1929,6 +1933,78 @@ class BenchmarkController < ApplicationController
     logger.debug "-----------------------------------------------------------------------------"
   end
   
+  # ============================================================================================ #
+  # SERVICE_ID: 2.9
+  # install opscenter agents
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  # attributes:
+  #   replication_factor: 2,1
+  #   backup: true
+  # ============================================================================================ #
+  private
+  def install_opscenter_agent
+    logger.debug "----------------------------------------------------------------------------------------------------------"
+    logger.debug "::: Installing OpsCenter Agent in Cassandra Node..."
+    logger.debug "[NOTE] Install OpsCenter Agent Function works in the moment only for single region, and for only us-east-1"
+    logger.debug "----------------------------------------------------------------------------------------------------------"
+    start_time = Time.now
+    
+    ips_arr = @db_regions['region1']['ips']
+    para_arr = []
+        
+    ips_arr.each do |ip|
+      if ip.include? ',' then ip = ip.chomp ',' end
+      para_arr << ip
+    end
+        
+    $stdout.sync = true
+    
+    state = get_state
+
+    key_pair = state['key_pair_name']
+    region = 'us-east-1'
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
+    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    opscenter_agent_tarball_file = "/usr/share/opscenter/agent.tar.gz"
+    install_opscenter_agent_file = "#{Rails.root}/chef-repo/.chef/sh/install_opscenter_agent.sh"
+        
+    capture_public_ip_of_kcsdb_server
+    
+    kcsdb_public_ip_address = ""
+    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt","r").each do |line|
+      kcsdb_public_ip_address = line.to_s.strip
+    end    
+        
+    results = Parallel.map(para_arr, in_threads: para_arr.size) do |ip|
+      cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{opscenter_agent_tarball_file} #{chef_client_ssh_user}@#{ip}:/home/#{chef_client_ssh_user}"          
+      puts "Command: #{cmd}"
+      system cmd
+      
+      cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{install_opscenter_agent_file} #{chef_client_ssh_user}@#{ip}:/home/#{chef_client_ssh_user}"          
+      puts "Command: #{cmd}"
+      system cmd
+      
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{ip} 'bash /home/ubuntu/install_opscenter_agent.sh #{kcsdb_public_ip_address}'"
+      puts "Command: #{cmd}"
+      system cmd
+    end
+    
+    logger.debug "--------------------------------------------------------------------------------------------"
+    logger.debug "---> Elapsed time for Service [Install OpsCenter Agent]: #{Time.now - start_time} seconds..."
+    logger.debug "--------------------------------------------------------------------------------------------"
+  end
   # ============================================================================================ # 
   # SERVICE_ID: 3 
   # install ycsb cluster in each region
