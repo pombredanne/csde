@@ -16,10 +16,10 @@ KCSDB now can be installed on Ubuntu 11.10 x64 and 12.04 x64. Please use the EBS
 For example
 Region: US-EAST-1
 
-AMI: ami-82fa58eb
+AMI: ami-3d4ff254
 OS: Ubuntu 12.04 x64
 
-AMI: ami-4dad7424
+AMI: ami-cdc072a4
 OS: Ubuntu 11.10 x64
 
 * Lauch a virtual machine and login via ssh
