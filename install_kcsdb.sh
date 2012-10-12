@@ -14,22 +14,26 @@ pause(){
 }
 
 install_kcsdb(){
+	echo ":::::::::::::::::::::::"
 	echo "::: Installing KCSDB..."
+	echo ":::::::::::::::::::::::"
 	git clone https://github.com/lehoanganh/kcsdb.git
 	(cd $HOME/kcsdb && bundle update)
 	cp $HOME/kcsdb/chef-repo/.chef/conf/state.tmpl.yml $HOME/kcsdb/chef-repo/.chef/conf/state.yml
 }
 
 build_chef_solo_config() {
+	echo "::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: Building configurations for chef-solo..."
-  mkdir -p /etc/chef
+  	echo "::::::::::::::::::::::::::::::::::::::::::::"
+	mkdir -p /etc/chef
 
-  cat > /etc/chef/solo.rb <<SOLO_RB
+	cat > /etc/chef/solo.rb <<SOLO_RB
 file_cache_path "/tmp/chef-solo"
 cookbook_path   "/tmp/chef-solo/cookbooks"
 SOLO_RB
 
-  cat > /etc/chef/bootstrap.json <<BOOTSTRAP_JSON
+  	cat > /etc/chef/bootstrap.json <<BOOTSTRAP_JSON
 {
   "chef_server" : {
 	"server_url": "http://localhost:4000",  
@@ -41,47 +45,56 @@ BOOTSTRAP_JSON
 }
 
 run_chef_solo(){
+	echo ":::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: Running chef-solo to install chef-server..."
+	echo ":::::::::::::::::::::::::::::::::::::::::::::::"
 	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
 start_chef_server(){
 	# -d: detach from console
 	
+	echo ":::::::::::::::::::::::::::::"
 	echo "::: Starting Chef Expander..."
+	echo ":::::::::::::::::::::::::::::"
 	chef-expander -d -n1
 
+	echo ":::::::::::::::::::::::::"
 	echo "::: Starting Chef Solr..."
+	echo ":::::::::::::::::::::::::"
 	chef-solr -d
 
+	echo ":::::::::::::::::::::::::::"
 	echo "::: Starting Chef Server..."
+	echo ":::::::::::::::::::::::::::"
 	chef-server -d
 
+	echo ":::::::::::::::::::::::::::::::::"
 	echo "::: Starting Chef Server WebUI..."
+	echo ":::::::::::::::::::::::::::::::::"
 	chef-server-webui -d
 }
 
 upload_cookbooks(){
+	echo ":::::::::::::::::::::::::::::::::::::::::"
 	echo "::: Uploading cookbooks to chef-server..."
+	echo ":::::::::::::::::::::::::::::::::::::::::"
 	knife cookbook upload --all --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb
 }
 
 upload_roles(){
+	echo ":::::::::::::::::::::::::::::::::::::"
 	echo "::: Uploading roles to chef-server..."
+	echo ":::::::::::::::::::::::::::::::::::::"
 	knife role from file /home/ubuntu/kcsdb/chef-repo/roles/cassandra.json --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb	
 }
 
 no_strict_host_key_checking(){
+	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: No strict host key checking in ssh connections..."
+	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	mkdir -p /home/ubuntu/.ssh
 	echo -e "Host *\n\tStrictHostKeyChecking no" > /home/ubuntu/.ssh/config
-}
-
-install_gmetad(){
-	echo "::: Installing Gmetad..."
-	sudo apt-get install ganglia-webfrontend -qq
-	sudo cp /etc/ganglia-webfrontend/apache.conf /etc/apache2/sites-enabled
-	#sudo /etc/init.d/apache2 restart
 }
 
 bye(){
@@ -99,5 +112,4 @@ start_chef_server
 upload_cookbooks
 #upload_roles
 #no_strict_host_key_checking
-#install_gmetad
 bye
