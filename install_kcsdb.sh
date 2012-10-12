@@ -13,6 +13,12 @@ pause(){
    read -p "$*"
 }
 
+configure_opscenter(){
+	kcsdb=$(curl -L http://169.254.169.254/latest/meta-data/public-ipv4 -s)
+	sudo sed -i 's/interface = .*/interface = '$kcsdb'/g' /etc/opscenter/opscenterd.conf
+	sudo service opscenterd start
+}
+
 install_kcsdb(){
 	echo ":::::::::::::::::::::::"
 	echo "::: Installing KCSDB..."
@@ -100,14 +106,20 @@ no_strict_host_key_checking(){
 bye(){
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: KCSDB installed successfully!!! Please run 'bash start.sh' in 'kcsdb' home folder to start KCSDB Server :::"
-	echo "::: KCSDB Server 	   --> [IP]:3000"
+	echo "::: KCSDB Server     --> [IP]:3000"
 	echo "::: OpsCenter Server --> [IP]:8888"
 	echo "::: Gmetad Server    --> [IP]:8651"
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 }
 
+# ================================================================
+
+# Time measurement
+start=$(date +%s)
+
 welcome
 #pause 'Press [Enter] key to install KCSDB...'
+configure_opscenter
 install_kcsdb
 build_chef_solo_config
 run_chef_solo
@@ -116,3 +128,12 @@ upload_cookbooks
 #upload_roles
 #no_strict_host_key_checking
 bye
+
+# Time measurement
+end=$(date +%s)
+
+diff=$(( $end - $start ))
+
+echo ":::::::::::::::::::::::::::::::::"
+echo "::: Elapsed Time: $diff seconds!!"
+echo ":::::::::::::::::::::::::::::::::"
