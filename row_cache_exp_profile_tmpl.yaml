@@ -5,7 +5,7 @@ service1:
     partitioner: RandomPartitioner
     heap_size: dummy
     heap_new_size: dummy
-    key_cache_size_in_mb: dummy
+    row_cache_size_in_mb: dummy
 service2:
   name: ycsb
   attributes:
