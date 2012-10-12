@@ -2222,9 +2222,9 @@ class BenchmarkController < ApplicationController
     logger.debug "--------------------------------"
     
     # LOADING or TRANSACTION phase
-    if load == 'no'
+    if load.to_s == 'false'
       load = 'run'
-    elsif load == 'yes'
+    elsif load.to_s == 'true'
       load = 'load'  
     end
     
