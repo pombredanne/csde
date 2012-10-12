@@ -2157,6 +2157,9 @@ class BenchmarkController < ApplicationController
   # ============================================================================================ #
   private
   def start_all_ycsb_clients ycsb_config_hash
+    # LOADING or TRANSACTION phase
+    load = ycsb_config_hash['attributes']['load']
+    
     parallel_array = []
     region_counter = 1
     
@@ -2214,7 +2217,17 @@ class BenchmarkController < ApplicationController
       end
     end  
     
-    logger.debug "Invoking ALL YCSB clients..."
+    logger.debug "--------------------------------"
+    logger.debug "::: Invoking ALL YCSB clients..."
+    logger.debug "--------------------------------"
+    
+    # LOADING or TRANSACTION phase
+    if load == 'no'
+      load = 'run'
+    elsif load == 'yes'
+      load = 'load'  
+    end
+    
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |block|
       sleep_time = 0
       @mutex.synchronize do
@@ -2223,9 +2236,9 @@ class BenchmarkController < ApplicationController
       
       sleep sleep_time
       
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} load cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_multiple_load -s #{attributes_string}'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
       
-      logger.debug "Command:"
+      logger.debug "YCSB command:"
       puts cmd
       
       system cmd # invoke A YCSB client

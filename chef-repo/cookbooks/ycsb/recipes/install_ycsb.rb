@@ -7,7 +7,7 @@
 # a load together on the SUT (in this case: Cassandra cluster)
 
 # step 1: download the tar ball
-execute "curl --location https://s3.amazonaws.com/kcsdb-init/ycsb-no-zk.tar.gz --output /home/ubuntu/ycsb.tar.gz --silent"
+execute "curl --location https://s3.amazonaws.com/kcsdb-init/ycsb-unique.tar.gz --output /home/ubuntu/ycsb.tar.gz --silent"
 
 # step 2: create an empty folder for ZooKeeper
 execute "mkdir -p #{node[:ycsb][:ycsb_home]}"
