@@ -26,7 +26,7 @@ configure_opscenter(){
 	echo '[agents]' | sudo tee -a etc/opscenter/opscenterd.conf
 	echo 'use_ssl = false' | sudo tee -a etc/opscenter/opscenterd.conf
 	
-	sudo service opscenterd start
+	sudo service opscenterd restart
 }
 
 install_kcsdb(){
