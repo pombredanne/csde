@@ -17,8 +17,15 @@ configure_opscenter(){
 	echo "::::::::::::::::::::::::::::"
 	echo "::: Configuring OpsCenter..."
 	echo "::::::::::::::::::::::::::::"
-	kcsdb=$(curl -L http://169.254.169.254/latest/meta-data/public-ipv4 -s)
+	
+	# private IP of this machine, NOT public IP
+	kcsdb=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
 	sudo sed -i 's/interface = .*/interface = '$kcsdb'/g' /etc/opscenter/opscenterd.conf
+	
+	# don't use SSL
+	echo '[agents]' | sudo tee -a etc/opscenter/opscenterd.conf
+	echo 'use_ssl = false' | sudo tee -a etc/opscenter/opscenterd.conf
+	
 	sudo service opscenterd start
 }
 

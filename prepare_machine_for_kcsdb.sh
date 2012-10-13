@@ -27,7 +27,7 @@ install_needed_packages(){
 	echo "::::::::::::::::::::::::::::::::"
 	echo "::: Installing needed packages.."
 	echo "::::::::::::::::::::::::::::::::"
-	sudo apt-get install nodejs build-essential openssl libreadline6 libreadline6-dev curl git-core \
+	sudo apt-get install openjdk-6-jdk nodejs build-essential openssl libreadline6 libreadline6-dev curl git-core \
 											 zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev \
 											 autoconf libc6-dev ncurses-dev automake libtool bison subversion -y
 }
@@ -47,7 +47,7 @@ install_gmetad(){
 	echo "::: Installing Gmetad..."
 	echo "::: [INFO] Always accept 'yes' for every question!!!"
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	sudo apt-get install ganglia-webfrontend -y
+	sudo apt-get install ganglia-webfrontend -y				
 	sudo cp /etc/ganglia-webfrontend/apache.conf /etc/apache2/sites-enabled
 }
 
@@ -77,18 +77,18 @@ start=$(date +%s)
 
 welcome
 apt_update
-install_java
+#install_java
 install_needed_packages
 install_opscenter
-#install_gmetad
+install_gmetad
 install_ruby
 
 echo ":::::::::::::::::::::::::::::::::::::::::"
 echo "::: MACHINE IS READY FOR INSTALLING KCSDB"
 echo "::: Sun JDK 6"
 echo "::: Ruby 1.9.3"
-echo "::: OpsCenter"
-echo "::: Gmetad Server"
+echo "::: OpsCenter 2.1.2"
+echo "::: Gmetad"
 echo ":::::::::::::::::::::::::::::::::::::::::"
 
 # Time measurement
