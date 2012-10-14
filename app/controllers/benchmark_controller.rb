@@ -1980,11 +1980,11 @@ class BenchmarkController < ApplicationController
     opscenter_agent_tarball_file = "/usr/share/opscenter/agent.tar.gz"
     install_opscenter_agent_file = "#{Rails.root}/chef-repo/.chef/sh/install_opscenter_agent.sh"
         
-    capture_public_ip_of_kcsdb_server
+    capture_private_ip_of_kcsdb_server
     
-    kcsdb_public_ip_address = ""
-    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt","r").each do |line|
-      kcsdb_public_ip_address = line.to_s.strip
+    kcsdb_private_ip_address = ""
+    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_private_ip.txt","r").each do |line|
+      kcsdb_private_ip_address = line.to_s.strip
     end    
         
     results = Parallel.map(para_arr, in_threads: para_arr.size) do |ip|
@@ -1996,7 +1996,7 @@ class BenchmarkController < ApplicationController
       puts "Command: #{cmd}"
       system cmd
       
-      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{ip} 'bash /home/ubuntu/install_opscenter_agent.sh #{kcsdb_public_ip_address}'"
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{ip} 'bash /home/ubuntu/install_opscenter_agent.sh #{kcsdb_private_ip_address}'"
       puts "Command: #{cmd}"
       system cmd
     end
