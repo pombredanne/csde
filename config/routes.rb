@@ -6,6 +6,8 @@ KCSD1::Application.routes.draw do
   get "benchmark/generate"  
 
   get "chef_server/go_to"
+  get "chef_server/go_to_opscenter"
+  get "chef_server/go_to_gmetad"
 
   get "dashboard/show"
   post "dashboard/show"
