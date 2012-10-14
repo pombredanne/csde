@@ -2,6 +2,32 @@ require 'helper'
 class ChefServerController < ApplicationController
   include Helper
 
+  # go to Gmetad Server WebUI
+  # which is running on the same machine as KCSDB Server
+  def go_to_gmetad
+    capture_public_ip_of_kcsdb_server
+    
+    kcsdb_public_ip = ""
+    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt","r").each do |line|
+      kcsdb_public_ip = line.to_s.strip    
+    end    
+    
+    redirect_to "http://#{kcsdb_public_ip}:8651"
+  end
+
+  # go to OpsCenter Server WebUI
+  # which is running on the same machine as KCSDB Server
+  def go_to_opscenter
+    capture_public_ip_of_kcsdb_server
+    
+    kcsdb_public_ip = ""
+    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt","r").each do |line|
+      kcsdb_public_ip = line.to_s.strip    
+    end    
+    
+    redirect_to "http://#{kcsdb_public_ip}:8888"
+  end
+
   # go to Chef Server WebUI
   # which is running on the same machine as KCSDB Server
   def go_to

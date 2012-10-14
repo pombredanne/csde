@@ -171,13 +171,35 @@
 				
 				<!-- Central Monitoring -->
 				<div id="tabs-2">
-					<!-- <% if @chef_server_state == 'not_setup'%>
-						<div style="color: red;">
-	          	Please, click on tab <strong>Configuration</strong> to create a <strong>fresh Chef Server</strong> at first. 
-	      		</div>
-					<% else %> -->
-						You can go to Ganglia Server here.
-					<!-- <% end %> -->
+					<p>OpsCenter Server is now <strong>ready</strong>. Click the button below to go to OpsCenter Server.</p>
+		          	<button id="go_to_opscenter">Go to OpsCenter Server</button>
+				    <script>
+				    	var button_go_to_opscenter_server_opts = {
+							icons:{
+						    	primary:"ui-icon-home"
+						    }
+						};
+						$("#go_to_opscenter").button(button_go_to_opscenter_server_opts);
+						$("#go_to_opscenter").click(function () {
+							window.open("/chef_server/go_to_opscenter");
+						});
+				    </script>
+				    
+				    </br>
+				    
+				    <p>Gmetad Server is now <strong>ready</strong>. Click the button below to go to Gmetad Server.</p>
+		          	<button id="go_to_gmetad">Go to Gmetad Server</button>
+				    <script>
+				    	var button_go_to_gmetad_server_opts = {
+							icons:{
+						    	primary:"ui-icon-home"
+						    }
+						};
+						$("#go_to_gmetad").button(button_go_to_gmetad_server_opts);
+						$("#go_to_gmetad").click(function () {
+							window.open("/chef_server/go_to_gmetad");
+						});
+				    </script>
 				</div>
 				
 				

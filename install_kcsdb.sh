@@ -117,6 +117,7 @@ bye(){
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: KCSDB installed successfully!!! Please run 'bash start.sh' in 'kcsdb' home folder to start KCSDB Server :::"
 	echo "::: KCSDB Server     --> [IP]:3000"
+	echo "::: Chef Server      --> [IP]:4040"
 	echo "::: OpsCenter Server --> [IP]:8888"
 	echo "::: Gmetad Server    --> [IP]:8651"
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
