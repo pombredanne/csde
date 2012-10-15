@@ -1999,7 +1999,7 @@ class BenchmarkController < ApplicationController
       puts "Command: #{cmd}"
       system cmd
       
-      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{ip} 'rvmsudo bash /home/ubuntu/install_opscenter_agent.sh #{kcsdb_private_ip_address}'"
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{ip} 'sudo bash /home/ubuntu/install_opscenter_agent.sh #{kcsdb_private_ip_address}'"
       puts "Command: #{cmd}"
       system cmd
     end

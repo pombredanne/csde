@@ -11,5 +11,6 @@ echo "::: Installing OpsCenter Agent..."
 echo "::: Disabling SSL in OpsCenter Agent..."
 echo 'use_ssl: 0' | tee -a /home/ubuntu/agent/conf/address.yaml
 
-#echo "::: Starting OpsCenter Agent..."
+#echo "::: Restarting Cassandra..."
+sudo service cassandra restart
 
