@@ -1399,9 +1399,6 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.8
     install_opscenter_agent
     
-    puts 'break point'
-    exit 1
-    
     # backup cassandra if needed
     # SERVICE_ID: 2.7
     if cassandra_config_hash['attributes']['backup'].to_s == 'true'
