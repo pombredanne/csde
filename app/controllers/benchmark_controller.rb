@@ -1395,6 +1395,9 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
 
+    puts 'Break point'
+    exit 1
+
     # install OpsCenter Agent
     # SERVICE_ID: 2.8
     install_opscenter_agent
@@ -1996,7 +1999,7 @@ class BenchmarkController < ApplicationController
       puts "Command: #{cmd}"
       system cmd
       
-      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{ip} 'bash /home/ubuntu/install_opscenter_agent.sh #{kcsdb_private_ip_address}'"
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{ip} 'rvmsudo bash /home/ubuntu/install_opscenter_agent.sh #{kcsdb_private_ip_address}'"
       puts "Command: #{cmd}"
       system cmd
     end
