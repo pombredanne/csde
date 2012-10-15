@@ -1257,7 +1257,7 @@ class BenchmarkController < ApplicationController
     # create server with the tag name
     server = ec2.servers.create server_def
     sleep 3 # a small pause
-    ec2.tags.create key: 'Name', value: name, resource_id: server.id
+#    ec2.tags.create key: 'Name', value: name, resource_id: server.id
 
     # wait until the server is ready
     logger.debug "::: Waiting for machine: #{server.id}..."
