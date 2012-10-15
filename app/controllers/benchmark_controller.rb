@@ -727,9 +727,6 @@ class BenchmarkController < ApplicationController
       logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
       logger.debug "-----------------------------------------------------------------------------"
       
-      puts 'Break point'
-      exit 1
-      
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
@@ -1385,6 +1382,10 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.5
     deploy_cassandra cassandra_config_hash
     
+    # install OpsCenter Agent
+    # SERVICE_ID: 2.8
+    install_opscenter_agent
+    
     # for single region mode only
     # make a small pause, the cassandra server needs a little time to be ready
     if single_region_hash['single_region'] == 'true'
@@ -1395,10 +1396,6 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
 
-    # install OpsCenter Agent
-    # SERVICE_ID: 2.8
-    install_opscenter_agent
-    
     # backup cassandra if needed
     # SERVICE_ID: 2.7
     if cassandra_config_hash['attributes']['backup'].to_s == 'true'
