@@ -40,14 +40,14 @@ ruby_block "update_properties_file" do
     end
     
     # properties file for loading phase
-    workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_load"
+    workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_unique"
     workload_properties_file = File.read workload_properties_file_name
     workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
     workload_properties_file.gsub!(/barrier-size=dummy/, "barrier-size=#{barrier_size}")
     File.open(workload_properties_file_name,'w'){|f| f.write workload_properties_file}
     
     # properties file for transaction phase
-    workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_multiple_transaction"
+    workload_properties_file_name =  node[:ycsb][:ycsb_home] + "/workloads/workload_unique"
     workload_properties_file = File.read workload_properties_file_name
     workload_properties_file.gsub!(/hosts=.*/, "hosts=#{hosts}")
     workload_properties_file.gsub!(/barrier-size=dummy/, "barrier-size=#{barrier_size}")
