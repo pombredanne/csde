@@ -1395,12 +1395,12 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.6
     configure_cassandra cassandra_config_hash
 
-    puts 'Break point'
-    exit 1
-
     # install OpsCenter Agent
     # SERVICE_ID: 2.8
     install_opscenter_agent
+    
+    puts 'break point'
+    exit 1
     
     # backup cassandra if needed
     # SERVICE_ID: 2.7
