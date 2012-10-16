@@ -26,7 +26,7 @@ end
 # update: JVM_OPTS
 # update: MAX_HEAP_SIZE (if needed)
 # update: HEAP_NEWSIZE (if needed)
-ruby_block "build_cassandra_evn" do
+ruby_block "build_cassandra_env" do
   block do
     filename = node[:cassandra][:conf_path] + "cassandra-env.sh"
     cassandra_env = File.read filename

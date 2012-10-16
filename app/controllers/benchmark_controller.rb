@@ -408,19 +408,21 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
                 @status << "row Cache Size: Medium\n"
                 profile_name << "row.med.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 102")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache
               # check row cache size: HIGH
               elsif tmp_arr[2] == 2.to_s
                 logger.debug "row Cache Size: High"
                 @status << "row Cache Size: High\n"
                 profile_name << "row.high.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 204")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache
               end
             # check java heap size: HIGH  
             elsif tmp_arr[1] == 1.to_s
@@ -434,19 +436,21 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
                 @status << "row Cache Size: Medium\n"
                 profile_name << "row.med.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 154")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache
               # check row cache size: HIGH
               elsif tmp_arr[2] == 2.to_s
                 logger.debug "row Cache Size: High"
                 @status << "row Cache Size: High\n"
                 profile_name << "row.high.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 307")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache             
               end
             end
           # check instance type: LARGE
@@ -467,19 +471,21 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
                 @status << "row Cache Size: Medium\n"
                 profile_name << "row.med.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 186")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache                
               # check row cache size: HIGH
               elsif tmp_arr[2] == 2.to_s
                 logger.debug "row Cache Size: High"
                 @status << "row Cache Size: High\n"
                 profile_name << "row.high.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 372")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache                
               end
             # check java heap size: HIGH  
             elsif tmp_arr[1] == 1.to_s
@@ -493,19 +499,21 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: ") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
                 @status << "row Cache Size: Medium\n"
                 profile_name << "row.med.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 279")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache                
               # check row cache size: HIGH
               elsif tmp_arr[2] == 2.to_s
                 logger.debug "row Cache Size: High"
                 @status << "row Cache Size: High\n"
                 profile_name << "row.high.yaml"
                 tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 558")
+                tmpl_file.gsub!(/row_cache_save_period:.*/, "row_cache_save_period: 14400") # active row cache                
               end
             end
           end
