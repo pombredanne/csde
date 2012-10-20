@@ -2062,7 +2062,7 @@ class BenchmarkController < ApplicationController
     # start all YCSB clients in all regions
     start_all_ycsb_clients ycsb_config_hash
     
-    
+    get_values_from_mbean_over_jmx
   end
   
   # ============================================================================================ #
