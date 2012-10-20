@@ -1407,7 +1407,8 @@ class BenchmarkController < ApplicationController
     # backup cassandra if needed
     # SERVICE_ID: 2.7
     if cassandra_config_hash['attributes']['backup'].to_s == 'true'
-      backup_cassandra      
+      backup_cassandra  
+      get_values_from_mbean_over_jmx    
     end
   end
   
@@ -2060,6 +2061,8 @@ class BenchmarkController < ApplicationController
     
     # start all YCSB clients in all regions
     start_all_ycsb_clients ycsb_config_hash
+    
+    
   end
   
   # ============================================================================================ #
@@ -2325,9 +2328,19 @@ class BenchmarkController < ApplicationController
       system cmd # invoke A YCSB client
     end
   end
-
-  
   # --------------------------------------------------------------------------------------------#
+  
+  private
+  def get_values_from_mbean_over_jmx
+    requester_path = "#{Rails.root}/chef-repo/.chef/sh/requester.rb"
+    host = @db_regions['region1']['ips'][0]
+    if host.include? ',' then host = host.chomp ',' end
+    port = 7199
+    
+    execute "jruby-1.6.8 -S #{requester_path} \'#{host} #{port}\'"
+  end
+  
+  
   
   # -------------------------------------------------------------------------------------------- #
   private
