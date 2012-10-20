@@ -11,16 +11,7 @@ apt_update(){
 	echo "::::::::::::::::::::::"
 	echo "::: Update Apt Repo..." 
 	echo "::::::::::::::::::::::"
-	sudo apt-get update -y
-}
-
-install_java(){
-	echo ":::::::::::::::::::::::::::::"
-	echo "::: Installing Oracle Java..."
-	echo ":::::::::::::::::::::::::::::"
-	curl -L https://raw.github.com/flexiondotorg/oab-java6/master/oab-java.sh -s | sudo bash
-	sudo apt-get install sun-java6-jdk -y
-	export JAVA_HOME=/usr/lib/jvm/java-6-sun
+	sudo apt-get update -qq
 }
 
 install_needed_packages(){
@@ -29,7 +20,7 @@ install_needed_packages(){
 	echo "::::::::::::::::::::::::::::::::"
 	sudo apt-get install openjdk-6-jdk nodejs build-essential openssl libreadline6 libreadline6-dev curl git-core \
 											 zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev \
-											 autoconf libc6-dev ncurses-dev automake libtool bison subversion -y
+											 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config g++ -qq
 }
 
 install_opscenter(){
@@ -38,8 +29,8 @@ install_opscenter(){
 	echo ":::::::::::::::::::::::::::"
 	echo 'deb http://debian.datastax.com/community stable main' | sudo tee -a /etc/apt/sources.list # add repo
 	curl -L http://debian.datastax.com/debian/repo_key -s | sudo apt-key add - # add key
-	sudo apt-get update -y # update repo
-	sudo apt-get install opscenter-free -y # install opscenter
+	sudo apt-get update -qq # update repo
+	sudo apt-get install opscenter-free -qq # install opscenter
 }
 
 install_gmetad(){
@@ -47,7 +38,7 @@ install_gmetad(){
 	echo "::: Installing Gmetad..."
 	echo "::: [INFO] Always accept 'yes' for every question!!!"
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	sudo apt-get install ganglia-webfrontend -y				
+	sudo apt-get install ganglia-webfrontend -qq				
 	sudo cp /etc/ganglia-webfrontend/apache.conf /etc/apache2/sites-enabled
 }
 
@@ -67,6 +58,8 @@ install_ruby(){
 	echo "::: [INFO] Do NOT forget to set ruby 1.9.3 as default use"
 	echo "::: [INFO] $ . $HOME/.bashrc"
 	echo "::: [INFO] $ rvm --default use 1.9.3"
+	echo "::: [INFO] $ rvm install jruby"
+	echo "::: [INFO] $ jruby-1.6.8 -S gem install jmx4r"
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 }
 
@@ -77,7 +70,6 @@ start=$(date +%s)
 
 welcome
 apt_update
-#install_java
 install_needed_packages
 install_opscenter
 install_gmetad

@@ -31,6 +31,10 @@ OS: Ubuntu 11.10 x64
  $ . $HOME/.bashrc
 * Set ruby 1.9.3 as default
  $ rvm --default use 1.9.3
+* Install JRuby
+ $ rvm install jruby
+* Install jmx4r
+ $ jruby-1.6.8 -S gem install jmx4r
 * Install KCSDB
  $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh -s | rvmsudo bash
 
