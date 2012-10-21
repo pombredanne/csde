@@ -735,6 +735,9 @@ class BenchmarkController < ApplicationController
       logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
       logger.debug "-----------------------------------------------------------------------------"
       
+      puts 'break point'
+      exit 1
+      
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
