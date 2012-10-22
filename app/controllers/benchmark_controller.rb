@@ -735,9 +735,6 @@ class BenchmarkController < ApplicationController
       logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
       logger.debug "-----------------------------------------------------------------------------"
       
-      puts 'break point'
-      exit 1
-      
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
@@ -1411,7 +1408,6 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 2.7
     if cassandra_config_hash['attributes']['backup'].to_s == 'true'
       backup_cassandra  
-      get_values_from_mbean_over_jmx    
     end
   end
   
