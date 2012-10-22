@@ -2341,7 +2341,7 @@ class BenchmarkController < ApplicationController
     if host.include? ',' then host = host.chomp ',' end
     
     requester = File.read requester_path
-    requester.gsub!(/host = "dummy"/,"host = \"#{host}\"")
+    requester.gsub!(/host = ".*/,"host = \"#{host}\"")
     File.open(requester_path,'w'){|f| f.write requester}
     
     system "jruby-1.6.8 #{requester_path}"
