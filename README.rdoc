@@ -35,6 +35,8 @@ OS: Ubuntu 11.10 x64
  $ rvm install jruby
 * Install jmx4r
  $ jruby-1.6.8 -S gem install jmx4r
+* Install i18n
+ $ jruby-1.6.8 -S gem install i18n
 * Install KCSDB
  $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh -s | rvmsudo bash
 

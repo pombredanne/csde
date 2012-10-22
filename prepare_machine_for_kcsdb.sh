@@ -60,6 +60,7 @@ install_ruby(){
 	echo "::: [INFO] $ rvm --default use 1.9.3"
 	echo "::: [INFO] $ rvm install jruby"
 	echo "::: [INFO] $ jruby-1.6.8 -S gem install jmx4r"
+	echo "::: [INFO] $ jruby-1.6.8 -S gem install i18n"
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 }
 

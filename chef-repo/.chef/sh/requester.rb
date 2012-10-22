@@ -3,8 +3,8 @@ require 'i18n'
 require 'java'
 require 'jmx4r'
 
-host = ARGV[0]
-port = ARGV[1]
+host = "dummy"
+port = "7199"
 
 puts "----------------------------------------------------------"
 puts "Establishing connection to host #{host} on port #{port}..."
