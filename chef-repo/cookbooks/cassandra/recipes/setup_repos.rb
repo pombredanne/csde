@@ -33,6 +33,6 @@ execute 'sudo apt-get update -qq'
 execute 'echo "deb http://debian.datastax.com/community stable main" | sudo -E tee -a /etc/apt/sources.list'
 execute 'curl -L http://debian.datastax.com/debian/repo_key | sudo apt-key add -'
 execute 'sudo apt-get update -qq'
-execute 'sudo apt-get install dsc1.1 -qq'
+execute 'sudo apt-get install python-cql dsc1.1 -qq'
 execute 'sudo service cassandra stop'
 
