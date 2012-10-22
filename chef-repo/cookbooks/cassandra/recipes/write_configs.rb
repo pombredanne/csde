@@ -2,8 +2,12 @@
 # create log directory
 execute "sudo mkdir -p #{node[:cassandra][:data_dir]}"
 execute "sudo mkdir -p #{node[:cassandra][:commitlog_dir]}"
-execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:data_dir]}"
-execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:commitlog_dir]}"
+execute "sudo chown -R #{node[:internal][:package_user]} #{node[:cassandra][:data_dir]}"
+execute "sudo chown -R #{node[:internal][:package_user]} #{node[:cassandra][:commitlog_dir]}"
+
+
+#execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:data_dir]}"
+#execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:commitlog_dir]}"
 
 # read the token.txt which is passed by KCSDB Server to this node
 # update node[:cassandra][:initial_token] attribute
