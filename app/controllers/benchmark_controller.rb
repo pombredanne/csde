@@ -543,16 +543,6 @@ class BenchmarkController < ApplicationController
   
   
   def run
-    
-    get_values_from_mbean_over_jmx
-    
-    
-    
-    
-    put 'test'
-    exit 1
-    
-    
     # get the url for benchmark profile, given by the user
     benchmark_profile_url = params[:benchmark_profile_url]
     
@@ -2347,13 +2337,14 @@ class BenchmarkController < ApplicationController
   def get_values_from_mbean_over_jmx
     requester_path = "#{Rails.root}/chef-repo/.chef/sh/requester.rb"
     
-    host = "54.242.24.75"
+    host = @db_regions['region1']['ips'][0]
+    if host.include? ',' then host = host.chomp ',' end
     
-    #host = @db_regions['region1']['ips'][0]
-    #if host.include? ',' then host = host.chomp ',' end
-    port = 7199
+    requester = File.read requester_path
+    requester.gsub!(/host = "dummy"/,"host = \"#{host}\"")
+    File.open(requester_path,'w'){|f| f.write requester}
     
-    system "jruby-1.6.8 #{requester_path} \'#{host} #{port}\'"
+    system "jruby-1.6.8 #{requester_path}"
   end
   
   
