@@ -5,6 +5,7 @@ node[:internal][:codename] = node['lsb']['codename']
 
 # Adds the Cassandra repo:
 # deb http://www.apache.org/dist/cassandra/debian <07x|08x|10x|11x> main
+=begin
 if node[:setup][:deployment] == "07x" or node[:setup][:deployment] == "08x" or node[:setup][:deployment] == "10x" or node[:setup][:deployment] == "11x"
   apt_repository "cassandra-repo" do
     uri "http://www.apache.org/dist/cassandra/debian"
@@ -15,6 +16,7 @@ if node[:setup][:deployment] == "07x" or node[:setup][:deployment] == "08x" or n
     action :add
   end
 end
+=end
 
 if node[:setup][:deployment] == "07x" or node[:setup][:deployment] == "08x" or node[:setup][:deployment] == "10x" or node[:setup][:deployment] == "11x"
   apt_repository "cassandra-repo" do
