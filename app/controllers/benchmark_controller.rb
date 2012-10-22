@@ -1395,7 +1395,7 @@ class BenchmarkController < ApplicationController
     
     # install OpsCenter Agent
     # SERVICE_ID: 2.8
-    install_opscenter_agent
+    #install_opscenter_agent
     
     # for single region mode only
     # make a small pause, the cassandra server needs a little time to be ready

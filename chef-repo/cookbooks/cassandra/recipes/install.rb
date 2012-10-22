@@ -6,8 +6,8 @@
 #end
 
 # Sets up a user to own the data directories
-# node[:internal][:package_user] = "cassandra"
-node[:internal][:package_user] = "ubuntu"
+node[:internal][:package_user] = "cassandra"
+#node[:internal][:package_user] = "ubuntu"
 
 #package "cassandra" do
 #  notifies :run, resources(:execute => "clear-data"), :immediately

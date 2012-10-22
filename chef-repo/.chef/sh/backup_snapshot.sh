@@ -7,8 +7,8 @@ index=$1
 echo "::: Stopping Cassandra node..."
 sudo /etc/init.d/cassandra stop
 
-#echo "::: Changing user for cassandra folder..."
-#sudo chown -R ubuntu /var/lib/cassandra
+echo "::: Changing user for cassandra folder..."
+sudo chown -R ubuntu /var/lib/cassandra
 
 echo "::: Clearing all commit log files..."
 rm -f /var/lib/cassandra/commitlog/*.log 
@@ -25,8 +25,8 @@ tar xf /home/ubuntu/cassandra-snapshot.tar.gz
 echo ":: Copying the db files into Cassandra folder..."
 cp /home/ubuntu/home/ubuntu/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
 
-#echo "::: Changing user back to cassandra..."
-#sudo chown -R cassandra /var/lib/cassandra
+echo "::: Changing user back to cassandra..."
+sudo chown -R cassandra /var/lib/cassandra
 
 echo "::: Restarting Cassandra node..."
 sudo /etc/init.d/cassandra start
