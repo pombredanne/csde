@@ -26,6 +26,8 @@ gem 'parallel', '0.5.18'
 # web server, instead of webrick
 gem 'thin', '1.4.1'
 
+# gem for jruby
+gem 'i18n', '0.6.1'
 # ======================================================================
 
 gem 'rails', '3.2.8'
