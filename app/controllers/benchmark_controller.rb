@@ -2353,7 +2353,7 @@ class BenchmarkController < ApplicationController
     #if host.include? ',' then host = host.chomp ',' end
     port = 7199
     
-    system "jruby-1.6.8 -S #{requester_path} \'#{host} #{port}\'"
+    system "jruby-1.6.8 #{requester_path} \'#{host} #{port}\'"
   end
   
   
