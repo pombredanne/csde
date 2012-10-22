@@ -40,7 +40,7 @@ ruby_block "build_cassandra_env" do
     File.open(filename,'w'){|f| f.write cassandra_env }
   end
   action :create
-  notifies :run, resources(:execute => "clear-data"), :immediately
+  #notifies :run, resources(:execute => "clear-data"), :immediately
 end
 
 # overwrite cassandra.yaml
