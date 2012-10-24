@@ -2347,9 +2347,9 @@ class BenchmarkController < ApplicationController
     #File.open(requester_path,'w'){|f| f.write requester}
     
     
-    system "rvm use jruby"
+    system "command rvm use jruby"
     system "jruby #{requester_path}"
-    system "rvm --default use 1.9.3"
+    system "command rvm --default use 1.9.3"
     #system "bash #{Rails.root}/chef-repo/.chef/sh/invoke_requester.sh"
   end
   
