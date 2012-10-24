@@ -1,5 +1,5 @@
 # load all needed gems by booting
-include Java
+#include Java
 
 require 'rubygems'
 require 'yaml'
