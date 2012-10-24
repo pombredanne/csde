@@ -3,7 +3,7 @@ require 'i18n'
 require 'java'
 require 'jmx4r'
 
-host = "dummy"
+host = "54.242.21.155"
 port = "7199"
 
 puts "----------------------------------------------------------"
