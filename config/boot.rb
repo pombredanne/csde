@@ -7,7 +7,7 @@ require 'yajl'
 require 'parallel'
 require 'psych'
 require 'i18n'
-require 'java'
+#require 'java'
 require 'jmx4r'
 
 # Set up gems listed in the Gemfile.
