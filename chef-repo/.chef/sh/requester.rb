@@ -1,4 +1,5 @@
 require 'rubygems'
+gem 'jmx4r'
 require 'jmx4r'
 require 'java'
 
