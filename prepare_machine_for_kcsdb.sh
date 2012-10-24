@@ -49,14 +49,14 @@ install_ruby(){
 	curl -L https://get.rvm.io -s | bash -s stable # load the install bash script
 		
 	# update rvm variables
-	echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >> $HOME/.bashrc
-	. "$HOME/.rvm/scripts/rvm"
+	echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >> $HOME/.bashrc
+	source "$HOME/.rvm/scripts/rvm"
 	
 	command rvm install 1.9.3 # rvm is NOT loaded into shell as a function
 	
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: [INFO] Do NOT forget to set ruby 1.9.3 as default use"
-	echo "::: [INFO] $ . $HOME/.bashrc"
+	echo "::: [INFO] $ source $HOME/.bashrc"
 	echo "::: [INFO] $ rvm --default use 1.9.3"
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 }

@@ -9,3 +9,4 @@ echo 'JRUBY_HOME=/home/ubuntu/jruby-1.7.0' | tee -a $HOME/.bashrc
 echo 'PATH=$PATH:$JRUBY_HOME/bin' | tee -a $HOME/.bashrc
 source $HOME/.bashrc
 rvmsudo jruby -S gem install jmx4r -v '0.1.4'
+rvmsudo jruby -S gem install fog -v '1.6.0'
