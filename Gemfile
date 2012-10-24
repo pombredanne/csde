@@ -26,7 +26,7 @@ gem 'parallel', '0.5.18'
 # web server, instead of webrick
 gem 'thin', '1.4.1'
 
-#gem 'jmx4r', '0.1.4'
+gem 'jmx4r', '0.1.4'
 # ======================================================================
 
 gem 'rails', '3.2.8'
