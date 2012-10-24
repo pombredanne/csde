@@ -1,4 +1,5 @@
 # load all needed gems by booting
+include Java
 
 require 'rubygems'
 require 'yaml'
@@ -6,7 +7,9 @@ require 'fog'
 require 'yajl'
 require 'parallel'
 require 'psych'
-require 'i18n'
+
+#require 'i18n'
+gem 'jmx4r'
 require 'jmx4r'
 
 # Set up gems listed in the Gemfile.
