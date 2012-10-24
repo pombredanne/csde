@@ -8,10 +8,6 @@ require 'yajl'
 require 'parallel'
 require 'psych'
 
-#require 'i18n'
-#gem 'jmx4r'
-#require 'jmx4r'
-
 # Set up gems listed in the Gemfile.
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)
 

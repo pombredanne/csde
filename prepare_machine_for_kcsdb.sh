@@ -20,7 +20,7 @@ install_needed_packages(){
 	echo "::::::::::::::::::::::::::::::::"
 	sudo apt-get install openjdk-6-jdk nodejs build-essential openssl libreadline6 libreadline6-dev curl git-core \
 											 zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev \
-											 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config g++ -qq
+											 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config -qq
 }
 
 install_opscenter(){
@@ -42,10 +42,20 @@ install_gmetad(){
 	sudo cp /etc/ganglia-webfrontend/apache.conf /etc/apache2/sites-enabled
 }
 
+install_jruby(){
+	echo "::::::::::::::::::::::::::::::::::::::::::::"
+	echo "::: Installing JRuby [1.7.0] via tar ball..."
+	echo "::::::::::::::::::::::::::::::::::::::::::::"
+	wget https://s3.amazonaws.com/kcsdb-init/jruby-bin-1.7.0.tar.gz --output-document /home/ubuntu/jruby-bin-1.7.0.tar.gz --quiet
+	tar xf /home/ubuntu/jruby-bin-1.7.0.tar.gz
+	echo "JRUBY_HOME=/home/ubuntu/jruby-1.7.0" >> $HOME/.bashrc
+	echo "PATH=$PATH:$JRUBY_HOME/bin" >> $HOME/.bashrc
+}
+
 install_ruby(){
-	echo "::::::::::::::::::::::::::::::"
-	echo "::: Installing Ruby via RVM..."
-	echo "::::::::::::::::::::::::::::::"
+	echo "::::::::::::::::::::::::::::::::::::::"
+	echo "::: Installing Ruby [1.9.3] via RVM..."
+	echo "::::::::::::::::::::::::::::::::::::::"
 	curl -L https://get.rvm.io -s | bash -s stable # load the install bash script
 		
 	# update rvm variables
@@ -58,9 +68,6 @@ install_ruby(){
 	echo "::: [INFO] Do NOT forget to set ruby 1.9.3 as default use"
 	echo "::: [INFO] $ . $HOME/.bashrc"
 	echo "::: [INFO] $ rvm --default use 1.9.3"
-	echo "::: [INFO] $ rvm install jruby"
-	echo "::: [INFO] $ jruby-1.6.8 -S gem install jmx4r"
-	echo "::: [INFO] $ jruby-1.6.8 -S gem install i18n"
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 }
 
@@ -72,16 +79,18 @@ start=$(date +%s)
 welcome
 apt_update
 install_needed_packages
-install_opscenter
-install_gmetad
+#install_opscenter
+#install_gmetad
+install_jruby
 install_ruby
 
 echo ":::::::::::::::::::::::::::::::::::::::::"
 echo "::: MACHINE IS READY FOR INSTALLING KCSDB"
-echo "::: Sun JDK 6"
+echo "::: Open JDK 6"
 echo "::: Ruby 1.9.3"
-echo "::: OpsCenter 2.1.2"
-echo "::: Gmetad"
+echo "::: JRuby 1.7.0"
+#echo "::: OpsCenter 2.1.2"
+#echo "::: Gmetad"
 echo ":::::::::::::::::::::::::::::::::::::::::"
 
 # Time measurement
