@@ -28,15 +28,11 @@ OS: Ubuntu 11.10 x64
 * Download and execute prepare_machine_for_kcsdb.sh script
  $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/prepare_machine_for_kcsdb.sh -s | bash
 * Load rvm into shell
- $ . $HOME/.bashrc
+ $ source $HOME/.bashrc
 * Set ruby 1.9.3 as default
  $ rvm --default use 1.9.3
-* Install JRuby
- $ rvm install jruby
-* Install jmx4r
- $ jruby-1.6.8 -S gem install jmx4r
-* Install i18n
- $ jruby-1.6.8 -S gem install i18n
+* Install Gems for JRuby
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_gem_for_jruby.sh -s | bash
 * Install KCSDB
  $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh -s | rvmsudo bash
 
