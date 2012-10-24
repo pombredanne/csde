@@ -2347,6 +2347,7 @@ class BenchmarkController < ApplicationController
     #File.open(requester_path,'w'){|f| f.write requester}
     
     puts "Changing jruby mode"
+    system "source ~/.rvm/scripts/rvm"
     system "rvm use jruby"
     system "jruby -S #{requester_path}"
     system "rvm --default use 1.9.3"
