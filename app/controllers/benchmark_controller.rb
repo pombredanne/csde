@@ -2346,7 +2346,7 @@ class BenchmarkController < ApplicationController
     #requester.gsub!(/host = ".*/,"host = \"#{host}\"")
     #File.open(requester_path,'w'){|f| f.write requester}
     
-    system "jruby-1.6.8 #{requester_path}"
+    system "jruby-1.6.8 -S #{requester_path}"
   end
   
   
