@@ -1,7 +1,6 @@
-require 'rubygems'
-gem 'jmx4r'
-require 'jmx4r'
-require 'java'
+#require 'rubygems'
+#require 'jmx4r'
+#require 'java'
 
 host = "54.242.21.155"
 port = "7199"
