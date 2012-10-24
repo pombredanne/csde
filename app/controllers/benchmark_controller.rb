@@ -2349,7 +2349,7 @@ class BenchmarkController < ApplicationController
     #puts "Changing jruby mode"
     #system ". /home/ubuntu/.rvm/scripts/rvm"
     #system "/bin/bash --login rvm use jruby"
-    system "jruby -S -d #{requester_path}"
+    system "jruby #{requester_path} -S -d"
     #system "rvm --default use 1.9.3"
     #system "bash #{Rails.root}/chef-repo/.chef/sh/invoke_requester.sh"
   end
