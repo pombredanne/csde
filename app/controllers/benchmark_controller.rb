@@ -2346,11 +2346,11 @@ class BenchmarkController < ApplicationController
     #requester.gsub!(/host = ".*/,"host = \"#{host}\"")
     #File.open(requester_path,'w'){|f| f.write requester}
     
-    puts "Changing jruby mode"
-    system ". /home/ubuntu/.rvm/scripts/rvm"
-    system "/bin/bash --login rvm use jruby"
-    system "jruby -S #{requester_path}"
-    system "rvm --default use 1.9.3"
+    #puts "Changing jruby mode"
+    #system ". /home/ubuntu/.rvm/scripts/rvm"
+    #system "/bin/bash --login rvm use jruby"
+    system "jruby-1.6.8 -S #{requester_path}"
+    #system "rvm --default use 1.9.3"
     #system "bash #{Rails.root}/chef-repo/.chef/sh/invoke_requester.sh"
   end
   
