@@ -42,6 +42,16 @@ install_gmetad(){
 	sudo cp /etc/ganglia-webfrontend/apache.conf /etc/apache2/sites-enabled
 }
 
+install_jruby(){
+	echo "::::::::::::::::::::::::::::::::::::::::::::"
+	echo "::: Installing JRuby [1.7.0] via tar ball..."
+	echo "::::::::::::::::::::::::::::::::::::::::::::"
+	wget https://s3.amazonaws.com/kcsdb-init/jruby-bin-1.7.0.tar.gz --output-document /home/ubuntu/jruby-bin-1.7.0.tar.gz --quiet
+	tar xf /home/ubuntu/jruby-bin-1.7.0.tar.gz
+	echo 'JRUBY_HOME=/home/ubuntu/jruby-1.7.0' | tee -a $HOME/.bashrc
+	echo 'PATH=$PATH:$JRUBY_HOME/bin' | tee -a $HOME/.bashrc
+}
+
 install_ruby(){
 	echo "::::::::::::::::::::::::::::::::::::::"
 	echo "::: Installing Ruby [1.9.3] via RVM..."
@@ -71,6 +81,7 @@ apt_update
 install_needed_packages
 #install_opscenter
 #install_gmetad
+install_jruby
 install_ruby
 
 echo ":::::::::::::::::::::::::::::::::::::::::"
