@@ -2346,7 +2346,8 @@ class BenchmarkController < ApplicationController
     #requester.gsub!(/host = ".*/,"host = \"#{host}\"")
     #File.open(requester_path,'w'){|f| f.write requester}
     
-    system "jruby #{requester_path}"
+    #system "jruby #{requester_path}"
+    system "bash #{Rails.root}/chef-repo/.chef/sh/invoke_requester.sh"
   end
   
   
