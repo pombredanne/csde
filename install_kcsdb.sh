@@ -118,8 +118,8 @@ bye(){
 	echo "::: KCSDB installed successfully!!! Please run 'bash start.sh' in 'kcsdb' home folder to start KCSDB Server :::"
 	echo "::: KCSDB Server     --> [IP]:3000"
 	echo "::: Chef Server      --> [IP]:4040"
-	echo "::: OpsCenter Server --> [IP]:8888"
-	echo "::: Gmetad Server    --> [IP]:8651"
+	#echo "::: OpsCenter Server --> [IP]:8888"
+	#echo "::: Gmetad Server    --> [IP]:8651"
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 }
 
@@ -130,7 +130,7 @@ start=$(date +%s)
 
 welcome
 #pause 'Press [Enter] key to install KCSDB...'
-configure_opscenter
+#configure_opscenter
 install_kcsdb
 build_chef_solo_config
 run_chef_solo
