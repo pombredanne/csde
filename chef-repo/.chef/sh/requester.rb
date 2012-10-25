@@ -5,6 +5,10 @@ require 'java'
 host = "dummy"
 port = "7199"
 
+puts "-----------------------------------------------------------------------------"
+puts "Invoking Requester in order to get values from MBeans in Cassandra via JMX..."
+puts "-----------------------------------------------------------------------------"
+
 str = ""
 str << "----------------------------------------------------------\n"
 str << "Establishing connection to host #{host} on port #{port}...\n"

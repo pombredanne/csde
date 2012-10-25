@@ -6,6 +6,10 @@ profile_id = "dummy"
 aws_access_key_id = "dummy"
 aws_secret_access_key = "dummy"
 
+puts "-----------------------------------------------------"
+puts "Invoking Uploader in order to upload results to S3..."
+puts "-----------------------------------------------------"
+
 s3 = Fog::Storage.new(
   provider: 'AWS',
   aws_access_key_id: aws_access_key_id,
