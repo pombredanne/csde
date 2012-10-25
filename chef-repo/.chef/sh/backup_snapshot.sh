@@ -17,7 +17,7 @@ echo "::: Clearing all db files..."
 rm /var/lib/cassandra/data/usertable/data/*.db
 
 echo "::: Downloading the tar ball backup file from S3..."
-wget https://s3.amazonaws.com/kcsdb-init/cassandra-$1.tar.gz --output-document /home/ubuntu/cassandra-snapshot.tar.gz --quiet
+wget https://s3.amazonaws.com/kcsdb-init/cassandra-$1.tar.gz --output-document /home/ubuntu/cassandra-snapshot.tar.gz
 
 echo "::Extracting the tar ball..."
 tar xf /home/ubuntu/cassandra-snapshot.tar.gz
