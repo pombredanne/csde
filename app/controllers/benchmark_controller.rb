@@ -2380,12 +2380,12 @@ class BenchmarkController < ApplicationController
     if host.to_s.include? ',' then host = host.chomp ',' end
     state = get_state
     
-    requester.gsub!(/host = ".*/,"host = \"#{host}\"")
-    requester.gsub!(/aws_access_key_id = ".*/,"aws_access_key_id = \"#{state['aws_access_key_id']}\"") 
-    requester.gsub!(/aws_secret_access_key = ".*/,"aws_secret_access_key = \"#{state['aws_secret_access_key']}\"")
-    requester.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")       
+    requester_file.gsub!(/host = ".*/,"host = \"#{host}\"")
+    requester_file.gsub!(/aws_access_key_id = ".*/,"aws_access_key_id = \"#{state['aws_access_key_id']}\"") 
+    requester_file.gsub!(/aws_secret_access_key = ".*/,"aws_secret_access_key = \"#{state['aws_secret_access_key']}\"")
+    requester_file.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")       
 
-    File.open(requester_path,'w'){|f| f.write requester}    
+    File.open(requester_path,'w'){|f| f.write requester_file}    
   end
   
   # -------------------------------------------------------------------------------------------- #
