@@ -10,7 +10,7 @@ service1:
 service2:
   name: ycsb
   attributes:
-    load: false # TRANSACTION phase
+    load: 'no' # TRANSACTION phase
     measurementtype: timeseries
     timeseries.granularity: 10000 # 10 s, one status
     heap_size: 8192 # a big enough heap size has to be set in order to generate millions rows
