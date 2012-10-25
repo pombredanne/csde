@@ -17,13 +17,13 @@ echo "::: Clearing all db files..."
 rm /var/lib/cassandra/data/usertable/data/*.db
 
 echo "::: Downloading the tar ball backup file from S3..."
-wget https://s3.amazonaws.com/kcsdb-init/cassandra-$1.tar.gz --output-document /home/ubuntu/cassandra-snapshot.tar.gz
+wget https://s3.amazonaws.com/kcsdb-init/cassandra-$1.tar.gz --output-document /home/ubuntu/cassandra-snapshot.tar.gz --quiet
 
-echo "::Extracting the tar ball..."
+echo "::: Extracting the tar ball..."
 tar xf /home/ubuntu/cassandra-snapshot.tar.gz
 
 echo ":: Moving the db files into Cassandra folder..."
-mv /home/ubuntu/home/ubuntu/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
+mv /home/ubuntu/var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
 
 echo "::: Changing user back to cassandra..."
 sudo chown -R cassandra /var/lib/cassandra
