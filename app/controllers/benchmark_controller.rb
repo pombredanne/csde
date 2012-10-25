@@ -2309,6 +2309,7 @@ class BenchmarkController < ApplicationController
         else
           attributes_string << "-p phase1.#{key}=#{value} " # use only single phase for YCSB++
         end
+      
       else
         heap_size = value
       end
