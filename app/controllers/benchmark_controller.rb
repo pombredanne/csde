@@ -2374,14 +2374,22 @@ class BenchmarkController < ApplicationController
     
     host = @db_regions['region1']['ips'][0]
     if host.to_s.include? ',' then host = host.chomp ',' end
-    state = get_state
     
     requester_file.gsub!(/host = ".*/,"host = \"#{host}\"")
-    requester_file.gsub!(/aws_access_key_id = ".*/,"aws_access_key_id = \"#{state['aws_access_key_id']}\"") 
-    requester_file.gsub!(/aws_secret_access_key = ".*/,"aws_secret_access_key = \"#{state['aws_secret_access_key']}\"")
-    requester_file.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")       
 
-    File.open(requester_path,'w'){|f| f.write requester_file}    
+    File.open(requester_path,'w'){|f| f.write requester_file}
+    
+    
+    uploader_path = "#{Rails.root}/chef-repo/.chef/sh/uploader.rb"
+    uploader_file = File.read uploader_path
+      
+    state = get_state
+    
+    uploader_file.gsub!(/aws_access_key_id = ".*/,"aws_access_key_id = \"#{state['aws_access_key_id']}\"") 
+    uploader_file.gsub!(/aws_secret_access_key = ".*/,"aws_secret_access_key = \"#{state['aws_secret_access_key']}\"")
+    uploader_file.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")       
+
+    File.open(uploader_path,'w'){|f| f.write uploader_file}
   end
   
   # -------------------------------------------------------------------------------------------- #
