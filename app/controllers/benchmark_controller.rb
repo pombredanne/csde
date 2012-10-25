@@ -720,7 +720,7 @@ class BenchmarkController < ApplicationController
       end
       
       tmp_array = benchmark_profile_url.to_s.split '/'
-      benchmark_name = tmp_array[tmp_array.siye - 1]
+      benchmark_name = tmp_array[tmp_array.size - 1]
       benchmark_name = benchmark_name.to_s.chomp '.yaml'
       
       overwrite_requester_rb benchmark_name
