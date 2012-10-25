@@ -543,12 +543,6 @@ class BenchmarkController < ApplicationController
   
   
   def run
-    
-    get_values_from_mbean_over_jmx
-    
-    puts 'break point'
-    exit 1
-    
     # get the url for benchmark profile, given by the user
     benchmark_profile_url = params[:benchmark_profile_url]
     
@@ -724,6 +718,16 @@ class BenchmarkController < ApplicationController
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
       end
+      
+      tmp_array = benchmark_profile_url.to_s.split '/'
+      benchmark_name = tmp_array[tmp_array.siye - 1]
+      benchmark_name = benchmark_name.to_s.chomp '.yaml'
+      
+      overwrite_requester_rb benchmark_name
+      
+      puts 'break point'
+      exit 1
+      
       
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
@@ -2066,8 +2070,12 @@ class BenchmarkController < ApplicationController
     
     # start all YCSB clients in all regions
     start_all_ycsb_clients ycsb_config_hash
-    
-    get_values_from_mbean_over_jmx
+
+    logger.debug "---------------------------------------------------------------------------------"    
+    logger.debug "YCSB Workload is already DONE."
+    logger.debug "Execute 'bash invoke_requester.sh' to get values from MBeans in Cassandra via JMX"
+    logger.debug "The result output file will be saved in S3 in bucket 'kcsdb-results'"
+    logger.debug "---------------------------------------------------------------------------------"
   end
   
   # ============================================================================================ #
@@ -2246,6 +2254,10 @@ class BenchmarkController < ApplicationController
   # ============================================================================================ #
   private
   def start_all_ycsb_clients ycsb_config_hash
+    logger.debug "----------------------------------------------------------------------"
+    logger.debug "::: Starting all YCSB Clients to generate the user defined workload..."
+    logger.debug "----------------------------------------------------------------------"
+    
     # LOADING or TRANSACTION phase
     load = ycsb_config_hash['attributes']['load']
     
@@ -2306,10 +2318,6 @@ class BenchmarkController < ApplicationController
       end
     end  
     
-    logger.debug "--------------------------------"
-    logger.debug "::: Invoking ALL YCSB clients..."
-    logger.debug "--------------------------------"
-    
     # LOADING or TRANSACTION phase
     if load.to_s == 'false'
       load = 'run'
@@ -2354,7 +2362,31 @@ class BenchmarkController < ApplicationController
     #system "bash #{Rails.root}/chef-repo/.chef/sh/invoke_requester.sh"
   end
   
-  
+  private
+  def overwrite_requester_rb profile_id
+    logger.debug "--------------------------------------------------------------------------------------"
+    logger.debug "::: Overwritting values in requester.rb script in order to invoke this script later..."
+    logger.debug "The following values will be overwritten"
+    logger.debug "1. Profile ID"
+    logger.debug "2. IP of Cassandra Node"
+    logger.debug "3. AWS Credentials"
+    logger.debug "--------------------------------------------------------------------------------------"    
+    
+    # overwrite values
+    requester_path = "#{Rails.root}/chef-repo/.chef/sh/requester.rb"
+    requester_file = File.read requester_path
+    
+    host = @db_regions['region1']['ips'][0]
+    if host.to_s.include? ',' then host = host.chomp ',' end
+    state = get_state
+    
+    requester.gsub!(/host = ".*/,"host = \"#{host}\"")
+    requester.gsub!(/aws_access_key_id = ".*/,"aws_access_key_id = \"#{state['aws_access_key_id']}\"") 
+    requester.gsub!(/aws_secret_access_key = ".*/,"aws_secret_access_key = \"#{state['aws_secret_access_key']}\"")
+    requester.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")       
+
+    File.open(requester_path,'w'){|f| f.write requester}    
+  end
   
   # -------------------------------------------------------------------------------------------- #
   private

@@ -3,13 +3,13 @@ require 'jmx4r'
 require 'java'
 require 'fog'
 
-host = "54.242.21.155"
+profile_id = "dummy"
+
+host = "dummy"
 port = "7199"
 
 aws_access_key_id = "dummy"
 aws_secret_access_key = "dummy"
-
-profile_id = "dummy"
 
 str = ""
 str << "----------------------------------------------------------\n"
