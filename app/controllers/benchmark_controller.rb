@@ -2316,9 +2316,9 @@ class BenchmarkController < ApplicationController
     end  
     
     # LOADING or TRANSACTION phase
-    if load.to_s == 'false'
+    if load.to_s == 'no'
       load = 'run'
-    elsif load.to_s == 'true'
+    elsif load.to_s == 'yes'
       load = 'load'  
     end
     
