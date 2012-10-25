@@ -10,16 +10,19 @@ aws_secret_access_key=$3
 
 echo "::: Installing fog library..."
 sudo apt-get install libxml2-dev libxslt-dev -qq
-sudo gem install fog --no-ri --no-rdoc
+sudo gem install fog --no-ri --no-rdoc -v '1.6.0'
 
 echo "::: Creating snapshot..."
 nodetool -h localhost -p 7199 snapshot usertable -cf data -t cassandra-snapshot
 
-echo "::: Copying snapshot folder to home folder..."
-sudo cp -r /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot /home/ubuntu
+#echo "::: Copying snapshot folder to home folder..."
+#sudo cp -r /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot /home/ubuntu
 
-echo "::: Creating archive tar ball of this snapshot..."
-sudo tar -zcvpf cassandra-snapshot.tar.gz /home/ubuntu/cassandra-snapshot
+#echo "::: Creating archive tar ball of this snapshot..."
+#sudo tar -zcvpf cassandra-snapshot.tar.gz /home/ubuntu/cassandra-snapshot
+
+echo "::: Creating archive tar ball of this snapshot"
+sudo tar -zcvpf cassandra-snapshot.tar.gz /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot
 
 echo "::: Creating a S3 upload Ruby script..."
 (

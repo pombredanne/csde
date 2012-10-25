@@ -22,8 +22,8 @@ wget https://s3.amazonaws.com/kcsdb-init/cassandra-$1.tar.gz --output-document /
 echo "::Extracting the tar ball..."
 tar xf /home/ubuntu/cassandra-snapshot.tar.gz
 
-echo ":: Copying the db files into Cassandra folder..."
-cp /home/ubuntu/home/ubuntu/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
+echo ":: Moving the db files into Cassandra folder..."
+mv /home/ubuntu/home/ubuntu/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
 
 echo "::: Changing user back to cassandra..."
 sudo chown -R cassandra /var/lib/cassandra
