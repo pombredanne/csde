@@ -718,16 +718,12 @@ class BenchmarkController < ApplicationController
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
       end
-      
+
       tmp_array = benchmark_profile_url.to_s.split '/'
       benchmark_name = tmp_array[tmp_array.size - 1]
       benchmark_name = benchmark_name.to_s.chomp '.yaml'
       
       overwrite_requester_rb benchmark_name
-      
-      puts 'break point'
-      exit 1
-      
       
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
