@@ -2371,7 +2371,7 @@ class BenchmarkController < ApplicationController
       
       sleep sleep_time
       
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
       
       logger.debug "YCSB command:"
       puts cmd
