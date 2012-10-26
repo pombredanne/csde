@@ -5,11 +5,21 @@ require 'java'
 host = "dummy"
 port = "7199"
 
+profile_content = "dummy"
+
 puts "-----------------------------------------------------------------------------"
 puts "Invoking Requester in order to get values from MBeans in Cassandra via JMX..."
 puts "-----------------------------------------------------------------------------"
 
 str = ""
+
+str << "--------------------------\n"
+str << "Executed Benchmark Profile\n"
+str << "--------------------------\n"
+str << profile_content
+
+str << "\n"
+
 str << "----------------------------------------------------------\n"
 str << "Establishing connection to host #{host} on port #{port}...\n"
 str << "----------------------------------------------------------\n"

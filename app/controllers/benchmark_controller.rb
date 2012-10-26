@@ -722,8 +722,9 @@ class BenchmarkController < ApplicationController
       tmp_array = benchmark_profile_url.to_s.split '/'
       benchmark_name = tmp_array[tmp_array.size - 1]
       benchmark_name = benchmark_name.to_s.chomp '.yaml'
+      benchmark_content = File.read(benchmark_profile_path)
       
-      overwrite_requester_rb benchmark_name
+      overwrite_requester_rb benchmark_name, benchmark_content
       
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
@@ -2360,14 +2361,14 @@ class BenchmarkController < ApplicationController
   end
   
   private
-  def overwrite_requester_rb profile_id
-    logger.debug "--------------------------------------------------------------------------------------"
-    logger.debug "::: Overwritting values in requester.rb script in order to invoke this script later..."
+  def overwrite_requester_rb profile_id, profile_content
+    logger.debug "--------------------------------------------------------------------------------------------------"
+    logger.debug "::: Overwritting values in requester.rb/uploader.rb script in order to invoke this script later..."
     logger.debug "The following values will be overwritten"
     logger.debug "1. Profile ID"
     logger.debug "2. IP of Cassandra Node"
     logger.debug "3. AWS Credentials"
-    logger.debug "--------------------------------------------------------------------------------------"    
+    logger.debug "--------------------------------------------------------------------------------------------------"    
     
     # overwrite values
     requester_path = "#{Rails.root}/chef-repo/.chef/sh/requester.rb"
@@ -2377,6 +2378,7 @@ class BenchmarkController < ApplicationController
     if host.to_s.include? ',' then host = host.chomp ',' end
     
     requester_file.gsub!(/host = ".*/,"host = \"#{host}\"")
+    requester_file.gsub!(/profile_content = ".*/,"profile_content = \"#{profile_content}\"")  
 
     File.open(requester_path,'w'){|f| f.write requester_file}
     
@@ -2388,7 +2390,7 @@ class BenchmarkController < ApplicationController
     
     uploader_file.gsub!(/aws_access_key_id = ".*/,"aws_access_key_id = \"#{state['aws_access_key_id']}\"") 
     uploader_file.gsub!(/aws_secret_access_key = ".*/,"aws_secret_access_key = \"#{state['aws_secret_access_key']}\"")
-    uploader_file.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")       
+    uploader_file.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")
 
     File.open(uploader_path,'w'){|f| f.write uploader_file}
   end
