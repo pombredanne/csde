@@ -7,6 +7,8 @@ port = "7199"
 
 profile_content = "dummy"
 
+profile_run = "dummy"
+
 puts "-----------------------------------------------------------------------------"
 puts "Invoking Requester in order to get values from MBeans in Cassandra via JMX..."
 puts "-----------------------------------------------------------------------------"
@@ -17,6 +19,14 @@ str << "--------------------------\n"
 str << "Executed Benchmark Profile\n"
 str << "--------------------------\n"
 str << profile_content
+
+str << "\n"
+
+str << "-----------\n"
+str << "Profile Run\n"
+str << "-----------\n"
+
+str << profile_run
 
 str << "\n"
 

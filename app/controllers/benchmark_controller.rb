@@ -676,6 +676,12 @@ class BenchmarkController < ApplicationController
       logger.debug "----------------------------------------------------------------------------------"
       logger.debug "STEP 1: Invoking Service [Provision] for Database Cluster and Benchmark Cluster..."
       logger.debug "----------------------------------------------------------------------------------"
+      
+      @benchmark_run = ""
+      @benchmark_run << "----------------------------------------------------------------------------------\n"
+      @benchmark_run << "STEP 1: Invoking Service [Provision] for Database Cluster and Benchmark Cluster...\n"
+      @benchmark_run << "----------------------------------------------------------------------------------\n"
+      
       start_time = Time.now
       if profile['regions']['region1']['template'].to_s.include? "cassandra" or profile['regions']['region1']['template'].to_s.include? "mongodb"
         service 'provision', profile 
@@ -686,6 +692,10 @@ class BenchmarkController < ApplicationController
       logger.debug "------------------------------------------------------------------------------"
       logger.debug "---> Elapsed time for Service [Provision]: #{Time.now - start_time} seconds..."
       logger.debug "------------------------------------------------------------------------------"
+      
+      @benchmark_run << "------------------------------------------------------------------------------\n"
+      @benchmark_run << "---> Elapsed time for Service [Provision]: #{Time.now - start_time} seconds...\n"
+      @benchmark_run << "------------------------------------------------------------------------------\n"
 
       # --- @db_regions ---
       #   region1:
@@ -719,16 +729,14 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
-      tmp_array = benchmark_profile_url.to_s.split '/'
-      benchmark_name = tmp_array[tmp_array.size - 1]
-      benchmark_name = benchmark_name.to_s.chomp '.yaml'
-      benchmark_content = File.read(benchmark_profile_path)
-      
-      overwrite_requester_rb benchmark_name, benchmark_content
-      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
+      
+      @benchmark_run << "-----------------------------------------------------------\n"
+      @benchmark_run << "STEP 2: Invoking Service [Database] for Database Cluster...\n"
+      @benchmark_run << "-----------------------------------------------------------\n"
+            
       start_time = Time.now
       if profile['regions']['region1']['template'].to_s.include? "cassandra"
         service 'cassandra', @db_regions
@@ -742,14 +750,33 @@ class BenchmarkController < ApplicationController
       logger.debug "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds..."
       logger.debug "-----------------------------------------------------------------------------"
       
+      @benchmark_run << "-----------------------------------------------------------------------------\n"
+      @benchmark_run << "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds...\n"
+      @benchmark_run << "-----------------------------------------------------------------------------\n"      
+      
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
+      @benchmark_run << "--------------------------------------------------------\n"
+      @benchmark_run << "STEP 3: Invoking Service [YCSB] for Benchmark Cluster...\n"
+      @benchmark_run << "--------------------------------------------------------\n"
+
       start_time = Time.now
       service 'ycsb', @bench_regions
+
       logger.debug "-------------------------------------------------------------------------"
       logger.debug "---> Elapsed time for Service [YCSB]: #{Time.now - start_time} seconds..."
       logger.debug "-------------------------------------------------------------------------"
+      @benchmark_run << "-------------------------------------------------------------------------\n"  
+      @benchmark_run << "---> Elapsed time for Service [YCSB]: #{Time.now - start_time} seconds...\n"  
+      @benchmark_run << "-------------------------------------------------------------------------\n"
+
+      tmp_array = benchmark_profile_url.to_s.split '/'
+      benchmark_name = tmp_array[tmp_array.size - 1]
+      benchmark_name = benchmark_name.to_s.chomp '.yaml'
+      benchmark_content = File.read(benchmark_profile_path)
+      
+      overwrite_requester_rb benchmark_name, benchmark_content, @benchmark_run
 
       if profile['snapshot'].to_s == 'true'
         create_snapshot_cassandra
@@ -1875,6 +1902,9 @@ class BenchmarkController < ApplicationController
     logger.debug "---------------------------------------------------------------------------"
     logger.debug "---> Elapsed time for Service [Backup]: #{Time.now - start_time} seconds..."
     logger.debug "---------------------------------------------------------------------------"
+    @benchmark_run << "---------------------------------------------------------------------------\n"
+    @benchmark_run << "---> Elapsed time for Service [Backup]: #{Time.now - start_time} seconds...\n"
+    @benchmark_run << "---------------------------------------------------------------------------\n"
   end
   
   # ============================================================================================ #
@@ -1943,6 +1973,9 @@ class BenchmarkController < ApplicationController
     logger.debug "-----------------------------------------------------------------------------"
     logger.debug "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds..."
     logger.debug "-----------------------------------------------------------------------------"
+    @benchmark_run << "-----------------------------------------------------------------------------\n"
+    @benchmark_run << "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds...\n"
+    @benchmark_run << "-----------------------------------------------------------------------------\n"
   end
   
   # ============================================================================================ #
@@ -2016,6 +2049,9 @@ class BenchmarkController < ApplicationController
     logger.debug "--------------------------------------------------------------------------------------------"
     logger.debug "---> Elapsed time for Service [Install OpsCenter Agent]: #{Time.now - start_time} seconds..."
     logger.debug "--------------------------------------------------------------------------------------------"
+    @benchmark_run << "--------------------------------------------------------------------------------------------\n"
+    @benchmark_run << "---> Elapsed time for Service [Install OpsCenter Agent]: #{Time.now - start_time} seconds...\n"
+    @benchmark_run << "--------------------------------------------------------------------------------------------\n"
   end
   # ============================================================================================ # 
   # SERVICE_ID: 3 
@@ -2361,7 +2397,7 @@ class BenchmarkController < ApplicationController
   end
   
   private
-  def overwrite_requester_rb profile_id, profile_content
+  def overwrite_requester_rb profile_id, profile_content, profile_run
     logger.debug "--------------------------------------------------------------------------------------------------"
     logger.debug "::: Overwritting values in requester.rb/uploader.rb script in order to invoke this script later..."
     logger.debug "The following values will be overwritten"
@@ -2379,7 +2415,8 @@ class BenchmarkController < ApplicationController
     
     requester_file.gsub!(/host = ".*/,"host = \"#{host}\"")
     requester_file.gsub!(/profile_content = ".*/,"profile_content = \"#{profile_content}\"")  
-
+    requester_file.gsub!(/profile_run = ".*/,"profile_run = \"#{profile_run}\"") 
+    
     File.open(requester_path,'w'){|f| f.write requester_file}
     
     
