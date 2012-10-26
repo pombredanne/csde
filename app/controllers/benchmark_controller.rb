@@ -408,7 +408,8 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 51")
+                tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400") # active row cache
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
@@ -436,7 +437,8 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 77")
+                tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400") # active row cache
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
@@ -471,7 +473,8 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 93")
+                tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400") # active row cache
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
@@ -499,7 +502,8 @@ class BenchmarkController < ApplicationController
                 logger.debug "row Cache Size: Low"
                 @status << "row Cache Size: Low\n"
                 profile_name << "row.low.yaml"
-                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # don't change
+                tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 140")
+                tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400") # active row cache
               # check row cache size: MEDIUM
               elsif tmp_arr[2] == 1.to_s
                 logger.debug "row Cache Size: Medium"
