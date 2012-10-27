@@ -2108,6 +2108,12 @@ class BenchmarkController < ApplicationController
     # start all YCSB clients in all regions
     start_all_ycsb_clients ycsb_config_hash
 
+    @benchmark_run << "------------\n"
+    @benchmark_run << "::: YCSB Log\n"
+    @benchmark_run << "------------\n"
+    @benchmark_run << File.read("/home/ubuntu/ycsb-log.txt")
+    @benchmark_run << "\n"
+
     logger.debug "---------------------------------------------------------------------------------"    
     logger.debug "YCSB Workload is already DONE."
     logger.debug "Execute 'bash invoke_requester.sh' to get values from MBeans in Cassandra via JMX"
@@ -2371,35 +2377,19 @@ class BenchmarkController < ApplicationController
       
       sleep sleep_time
       
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
-      
       logger.debug "YCSB command:"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
       puts cmd
-      
       system cmd # invoke A YCSB client
+      
+      logger.debug "Copy YCSB Log back to KCSDB Server:"
+      cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
+      puts cmd      
+      system cmd
     end
   end
   # --------------------------------------------------------------------------------------------#
-  
-  private
-  def get_values_from_mbean_over_jmx
-    requester_path = "#{Rails.root}/chef-repo/.chef/sh/requester.rb"
-    
-    #host = @db_regions['region1']['ips'][0]
-    #if host.include? ',' then host = host.chomp ',' end
-    
-    #requester = File.read requester_path
-    #requester.gsub!(/host = ".*/,"host = \"#{host}\"")
-    #File.open(requester_path,'w'){|f| f.write requester}
-    
-    #puts "Changing jruby mode"
-    #system ". /home/ubuntu/.rvm/scripts/rvm"
-    #system "/bin/bash --login rvm use jruby"
-    system "jruby #{requester_path} -S -d"
-    #system "rvm --default use 1.9.3"
-    #system "bash #{Rails.root}/chef-repo/.chef/sh/invoke_requester.sh"
-  end
-  
+
   private
   def overwrite_requester_rb profile_id, profile_content, profile_run
     logger.debug "--------------------------------------------------------------------------------------------------"
