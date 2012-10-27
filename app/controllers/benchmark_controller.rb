@@ -80,7 +80,7 @@ class BenchmarkController < ApplicationController
       @status << "Low\n"  
     end
       
-    ! params[:key_cache_medium].nil? ? key_cache_size_array[1] = 1 : key_cache_size_array[1] = 0
+    ! params[:key_cache_high].nil? ? key_cache_size_array[1] = 1 : key_cache_size_array[1] = 0
     if key_cache_size_array[1] == 1 
       logger.debug "High" 
       @status << "High\n"
@@ -99,7 +99,7 @@ class BenchmarkController < ApplicationController
       @status << "Low\n"
     end
       
-    ! params[:row_cache_medium].nil? ? row_cache_size_array[1] = 1 : row_cache_size_array[1] = 0
+    ! params[:row_cache_high].nil? ? row_cache_size_array[1] = 1 : row_cache_size_array[1] = 0
     if row_cache_size_array[1] == 1 
       logger.debug "High" 
       @status << "High\n"
