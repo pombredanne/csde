@@ -156,29 +156,6 @@ class BenchmarkController < ApplicationController
         @status << "Profile with <strong>BOTH KEY</strong> cache and <strong>ROW</strong> cache\n"
       end
       
-      logger.debug "------------------------------------------------------------------------------"
-      logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
-      logger.debug "------------------------------------------------------------------------------"
-      s3 = create_fog_object 'aws', nil, 'storage'
-      
-      # check if a bucket called 'kcsdb-profiles' already exists
-      dirs = s3.directories
-      check = false
-      dirs.each {|dir| if dir.key == "kcsdb-profiles" then check = true end}
-      
-      # if this bucket does not exist than create a new one
-      kcsdb_profiles = nil
-      if ! check
-        logger.debug "Bucket 'kcsdb-profiles' does NOT exist, create a new one..."
-        kcsdb_profiles = s3.directories.create(
-          :key => "kcsdb-profiles",
-          :public => true
-        )
-      else
-        logger.debug "Bucket 'kcsdb-profiles' EXIST, get the bucket..."
-        kcsdb_profiles = s3.directories.get 'kcsdb-profiles'
-      end        
-      
       logger.debug "--------------------------------"
       logger.debug "::: Generating Profile Matrix..."
       logger.debug "--------------------------------"
@@ -241,8 +218,32 @@ class BenchmarkController < ApplicationController
       # puts profile_matrix_for_key_cache
       # puts "Profile Matrix for Row Cache"
       # puts profile_matrix_for_row_cache
-      puts 'breal point'
+      puts 'break point '
       exit 1
+      
+      logger.debug "------------------------------------------------------------------------------"
+      logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
+      logger.debug "------------------------------------------------------------------------------"
+      s3 = create_fog_object 'aws', nil, 'storage'
+      
+      # check if a bucket called 'kcsdb-profiles' already exists
+      dirs = s3.directories
+      check = false
+      dirs.each {|dir| if dir.key == "kcsdb-profiles" then check = true end}
+      
+      # if this bucket does not exist than create a new one
+      kcsdb_profiles = nil
+      if ! check
+        logger.debug "Bucket 'kcsdb-profiles' does NOT exist, create a new one..."
+        kcsdb_profiles = s3.directories.create(
+          :key => "kcsdb-profiles",
+          :public => true
+        )
+      else
+        logger.debug "Bucket 'kcsdb-profiles' EXIST, get the bucket..."
+        kcsdb_profiles = s3.directories.get 'kcsdb-profiles'
+      end        
+      
       
       profile_counter = 1
       
