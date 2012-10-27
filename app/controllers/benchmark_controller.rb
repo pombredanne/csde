@@ -200,11 +200,11 @@ class BenchmarkController < ApplicationController
           for h in 0..(java_heap_size_array.size - 1)
             if java_heap_size_array[h] != 0
               
-              if (! key_cache_size_array.include 1) && (! row_cache_size_array.include? 1)
+              if (! key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1)
                 profile_matrix << i.to_s + "-" + h.to_s + "-" + "x" + "-" + "x"
               end  
               
-              if (! key_cache_size_array.include 1) && (row_cache_size_array.include? 1)
+              if (! key_cache_size_array.include? 1) && (row_cache_size_array.include? 1)
                 for r in 0..(row_cache_size_array.size - 1)
                   if row_cache_size_array[r] != 0
                     profile_matrix << i.to_s + "-" + h.to_s + "-" + "x" + "-" + r.to_s
@@ -212,7 +212,7 @@ class BenchmarkController < ApplicationController
                 end
               end
               
-              if (key_cache_size_array.include 1) && (! row_cache_size_array.include? 1)
+              if (key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1)
                 for k in 0..(key_cache_size_array.size - 1)
                   if key_cache_size_array[k] != 0
                     profile_matrix << i.to_s + "-" + h.to_s + "-" + k.to_s + "-" + "x"
@@ -220,7 +220,7 @@ class BenchmarkController < ApplicationController
                 end
               end
               
-              if (key_cache_size_array.include 1) && (row_cache_size_array.include? 1)
+              if (key_cache_size_array.include? 1) && (row_cache_size_array.include? 1)
                 for k in 0..(key_cache_size_array.size - 1)
                   if key_cache_size_array[k] != 0
                     for r in 0..(row_cache_size_array.size - 1)
