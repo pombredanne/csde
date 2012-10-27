@@ -132,12 +132,6 @@ class BenchmarkController < ApplicationController
       logger.debug "You have to choose at least a Java heap size!"
       @status << "You have to choose at least a <strong>Java heap size!</strong>\n"
     
-    elsif (! key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1)
-      logger.debug "Input [NOT OK]"
-      @status << "Input <strong>[NOT OK]</strong>"
-      logger.debug "You have to choose at least a Key Cache size OR a Row Cache size!"
-      @status << "You have to choose at least a <strong>Key Cache size</strong> OR a <strong>Row Cache size</strong>\n"
-
     else
       logger.debug "Input [OK]"
       @status << "Input <strong>[OK]</strong>\n"
@@ -221,10 +215,9 @@ class BenchmarkController < ApplicationController
         end
       end
       
-      # test
+      # Test
       puts "Profile Matrix for Key Cache"
       puts profile_matrix_for_key_cache
-      
       puts "Profile Matrix for Row Cache"
       puts profile_matrix_for_row_cache
       
