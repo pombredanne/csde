@@ -156,9 +156,6 @@ class BenchmarkController < ApplicationController
         @status << "Profile with <strong>BOTH KEY</strong> cache and <strong>ROW</strong> cache\n"
       end
       
-      puts 'break point'
-      exit 1
-      
       logger.debug "------------------------------------------------------------------------------"
       logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
       logger.debug "------------------------------------------------------------------------------"
@@ -186,40 +183,66 @@ class BenchmarkController < ApplicationController
       logger.debug "::: Generating Profile Matrix..."
       logger.debug "--------------------------------"
       
-      profile_matrix_for_key_cache = []
-      profile_matrix_for_row_cache = []
-      
+      # profile_matrix_for_key_cache = []
+      # profile_matrix_for_row_cache = []      
+      # for i in 0..(instance_type_array.size - 1)
+        # if instance_type_array[i] != 0
+          # for j in 0..(java_heap_size_array.size - 1)
+            # if java_heap_size_array[j] != 0
+#               
+              # if key_cache_size_array.size > 0
+                # for k in 0..(key_cache_size_array.size - 1)
+                  # if key_cache_size_array[k] != 0
+                    # profile_matrix_for_key_cache << i.to_s + "-" + j.to_s + "-" + k.to_s
+                  # end
+                # end
+              # end
+#               
+              # if row_cache_size_array.size > 0
+                # for l in 0..(row_cache_size_array.size - 1)
+                  # if row_cache_size_array[l] != 0
+                    # profile_matrix_for_row_cache << i.to_s + "-" + j.to_s + "-" + l.to_s
+                  # end
+                # end
+              # end
+# 
+            # end
+          # end  
+        # end
+      # end
+
+      # 4-level matrix
+      # instance type [0/1] - heap size [0/1] - key cache [0/1] - row cache [0/1]
+      profile_matrix = []
       for i in 0..(instance_type_array.size - 1)
         if instance_type_array[i] != 0
-          for j in 0..(java_heap_size_array.size - 1)
-            if java_heap_size_array[j] != 0
-              
-              if key_cache_size_array.size > 0
-                for k in 0..(key_cache_size_array.size - 1)
-                  if key_cache_size_array[k] != 0
-                    profile_matrix_for_key_cache << i.to_s + "-" + j.to_s + "-" + k.to_s
+          for h in 0..(java_heap_size_array.size - 1)
+            if java_heap_size_array[h] != 0
+              for k in 0..(key_cache_size_array.size - 1)
+                if key_cache_size_array[k] != 0
+                  for r in 0..(row_cache_size_array.size - 1)
+                    if row_cache_size_array[r] != 0
+                      profile_matrix << i.to_s + "-" + h.to_s + "-" + k.to_s + "-" + r.to_s
+                    end
                   end
                 end
               end
-              
-              if row_cache_size_array.size > 0
-                for l in 0..(row_cache_size_array.size - 1)
-                  if row_cache_size_array[l] != 0
-                    profile_matrix_for_row_cache << i.to_s + "-" + j.to_s + "-" + l.to_s
-                  end
-                end
-              end
-
             end
-          end  
+          end
         end
       end
+
+      # Test
+      puts "Profile Matrix"
+      puts profile_matrix
       
       # Test
-      puts "Profile Matrix for Key Cache"
-      puts profile_matrix_for_key_cache
-      puts "Profile Matrix for Row Cache"
-      puts profile_matrix_for_row_cache
+      # puts "Profile Matrix for Key Cache"
+      # puts profile_matrix_for_key_cache
+      # puts "Profile Matrix for Row Cache"
+      # puts profile_matrix_for_row_cache
+      puts 'breal point'
+      exit 1
       
       profile_counter = 1
       
