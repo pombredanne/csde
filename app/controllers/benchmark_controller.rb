@@ -106,6 +106,10 @@ class BenchmarkController < ApplicationController
     end
 
     # Test
+    puts "Instance Type Array:"
+    puts instance_type_array
+    puts "Java Heap Size Array:"
+    puts java_heap_size_array
     puts "Key Cache Size Array:"
     puts key_cache_size_array
     puts "Row Cache Size Array:"
@@ -210,7 +214,7 @@ class BenchmarkController < ApplicationController
       end
 
       # Test
-      puts "Profile Matrix"
+      puts "Profile Matrix:"
       puts profile_matrix
       
       # Test
@@ -218,8 +222,8 @@ class BenchmarkController < ApplicationController
       # puts profile_matrix_for_key_cache
       # puts "Profile Matrix for Row Cache"
       # puts profile_matrix_for_row_cache
-      puts 'break point '
-      exit 1
+      puts "Break Point"
+      exit 0
       
       logger.debug "------------------------------------------------------------------------------"
       logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
