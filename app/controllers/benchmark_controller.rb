@@ -199,23 +199,39 @@ class BenchmarkController < ApplicationController
         if instance_type_array[i] != 0
           for h in 0..(java_heap_size_array.size - 1)
             if java_heap_size_array[h] != 0
-              for k in 0..(key_cache_size_array.size - 1)
-                k_temp = ""
-                if key_cache_size_array[k] != 0
-                  k_temp = k
-                else
-                  k_temp = "x"
-                end
+              
+              if (! key_cache_size_array.include 1) && (! row_cache_size_array.include? 1)
+                profile_matrix << i.to_s + "-" + h.to_s + "-" + "x" + "-" + "x"
+              end  
+              
+              if (! key_cache_size_array.include 1) && (row_cache_size_array.include? 1)
                 for r in 0..(row_cache_size_array.size - 1)
-                  r_temp = ""
                   if row_cache_size_array[r] != 0
-                    r_temp = r    
-                  else
-                    r_temp = "x"      
+                    profile_matrix << i.to_s + "-" + h.to_s + "-" + "x" + "-" + r.to_s
                   end
-                  profile_matrix << i.to_s + "-" + h.to_s + "-" + k_temp.to_s + "-" + r_temp.to_s
-                end                
+                end
               end
+              
+              if (key_cache_size_array.include 1) && (! row_cache_size_array.include? 1)
+                for k in 0..(key_cache_size_array.size - 1)
+                  if key_cache_size_array[k] != 0
+                    profile_matrix << i.to_s + "-" + h.to_s + "-" + k.to_s + "-" + "x"
+                  end
+                end
+              end
+              
+              if (key_cache_size_array.include 1) && (row_cache_size_array.include? 1)
+                for k in 0..(key_cache_size_array.size - 1)
+                  if key_cache_size_array[k] != 0
+                    for r in 0..(row_cache_size_array.size - 1)
+                      if row_cache_size_array[r] != 0
+                        profile_matrix << i.to_s + "-" + h.to_s + "-" + k.to_s + "-" + r.to_s  
+                      end
+                    end
+                  end
+                end
+              end
+              
             end
           end
         end
