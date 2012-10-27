@@ -163,37 +163,10 @@ class BenchmarkController < ApplicationController
       logger.debug "--------------------------------"
       logger.debug "::: Generating Profile Matrix..."
       logger.debug "--------------------------------"
-      
-      # profile_matrix_for_key_cache = []
-      # profile_matrix_for_row_cache = []      
-      # for i in 0..(instance_type_array.size - 1)
-        # if instance_type_array[i] != 0
-          # for j in 0..(java_heap_size_array.size - 1)
-            # if java_heap_size_array[j] != 0
-#               
-              # if key_cache_size_array.size > 0
-                # for k in 0..(key_cache_size_array.size - 1)
-                  # if key_cache_size_array[k] != 0
-                    # profile_matrix_for_key_cache << i.to_s + "-" + j.to_s + "-" + k.to_s
-                  # end
-                # end
-              # end
-#               
-              # if row_cache_size_array.size > 0
-                # for l in 0..(row_cache_size_array.size - 1)
-                  # if row_cache_size_array[l] != 0
-                    # profile_matrix_for_row_cache << i.to_s + "-" + j.to_s + "-" + l.to_s
-                  # end
-                # end
-              # end
-# 
-            # end
-          # end  
-        # end
-      # end
 
       # 4-level matrix
-      # instance type [0/1] - heap size [0/1] - key cache [0/1] - row cache [0/1]
+      # instance type [0/1] - heap size [0/1] - key cache [0/1/x] - row cache [0/1/x]
+      
       profile_matrix = []
       for i in 0..(instance_type_array.size - 1)
         if instance_type_array[i] != 0
@@ -240,15 +213,7 @@ class BenchmarkController < ApplicationController
       # Test
       puts "Profile Matrix:"
       puts profile_matrix
-      
-      # Test
-      # puts "Profile Matrix for Key Cache"
-      # puts profile_matrix_for_key_cache
-      # puts "Profile Matrix for Row Cache"
-      # puts profile_matrix_for_row_cache
-      puts "Break Point"
-      exit 0
-      
+
       logger.debug "------------------------------------------------------------------------------"
       logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
       logger.debug "------------------------------------------------------------------------------"
@@ -272,8 +237,241 @@ class BenchmarkController < ApplicationController
         kcsdb_profiles = s3.directories.get 'kcsdb-profiles'
       end        
       
-      
       profile_counter = 1
+      
+      logger.debug "---------------------------------"
+      logger.debug "::: Profiles for Cache Experiment"
+      logger.debug "---------------------------------"
+      
+      @status << "-------------------------------------\n"
+      @status << "<strong>::: Profiles for Cache Experiment</strong>\n"
+      @status << "-------------------------------------\n"
+      
+      profile_matrix.each do |p|
+        puts "Profile: #{p}\n"
+
+        logger.debug "Profile #{profile_counter}:"
+        @status << "<strong>Profile #{profile_counter}:</strong>\n"
+
+        tmp_arr = p.to_s.split("-")
+          
+        tmpl_file = File.read "#{Rails.root}/cache_exp_profile_tmpl.yaml"
+        profile_name = ""
+        
+        # instance type: MEDIUM
+        if tmp_arr[0] == 0.to_s
+          profile_name << "ins.med-"
+          tmpl_file.gsub!(/machine_type: dummy/, "machine_type: medium")
+            
+          # heap size: LOW  
+          if tmp_arr[1] == 0.to_s
+            profile_name << "heap.low-"
+            tmpl_file.gsub!(/heap_size: dummy/, "heap_size: dummy") # don't change
+            tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: dummy") # don't change
+            
+            # key cache: UNSET
+            if tmp_arr[2] == "x"
+              profile_name << "key.none-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+            
+            # key cache: LOW (5%)  
+            elsif tmp_arr[2] == 0.to_s
+              profile_name << "key.low-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 51")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+              
+            # key cache: HIGH (10%)  
+            elsif tmp_arr[2] == 1.to_s
+              profile_name << "key.high-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 102")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+                            
+            end
+            
+            # row cache: UNSET
+            if tmp_arr[3] == "x"
+              profile_name << "row.none.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+            
+            # row cache: LOW (5%)  
+            elsif tmp_arr[3] == 0.to_s
+              profile_name << "row.low.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 51")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+              
+            # row cache: HIGH (10%)  
+            elsif tmp_arr[3] == 1.to_s
+              profile_name << "key.high.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 102")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+                            
+            end
+
+          # heap size: HIGH          
+          elsif tmp_arr[1] == 1.to_s
+            profile_name << "heap.high-"
+            tmpl_file.gsub!(/heap_size: dummy/, "heap_size: 1536")
+            tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: 100")       
+            
+            # key cache: UNSET
+            if tmp_arr[2] == "x"
+              profile_name << "key.none-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+            
+            # key cache: LOW (5%)  
+            elsif tmp_arr[2] == 0.to_s
+              profile_name << "key.low-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 76")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+              
+            # key cache: HIGH (10%)  
+            elsif tmp_arr[2] == 1.to_s
+              profile_name << "key.high-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 152")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+                            
+            end
+            
+            # row cache: UNSET
+            if tmp_arr[3] == "x"
+              profile_name << "row.none.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+            
+            # row cache: LOW (5%)  
+            elsif tmp_arr[3] == 0.to_s
+              profile_name << "row.low.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 76")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+              
+            # row cache: HIGH (10%)  
+            elsif tmp_arr[3] == 1.to_s
+              profile_name << "key.high.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 152")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+                            
+            end   
+          end
+        
+        # instance type: LARGE
+        elsif tmp_arr[0] == 1.to_s
+          profile_name << "ins.lar-"    
+          tmpl_file.gsub!(/machine_type: dummy/, "machine_type: large")
+
+          # heap size: LOW  
+          if tmp_arr[1] == 0.to_s
+            profile_name << "heap.low-"
+            tmpl_file.gsub!(/heap_size: dummy/, "heap_size: dummy") # don't change
+            tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: dummy") # don't change
+
+            # key cache: UNSET
+            if tmp_arr[2] == "x"
+              profile_name << "key.none-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+            
+            # key cache: LOW (5%)  
+            elsif tmp_arr[2] == 0.to_s
+              profile_name << "key.low-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 93")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+              
+            # key cache: HIGH (10%)  
+            elsif tmp_arr[2] == 1.to_s
+              profile_name << "key.high-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 186")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+                            
+            end
+            
+            # row cache: UNSET
+            if tmp_arr[3] == "x"
+              profile_name << "row.none.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+            
+            # row cache: LOW (5%)  
+            elsif tmp_arr[3] == 0.to_s
+              profile_name << "row.low.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 93")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+              
+            # row cache: HIGH (10%)  
+            elsif tmp_arr[3] == 1.to_s
+              profile_name << "key.high.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 186")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+                            
+            end
+          # heap size: HIGH          
+          elsif tmp_arr[1] == 1.to_s
+            profile_name << "heap.high-"
+            tmpl_file.gsub!(/heap_size: dummy/, "heap_size: 2793")
+            tmpl_file.gsub!(/heap_new_size: dummy/, "heap_new_size: 200")
+            
+            # key cache: UNSET
+            if tmp_arr[2] == "x"
+              profile_name << "key.none-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+            
+            # key cache: LOW (5%)  
+            elsif tmp_arr[2] == 0.to_s
+              profile_name << "key.low-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 140")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+              
+            # key cache: HIGH (10%)  
+            elsif tmp_arr[2] == 1.to_s
+              profile_name << "key.high-"
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 280")
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 14400")
+                            
+            end
+            
+            # row cache: UNSET
+            if tmp_arr[3] == "x"
+              profile_name << "row.none.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+            
+            # row cache: LOW (5%)  
+            elsif tmp_arr[3] == 0.to_s
+              profile_name << "row.low.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 140")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+              
+            # row cache: HIGH (10%)  
+            elsif tmp_arr[3] == 1.to_s
+              profile_name << "key.high.yaml"
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 280")
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
+                            
+            end
+            
+          end
+                                
+        end
+        
+        logger.debug "Writting profile: #{profile_counter} in localhost..."
+        File.open("#{Rails.root}/#{profile_name}",'w') {|f| f.write tmpl_file}
+
+        logger.debug "Uploading profile: #{profile_counter} to S3..."
+        file = kcsdb_profiles.files.create(
+          :key    => profile_name,
+          :body   => File.open("#{Rails.root}/#{profile_name}"),
+          :public => true
+        )
+
+        profile_counter += 1
+        
+      end
+      
+      puts 'Break point'
+      exit 0
       
       if profile_matrix_for_key_cache.size > 0
         logger.debug "--------------------------------------"
