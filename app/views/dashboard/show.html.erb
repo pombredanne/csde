@@ -76,26 +76,6 @@
         font-weight: bold;
     }
 	</style>
-	<!-- <script type="text/javascript">
-		$(document).ready(function() {
-	   if ($('textarea').length > 0) {      
-	     var data = $('textarea');
-	     $.each(data, function(i) {
-	       CKEDITOR.replace(data[i].id);
-	     });    
-	   } 
-		});
-		$(function(){
-							var config = {
-								skin:'v2'
-							};
-							$('.ckeditor').ckeditor(config);
-		});
-	</script> -->
-	
-	<!-- <script type="text/javascript" src="/ckeditor/ckeditor.js"></script>
-	<script type="text/javascript" src="/ckeditor/adapters/jquery.js"></script>
-	 -->
 </head>
 
 
@@ -122,35 +102,6 @@
 				
 				<!-- Configuration Management -->
 				<div id="tabs-1">
-					<!-- <% if @chef_server_state == 'not_setup'%>
-						<div id="chef_server_status_dialog"></div>
-	          <div style="color: red;">
-		          <p>
-		            KCSDB is now in the <strong>fresh state</strong>. You have to set up a Chef Server in order to configure machines in infrastructure.
-		            Click the button below to set up a new Chef Server.
-		          </p>
-		          <div id="set_up_chef_server">Set up Chef Server</div>
-		          <script>
-		          	var button_set_up_chef_server_opts = {
-				        	icons:{
-				       			primary:"ui-icon-wrench"
-				        	}
-				        };
-				        $("#set_up_chef_server").button(button_set_up_chef_server_opts);
-				        $("#set_up_chef_server").click(function(){
-				        	$("#chef_server_status_dialog").dialog({
-				          	title:"Set up a fresh Chef Server. KCSDB's automating everything in the background for you. Time to take a coffee now, just 5 minutes. When you come back, it's already done!",
-				            show:"slide",
-				            hide:"puff",
-				            open:function (event) {
-				            	$(this).empty();
-				              $(this).load("/chef_server/setup");
-				          	}
-				          });
-				        });
-		          </script>
-	      		</div>
-					<% else %> -->
 					<div style="color: green;">
 		          		<p>Chef Server is now <strong>ready</strong>. Click the button below to go to Chef Server.</p>
 		          		<button id="go_to_chef_server">Go to Chef Server</button>
@@ -166,7 +117,6 @@
 						    });
 				        </script>
 	      			</div>
-					<!-- <% end %> -->
 				</div>
 				
 				<!-- Central Monitoring -->
@@ -385,39 +335,7 @@
 					<script>
 						$("#benchmark_execution_accordion").accordion();
 					</script>
-					
-		 			<!-- <%= form_tag('/chef_node/create') do %>
-				  	<%= label_tag "Flavor Create", "Choose a machine type:" %>
-				    <input type="radio" name="flavor_create" id="small_create" value="small_create"><label for="small_create">Small</label></input>
-				    <input type="radio" name="flavor_create" id="medium_create" value="medium_create"><label for="medium_create">Medium</label></input>
-				    <input type="radio" name="flavor_create" id="large_create" value="large_create"><label for="large_create">Large</label></input>
-				    </br>
-				
-				    <%= label_tag "Number", "How many machines:" %>
-				    <%= text_field_tag "number_create", "dummy" %>
-				    </br>
-				
-					<button id="createChefNodes" type="submit">Create</button>
-				 	<% end %>
-				 	</br>
-				 	
-				 	<%= form_tag('/chef_node/configure') do %>
-				    <%= label_tag "Replication Factor", "Replication Factor:" %>
-				    <%= text_field_tag "replication_factor", "3" %>
-				    </br>
-				    
-				    <%= label_tag "Keyspace", "Keyspace:" %>
-				    <%= text_field_tag "keyspace", "usertable" %>
-				    </br>
-				    
-				    <%= label_tag "Column Family", "Column Family:" %>
-				    <%= text_field_tag "column_family", "data" %>
-				    </br>
-				
-					  <button id="configureChefNodes" type="submit">Configure</button>
-				 	<% end %> -->
 				</div>
-				
 				
 				<!-- Credentials -->
 				<div id="tabs-4">
@@ -479,18 +397,6 @@
 			      $("#tabs").tabs();
 			  	</script>
 		  	
-			  <!-- <% if @chef_server_state == 'not_setup' %>
-			      <div id="state_status_dialog">
-			        <div style="color: red;"><%= simple_format @status %></div>
-			      </div>
-			      <script>
-			          $("#state_status_dialog").dialog({
-			              title:"KCSDB Status",
-			              show:"slide",
-			              hide:"puff"
-			          });
-			      </script>
-			  <% else %> -->
 			      <div id="state_status_dialog">
 			        <div style="color: green;"><%= simple_format @status %></div>
 			      </div>
@@ -503,11 +409,10 @@
 			              resizable: false
 			          });
 			      </script>
-			  <!-- <% end %> -->
 			</div>
 		</div>
 		<div id="footer">
-			Copyright &copy; | Version 0.9.5 | 2012 | <a href="http://aifb.kit.edu/">AIFB</a> | <a href="http://www.fzi.de/">FZI</a></br>
+			Copyright &copy; | Version 1.0 | 2012 | <a href="http://aifb.kit.edu/">AIFB</a> | <a href="http://www.fzi.de/">FZI</a></br>
 			<a href="mailto:me@lehoanganh.de">Hoang Anh Le</a> | <a href="mailto:Markus.Klems@aifb.uni-karlsruhe.de">Markus Klems</a>
 		</div>
 	</div>
