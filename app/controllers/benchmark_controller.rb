@@ -16,10 +16,10 @@ class BenchmarkController < ApplicationController
     # get values from the view
     # and generate multiple profiles
     #
-    # layer 1: instance type [small/medium/large]
+    # layer 1: instance type [medium/large]
     # layer 2: java heap size [low/high]
-    # layer 3.1: key cache size [small/medium/high]
-    # layer 3.2: row cache size [small/medium/high]
+    # layer 3.1: key cache size [low/high]
+    # layer 3.2: row cache size [low/high]
     #
     # each layer is represented as an array    
     instance_type_array = []
@@ -50,8 +50,8 @@ class BenchmarkController < ApplicationController
 
     # layer 2:
     # java heap size
-    # 0 --> low
-    # 1 --> high
+    # 0 --> low (recommended value of Cassandra)
+    # 1 --> high (50% more of recommended value)
     logger.debug "::: Selected Java Heap Sizes:"
     @status << "<strong>::: Selected Java Heap Sizes:</strong>\n"
     
@@ -67,12 +67,10 @@ class BenchmarkController < ApplicationController
       @status << "High\n"  
     end
 
-
     # layer 3.1:
     # key cache size
-    # 0 --> low
-    # 1 --> medium
-    # 2 --> high
+    # 0 --> low (recommended value of Cassandra 5%)
+    # 1 --> high (double of recommended value 10%)
     logger.debug "::: Selected Key Cache Sizes:"
     @status << "<strong>::: Selected Key Cache Sizes:</strong>\n"
     
@@ -84,21 +82,14 @@ class BenchmarkController < ApplicationController
       
     ! params[:key_cache_medium].nil? ? key_cache_size_array[1] = 1 : key_cache_size_array[1] = 0
     if key_cache_size_array[1] == 1 
-      logger.debug "Medium" 
-      @status << "Medium\n"
-    end
-
-    ! params[:key_cache_high].nil? ? key_cache_size_array[2] = 1 : key_cache_size_array[2] = 0
-    if key_cache_size_array[2] == 1 
       logger.debug "High" 
-      @status << "High\n"  
+      @status << "High\n"
     end
     
     # layer 3.2:
     # row cache size
-    # 0 --> low
-    # 1 --> medium
-    # 2 --> high
+    # 0 --> low (recommended value of Cassandra 5%)
+    # 1 --> high (double of recommended value 10%)
     logger.debug "::: Selected Row Cache Sizes:"
     @status << "<strong>::: Selected Row Cache Sizes:</strong>\n"
     
@@ -110,20 +101,13 @@ class BenchmarkController < ApplicationController
       
     ! params[:row_cache_medium].nil? ? row_cache_size_array[1] = 1 : row_cache_size_array[1] = 0
     if row_cache_size_array[1] == 1 
-      logger.debug "Medium" 
-      @status << "Medium\n"
-    end
-
-    ! params[:row_cache_high].nil? ? row_cache_size_array[2] = 1 : row_cache_size_array[2] = 0
-    if row_cache_size_array[2] == 1 
       logger.debug "High" 
       @status << "High\n"
     end
 
-    # test
+    # Test
     puts "Key Cache Size Array:"
     puts key_cache_size_array
-    
     puts "Row Cache Size Array:"
     puts row_cache_size_array
 
@@ -133,24 +117,53 @@ class BenchmarkController < ApplicationController
     @status << "------------------\n"
     @status << "<strong>::: Checking Input</strong>\n"
     @status << "------------------\n"
+    
+    # at least one instance type has to be chosen
     if ! instance_type_array.include? 1
       logger.debug "Input [NOT OK]"
       @status << "Input <strong>[NOT OK]</strong>"
       logger.debug "You have to choose at least an instance type!"
       @status << "You have to choose at least an <strong>instance type!</strong>\n"
+    
+    # at least one heap size has to be chosen
     elsif ! java_heap_size_array.include? 1
       logger.debug "Input [NOT OK]"
       @status << "Input <strong>[NOT OK]</strong>"
       logger.debug "You have to choose at least a Java heap size!"
       @status << "You have to choose at least a <strong>Java heap size!</strong>\n"
+    
     elsif (! key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1)
       logger.debug "Input [NOT OK]"
       @status << "Input <strong>[NOT OK]</strong>"
       logger.debug "You have to choose at least a Key Cache size OR a Row Cache size!"
       @status << "You have to choose at least a <strong>Key Cache size</strong> OR a <strong>Row Cache size</strong>\n"
+
     else
       logger.debug "Input [OK]"
       @status << "Input <strong>[OK]</strong>\n"
+
+      if (! key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1)
+        logger.debug "Profile with NO cache"
+        @status << "Profile with <strong>NO</strong> cache\n"
+      end 
+      
+      if (key_cache_size_array.include? 1) && (! row_cache_size_array.include? 1) 
+        logger.debug "Profile with ONLY KEY cache"
+        @status << "Profile with <strong>ONLY KEY</strong> cache\n"
+      end
+      
+      if (! key_cache_size_array.include? 1) && (row_cache_size_array.include? 1) 
+        logger.debug "Profile with ONLY ROW cache"
+        @status << "Profile with <strong>ONLY ROW</strong> cache\n"
+      end
+      
+      if (key_cache_size_array.include? 1) && (row_cache_size_array.include? 1) 
+        logger.debug "Profile with BOTH KEY cache and ROW cache"
+        @status << "Profile with <strong>BOTH KEY</strong> cache and <strong>ROW</strong> cache\n"
+      end
+      
+      puts 'break point'
+      exit 1
       
       logger.debug "------------------------------------------------------------------------------"
       logger.debug "::: Creating a bucket called 'kcsdb-profiles' for all profiles in S3 if needed"
