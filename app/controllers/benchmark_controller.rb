@@ -303,7 +303,7 @@ class BenchmarkController < ApplicationController
               
             # row cache: HIGH (10%)  
             elsif tmp_arr[3] == 1.to_s
-              profile_name << "key.high.yaml"
+              profile_name << "row.high.yaml"
               tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 102")
               tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
                             
@@ -349,7 +349,7 @@ class BenchmarkController < ApplicationController
               
             # row cache: HIGH (10%)  
             elsif tmp_arr[3] == 1.to_s
-              profile_name << "key.high.yaml"
+              profile_name << "row.high.yaml"
               tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 152")
               tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
                             
@@ -401,7 +401,7 @@ class BenchmarkController < ApplicationController
               
             # row cache: HIGH (10%)  
             elsif tmp_arr[3] == 1.to_s
-              profile_name << "key.high.yaml"
+              profile_name << "row.high.yaml"
               tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 186")
               tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
                             
@@ -446,7 +446,7 @@ class BenchmarkController < ApplicationController
               
             # row cache: HIGH (10%)  
             elsif tmp_arr[3] == 1.to_s
-              profile_name << "key.high.yaml"
+              profile_name << "row.high.yaml"
               tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 280")
               tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 14400")
                             
