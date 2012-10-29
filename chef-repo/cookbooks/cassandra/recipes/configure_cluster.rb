@@ -6,25 +6,25 @@ ruby_block "configure_cluster" do
       file << "use #{node[:cassandra][:keyspace]};"
       file << "\n"
       file << "create column family #{node[:cassandra][:column_family]} with comparator='AsciiType';"
-      
+      file << "\n"
       # NO cache
       if (node[:cassandra][:key_cache_size_in_mb] == "0") && (node[:cassandra][:row_cache_size_in_mb] == "0")
-        file << "update column family #{node[:cassandra][:column_family]} with caching=none"
+        file << "update column family #{node[:cassandra][:column_family]} with caching=none;"
       end
       
       # only KEY cache
       if (! node[:cassandra][:key_cache_size_in_mb] == "0") && (node[:cassandra][:row_cache_size_in_mb] == "0")
-        file << "update column family #{node[:cassandra][:column_family]} with caching=keys_only"
+        file << "update column family #{node[:cassandra][:column_family]} with caching=keys_only;"
       end
       
       # only ROW cache
       if (node[:cassandra][:key_cache_size_in_mb] == "0") && (! node[:cassandra][:row_cache_size_in_mb] == "0")
-        file << "update column family #{node[:cassandra][:column_family]} with caching=rows_only"
+        file << "update column family #{node[:cassandra][:column_family]} with caching=rows_only;"
       end
       
       # ALL cache
       if (! node[:cassandra][:key_cache_size_in_mb] == "0") && (! node[:cassandra][:row_cache_size_in_mb] == "0")
-        file << "update column family #{node[:cassandra][:column_family]} with caching=all"
+        file << "update column family #{node[:cassandra][:column_family]} with caching=all;"
       end
     end
       
