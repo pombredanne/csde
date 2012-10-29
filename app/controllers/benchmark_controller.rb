@@ -272,8 +272,8 @@ class BenchmarkController < ApplicationController
             # key cache: UNSET
             if tmp_arr[2] == "x"
               profile_name << "key.none-"
-              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
-              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 0") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 0") # deactive key cache
             
             # key cache: LOW (5%)  
             elsif tmp_arr[2] == 0.to_s
@@ -292,8 +292,8 @@ class BenchmarkController < ApplicationController
             # row cache: UNSET
             if tmp_arr[3] == "x"
               profile_name << "row.none.yaml"
-              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
-              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 0") # deactive row cache
             
             # row cache: LOW (5%)  
             elsif tmp_arr[3] == 0.to_s
@@ -318,8 +318,8 @@ class BenchmarkController < ApplicationController
             # key cache: UNSET
             if tmp_arr[2] == "x"
               profile_name << "key.none-"
-              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
-              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 0") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 0") # deactive key cache
             
             # key cache: LOW (5%)  
             elsif tmp_arr[2] == 0.to_s
@@ -338,8 +338,8 @@ class BenchmarkController < ApplicationController
             # row cache: UNSET
             if tmp_arr[3] == "x"
               profile_name << "row.none.yaml"
-              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
-              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 0") # deactive row cache
             
             # row cache: LOW (5%)  
             elsif tmp_arr[3] == 0.to_s
@@ -370,8 +370,8 @@ class BenchmarkController < ApplicationController
             # key cache: UNSET
             if tmp_arr[2] == "x"
               profile_name << "key.none-"
-              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
-              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 0") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 0") # deactive key cache
             
             # key cache: LOW (5%)  
             elsif tmp_arr[2] == 0.to_s
@@ -390,8 +390,8 @@ class BenchmarkController < ApplicationController
             # row cache: UNSET
             if tmp_arr[3] == "x"
               profile_name << "row.none.yaml"
-              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
-              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 0") # deactive row cache
             
             # row cache: LOW (5%)  
             elsif tmp_arr[3] == 0.to_s
@@ -415,8 +415,8 @@ class BenchmarkController < ApplicationController
             # key cache: UNSET
             if tmp_arr[2] == "x"
               profile_name << "key.none-"
-              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: dummy") # deactive key cache
-              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: dummy") # deactive key cache
+              tmpl_file.gsub!(/key_cache_size_in_mb: dummy/, "key_cache_size_in_mb: 0") # deactive key cache
+              tmpl_file.gsub!(/key_cache_save_period: dummy/, "key_cache_save_period: 0") # deactive key cache
             
             # key cache: LOW (5%)  
             elsif tmp_arr[2] == 0.to_s
@@ -435,8 +435,8 @@ class BenchmarkController < ApplicationController
             # row cache: UNSET
             if tmp_arr[3] == "x"
               profile_name << "row.none.yaml"
-              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: dummy") # deactive row cache
-              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: dummy") # deactive row cache
+              tmpl_file.gsub!(/row_cache_size_in_mb: dummy/, "row_cache_size_in_mb: 0") # deactive row cache
+              tmpl_file.gsub!(/row_cache_save_period: dummy/, "row_cache_save_period: 0") # deactive row cache
             
             # row cache: LOW (5%)  
             elsif tmp_arr[3] == 0.to_s
