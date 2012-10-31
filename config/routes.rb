@@ -8,6 +8,7 @@ KCSD1::Application.routes.draw do
   get "chef_server/go_to"
   get "chef_server/go_to_opscenter"
   get "chef_server/go_to_gmetad"
+  get "chef_server/reset"
 
   get "dashboard/show"
   post "dashboard/show"

@@ -2,6 +2,47 @@ require 'helper'
 class ChefServerController < ApplicationController
   include Helper
 
+  # delete all nodes, all clients and all corresponding machines
+  def reset
+    @status = ""
+    
+    logger.debug "::: Deleting all nodes..."
+    @status << "::: Deleting all nodes..."
+    system "rvmsudo knife node bulk delete '.*-node-.*' --yes --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    
+    logger.debug "::: Deleting all clients..."
+    @status << "::: Deleting all clients"
+    system "rvmsudo knife client bulk delete '.*-node-.* --yes --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    
+    logger.debug "::: Terminating all corresponding machines..."
+    @status << "::: Terminating all corresponding machines"
+    
+    all_regions = []
+    all_regions << "us-east-1"
+    all_regions << "us-west-1"
+    all_regions << "us-west-2"
+    all_regions << "eu-west-1"
+
+    state = get_state
+    key_pair_name = state['key_pair_name']
+    
+    all_regions.each do |region|
+      logger.debug "--- Checking region: #{region}"
+      @status << "--- Checking region: #{region}"
+      ec2 = create_fog_object 'aws', region, 'compute'
+      
+      # iterating all machines and terminating corresponding machines
+      ec2.servers.each do |server|
+        if (server.state.to_s == "running") && (server.key_name.to_s == key_pair_name) 
+          logger.debug "Found machine with ID: #{server.id} --> terminate"
+          @status << "Found machine with ID: #{server.id} --> terminate"
+          server.destroy
+        end
+      end  
+    end      
+    
+  end
+
   # go to Gmetad Server WebUI
   # which is running on the same machine as KCSDB Server
   def go_to_gmetad

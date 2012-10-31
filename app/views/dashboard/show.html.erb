@@ -117,6 +117,22 @@
 						    });
 				        </script>
 	      			</div>
+	      			
+	      			<div style="color: red;">
+		          		<p>Click the button below reset Chef Server and terminate all corresponding machines</p>
+		          		<button id="reset_chef_server">Reset Chef Server</button>
+				        <script>
+				        	var button_reset_chef_server_opts = {
+						    	icons:{
+						       		primary:"ui-icon-power"
+						        }
+						    };
+						    $("#reset_chef_server").button(button_reset_chef_server_opts);
+						    $("#reset_chef_server").click(function () {
+						    	window.open("/chef_server/reset");
+						    });
+				        </script>
+	      			</div>
 				</div>
 				
 				<!-- Central Monitoring -->
