@@ -7,15 +7,15 @@ class ChefServerController < ApplicationController
     @status = ""
     
     logger.debug "::: Deleting all nodes..."
-    @status << "::: Deleting all nodes..."
+    @status << "::: Deleting all nodes...\n"
     system "rvmsudo knife node bulk delete '.*-node-.*' --yes --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
     
     logger.debug "::: Deleting all clients..."
-    @status << "::: Deleting all clients"
-    system "rvmsudo knife client bulk delete '.*-node-.* --yes --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    @status << "::: Deleting all clients\n"
+    system "rvmsudo knife client bulk delete '.*-node-.*' --yes --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
     
     logger.debug "::: Terminating all corresponding machines..."
-    @status << "::: Terminating all corresponding machines"
+    @status << "::: Terminating all corresponding machines\n"
     
     all_regions = []
     all_regions << "us-east-1"
@@ -28,14 +28,14 @@ class ChefServerController < ApplicationController
     
     all_regions.each do |region|
       logger.debug "--- Checking region: #{region}"
-      @status << "--- Checking region: #{region}"
+      @status << "--- Checking region: #{region}\n"
       ec2 = create_fog_object 'aws', region, 'compute'
       
       # iterating all machines and terminating corresponding machines
       ec2.servers.each do |server|
         if (server.state.to_s == "running") && (server.key_name.to_s == key_pair_name) 
           logger.debug "Found machine with ID: #{server.id} --> terminate"
-          @status << "Found machine with ID: #{server.id} --> terminate"
+          @status << "Found machine with ID: #{server.id} --> terminate\n"
           server.destroy
         end
       end  
