@@ -1897,6 +1897,18 @@ class BenchmarkController < ApplicationController
     $stdout.sync = true
     
     state = get_state
+    aws_access_key_id = state['aws_access_key_id']
+    aws_secret_access_key = state['aws_secret_access_key']
+    
+    s3cfg_src = "#{Rails.root}/chef-repo/.chef/sh/s3cfg_tmpl"
+    s3cfg_des = "#{Rails.root}/chef-repo/.chef/sh/.s3cfg"
+    s3cfg_file = File.read s3cfg_src
+    
+    s3cfg_file.gsub!(/access_key = dummy/,"access_key = #{aws_access_key_id}")
+    s3cfg_file.gsub!(/secret_key = dummy/,"secret_key = #{aws_secret_access_key}")
+    
+    File.open(s3cfg_des,'w'){|f| f.write s3cfg_file}
+    
 
     key_pair = state['key_pair_name']
     region = 'us-east-1'
@@ -1904,15 +1916,17 @@ class BenchmarkController < ApplicationController
     chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
     chef_client_ssh_user = state['chef_client_ssh_user']
     upload_snapshot_to_s3_file = "#{Rails.root}/chef-repo/.chef/sh/create_snapshot.sh"
-    aws_access_key_id = state['aws_access_key_id']
-    aws_secret_access_key = state['aws_secret_access_key']
         
     results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
       cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{upload_snapshot_to_s3_file} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"          
       puts cmd
       system cmd
+      
+      cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{s3cfg_des} #{chef_client_ssh_user}@#{node[0]}:/home/#{chef_client_ssh_user}"          
+      puts cmd
+      system cmd
   
-      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/create_snapshot.sh #{node[1]} #{aws_access_key_id} #{aws_secret_access_key}'"
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/create_snapshot.sh #{node[1]}'"
       puts cmd
       system cmd
     end

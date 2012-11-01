@@ -18,7 +18,6 @@ echo "::: Clearing all commit log files..."
 rm -f /var/lib/cassandra/commitlog/*.log 
 
 echo "::: Downloading the tar ball backup file from S3..."
-#wget https://s3.amazonaws.com/kcsdb-init/cassandra-$1.tar.gz --output-document /home/ubuntu/cassandra-snapshot.tar.gz --quiet
 /home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd get s3://kcsdb-init/cassandra-$index.tar.gz
 
 echo "::: Extracting the tar ball..."

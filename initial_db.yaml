@@ -11,8 +11,8 @@ service2:
     measurementtype: timeseries
     timeseries.granularity: 10000 # 10 s, one status
     heap_size: 8192 # a big enough heap size has to be set in order to generate millions rows
-    recordcount: 30000000 # 30 Mio rows for all nodes
-    operationcount: 30000000 # 30 Mio rows for all nodes
+    recordcount: 300000 # 300 000 rows for all nodes
+    operationcount: 300000 # 300 000 rows for all nodes
     fieldcount: 10 # 10 columns pro row
     fieldlength: 100 # a column is 100 byte
     threadcount: 30
