@@ -1813,6 +1813,8 @@ class BenchmarkController < ApplicationController
     $stdout.sync = true
     
     state = get_state
+    aws_access_key_id = state['aws_access_key_id']
+    aws_secret_access_key = state['aws_secret_access_key']
 
     key_pair = state['key_pair_name']
     region = 'us-east-1'
@@ -1826,7 +1828,7 @@ class BenchmarkController < ApplicationController
       puts cmd
       system cmd
   
-      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/backup_snapshot.sh #{node[1]}'"
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node[0]} 'bash /home/ubuntu/backup_snapshot.sh #{node[1]} #{aws_access_key_id} #{aws_secret_access_key}'"
       puts cmd
       system cmd
     end
