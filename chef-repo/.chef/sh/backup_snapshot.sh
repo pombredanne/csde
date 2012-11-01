@@ -17,14 +17,11 @@ sudo chown -R ubuntu /var/lib/cassandra
 echo "::: Clearing all commit log files..."
 rm -f /var/lib/cassandra/commitlog/*.log 
 
-echo "::: Downloading the tar ball backup file from S3..."
-/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd get s3://kcsdb-init/cassandra-$index.tar.gz
-
-echo "::: Extracting the tar ball..."
-tar xf /home/ubuntu/cassandra-$index.tar.gz
+echo "::: Downloading backup files from S3..."
+/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd get s3://kcsdb-init/cassandra-$index/* /var/tmp/
 
 echo ":: Moving the db files into Cassandra folder..."
-mv /home/ubuntu/var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot/* /var/lib/cassandra/data/usertable/data/
+mv /var/tmp/*db /var/lib/cassandra/data/usertable/data/
 
 echo "::: Changing user back to cassandra..."
 sudo chown -R cassandra /var/lib/cassandra
