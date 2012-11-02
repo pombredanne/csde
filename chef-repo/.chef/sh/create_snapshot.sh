@@ -26,3 +26,9 @@ tar -cf cas-snap-$index.tar.bz2 -I /usr/bin/pbzip2 /var/lib/cassandra/data/usert
 
 echo "::: Uploading all files to bucket 'kcsdb-init' in folder 'cassandra-$index'"
 /home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd put cas-snap-$index.tar.bz2 s3://kcsdb-init
+
+echo "::: Changing user back to cassandra..."
+sudo chown -R cassandra /var/lib/cassandra
+
+echo "::: Restarting Cassandra node..."
+sudo /etc/init.d/cassandra start
