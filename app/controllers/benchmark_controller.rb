@@ -2365,9 +2365,9 @@ class BenchmarkController < ApplicationController
     host = @db_regions['region1']['ips'][0]
     if host.to_s.include? ',' then host = host.chomp ',' end
     
-    requester_file.gsub!(/host = '.*/,"host = \'#{host}\'")
-    requester_file.gsub!(/profile_content = '.*/,"profile_content = \'#{profile_content}\'")  
-    requester_file.gsub!(/profile_run = '.*/,"profile_run = \'#{profile_run}\'") 
+    requester_file.gsub!(/host = ".*/,"host = \"#{host}\"")
+    requester_file.gsub!(/profile_content = ".*/,"profile_content = \"#{profile_content}\"")  
+    requester_file.gsub!(/profile_run = ".*/,"profile_run = \"#{profile_run}\"") 
     
     File.open(requester_des,'w'){|f| f.write requester_file}
     
@@ -2378,9 +2378,9 @@ class BenchmarkController < ApplicationController
       
     state = get_state
     
-    uploader_file.gsub!(/aws_access_key_id = '.*/,"aws_access_key_id = \'#{state['aws_access_key_id']}\'") 
-    uploader_file.gsub!(/aws_secret_access_key = '.*/,"aws_secret_access_key = \'#{state['aws_secret_access_key']}\'")
-    uploader_file.gsub!(/profile_id = '.*/,"profile_id = \'#{profile_id}\'")
+    uploader_file.gsub!(/aws_access_key_id = ".*/,"aws_access_key_id = \"#{state['aws_access_key_id']}\"") 
+    uploader_file.gsub!(/aws_secret_access_key = ".*/,"aws_secret_access_key = \"#{state['aws_secret_access_key']}\"")
+    uploader_file.gsub!(/profile_id = ".*/,"profile_id = \"#{profile_id}\"")
 
     File.open(uploader_des,'w'){|f| f.write uploader_file}
   end

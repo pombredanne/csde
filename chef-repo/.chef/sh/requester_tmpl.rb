@@ -2,12 +2,12 @@ require 'rubygems'
 require 'jmx4r'
 require 'java'
 
-host = 'dummy'
-port = '7199'
+host = "dummy"
+port = "7199"
 
-profile_content = 'dummy'
+profile_content = "dummy"
 
-profile_run = 'dummy'
+profile_run = "dummy"
 
 puts "-----------------------------------------------------------------------------"
 puts "Invoking Requester in order to get values from MBeans in Cassandra via JMX..."
