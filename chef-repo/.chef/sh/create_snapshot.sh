@@ -28,7 +28,7 @@ sudo chown -R ubuntu /var/lib/cassandra
 
 echo "::: Uploading backup files to bucket 'kcsdb-init' in folder 'cas-$index'"
 #/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd put cas-snap-$index.tar.bz2 s3://kcsdb-init
-s3cmd put /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot/* s3://kcsdb-init/cas-$index/ --no-progress 
+s3cmd put /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot/* s3://kcsdb-init/cas-$index/ --no-progress --no-check-md5 --no-encrypt
 
 echo "::: Changing user back to cassandra..."
 sudo chown -R cassandra /var/lib/cassandra

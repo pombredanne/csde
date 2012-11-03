@@ -28,7 +28,7 @@ rm -f /var/lib/cassandra/commitlog/*.log
 
 echo "::: Downloading backup files from bucket 'kcsdb-init' in folder 'cas-$index'"
 mkdir -p /home/ubuntu/temp
-s3cmd get s3://kcsdb-init/cas-$index/* /home/ubuntu/temp --no-progress
+s3cmd get s3://kcsdb-init/cas-$index/* /home/ubuntu/temp --no-progress --no-check-md5 --no-encrypt
 
 #echo "::: Extracting backup snapshot..."
 #pbzip2 -dc cas-snap-$index.tar.bz2 | tar -x
