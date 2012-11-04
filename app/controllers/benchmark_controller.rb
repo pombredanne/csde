@@ -2068,11 +2068,11 @@ class BenchmarkController < ApplicationController
     # start all YCSB clients in all regions
     start_all_ycsb_clients ycsb_config_hash
 
-    @benchmark_run << "------------\n"
-    @benchmark_run << "::: YCSB Log\n"
-    @benchmark_run << "------------\n"
-    @benchmark_run << File.read("/home/ubuntu/ycsb-log.txt")
-    @benchmark_run << "\n"
+    #@benchmark_run << "------------\n"
+    #@benchmark_run << "::: YCSB Log\n"
+    #@benchmark_run << "------------\n"
+    #@benchmark_run << File.read("/home/ubuntu/ycsb-log.txt")
+    #@benchmark_run << "\n"
 
     logger.debug "---------------------------------------------------------------------------------"    
     logger.debug "YCSB Workload is already DONE."
