@@ -2345,10 +2345,10 @@ class BenchmarkController < ApplicationController
       puts cmd
       system cmd # invoke A YCSB client
       
-      logger.debug "Copy YCSB Log back to KCSDB Server:"
-      cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
-      puts cmd      
-      system cmd
+      #logger.debug "Copy YCSB Log back to KCSDB Server:"
+      #cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
+      #puts cmd      
+      #system cmd
     end
   end
   # --------------------------------------------------------------------------------------------#
