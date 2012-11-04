@@ -2068,11 +2068,11 @@ class BenchmarkController < ApplicationController
     # start all YCSB clients in all regions
     start_all_ycsb_clients ycsb_config_hash
 
-    #@benchmark_run << "------------\n"
-    #@benchmark_run << "::: YCSB Log\n"
-    #@benchmark_run << "------------\n"
-    #@benchmark_run << File.read("/home/ubuntu/ycsb-log.txt")
-    #@benchmark_run << "\n"
+    @benchmark_run << "------------\n"
+    @benchmark_run << "::: YCSB Log\n"
+    @benchmark_run << "------------\n"
+    @benchmark_run << File.read("/home/ubuntu/ycsb-log.txt")
+    @benchmark_run << "\n"
 
     logger.debug "---------------------------------------------------------------------------------"    
     logger.debug "YCSB Workload is already DONE."
@@ -2340,18 +2340,18 @@ class BenchmarkController < ApplicationController
       logger.debug "YCSB command:"
 
       # NO output
-      #cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
 
       # OUTPUT
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
+      #cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
 
       puts cmd
       system cmd # invoke A YCSB client
       
-      #logger.debug "Copy YCSB Log back to KCSDB Server:"
-      #cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
-      #puts cmd      
-      #system cmd
+      logger.debug "Copy YCSB Log back to KCSDB Server:"
+      cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
+      puts cmd      
+      system cmd
     end
   end
   # --------------------------------------------------------------------------------------------#

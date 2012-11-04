@@ -27,8 +27,8 @@ service2:
     readproportion: 0.99 # 99% read ops
     updateproportion: 0.01 # 1% write ops
     requestdistribution: veryhotspot # zipfian | veryhotspot
-    hotspots: 300000 # number of hotspots
-    variance: 0.01 # low variance --> All hotspots have equally popularities (entropy ~1) | high variace --> Some hotspots have dominated popularities (entropy ~0)
+    hotspots: 300 # number of hotspots
+    variance: 0.0001 # low variance --> All hotspots have equally popularities (entropy ~1) | high variace --> Some hotspots have dominated popularities (entropy ~0)
     alpha: 0.5 # alpha defines how likely a hotspot takes a new cluster, low alpha --> small chance to take a new cluster, big alpha --> big chance to take a new cluster
 service3:
   name: gmond
