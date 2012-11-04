@@ -10,6 +10,7 @@ class ConfigurationController < ApplicationController
     state['key_pair_name'] = params[:key_pair_and_group]
     state['security_group_name'] = params[:key_pair_and_group]
     state['chef_client_aws_ssh_key_id'] = params[:key_pair_and_group]
+    state['notification_email'] = params[:notification_email]
     state['chef_client_template_file'] = "#{Rails.root}/chef-repo/bootstrap/ubuntu12.04-new-light-gems.erb"
     update_state state    
 

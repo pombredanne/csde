@@ -14,3 +14,6 @@ chef_client_ssh_user: ubuntu # SSH Login User
 chef_client_bootstrap_version: 10.12.0
 chef_client_aws_ssh_key_id: dummy
 chef_client_template_file: dummy # Full path to template file for Knife Bootstrap
+
+# Email for Notification
+notification_email: dummy

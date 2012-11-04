@@ -714,6 +714,9 @@ class BenchmarkController < ApplicationController
       
       overwrite_requester_rb benchmark_name, benchmark_content, @benchmark_run
       
+      # notification via email
+      notify_via_email
+      
       # the next profile
       profile_counter += 1
       
@@ -2337,18 +2340,18 @@ class BenchmarkController < ApplicationController
       logger.debug "YCSB command:"
 
       # NO output
-      #cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
+      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
 
       # OUTPUT
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
+      #cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
 
       puts cmd
       system cmd # invoke A YCSB client
       
-      #logger.debug "Copy YCSB Log back to KCSDB Server:"
-      #cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
-      #puts cmd      
-      #system cmd
+      logger.debug "Copy YCSB Log back to KCSDB Server:"
+      cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
+      puts cmd      
+      system cmd
     end
   end
   # --------------------------------------------------------------------------------------------#
@@ -2401,5 +2404,27 @@ class BenchmarkController < ApplicationController
   private
   def service_gmond attribute_array
     logger.debug "::: Service: Gmond is being deployed..."
+  end
+  
+  private
+  def notify_via_email
+    logger.debug "::: Sending notification email..."
+    state = get_state
+    email = state['notification_email']
+    Pony.mail({
+          :to => email,
+          :via => :smtp,
+          :subject => 'Your KCSDB Service :)',
+          :body => "The workload is already done. Please run 'bash invoke_requester.sh to get results!",
+          :via_options => {
+          :address              => 'smtp.gmail.com',
+          :port                 => '587',
+          :enable_starttls_auto => true,
+          :user_name            => 'kcsdb2012',
+          :password             => 'kcsdb2012',
+          :authentication       => :plain, # :plain, :login, :cram_md5, no auth by default
+          :domain               => "localhost.localdomain" # the HELO domain provided by the client to the server,
+          }
+    })
   end
 end

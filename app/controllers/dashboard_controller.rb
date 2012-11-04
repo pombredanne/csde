@@ -11,6 +11,7 @@ class DashboardController < ApplicationController
     @aws_access_key_id = state['aws_access_key_id']
     @aws_secret_access_key = state['aws_secret_access_key']
     @key_pair_name = state['key_pair_name']
+    @notification_email = state['notification_email']
 
     @status = "KCSDB welcomes you :).\n"
     @status << "Have a great day !!!\n\n"
