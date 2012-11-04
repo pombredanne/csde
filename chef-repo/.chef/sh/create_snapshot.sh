@@ -31,7 +31,7 @@ date
 echo "::: Uploading the tarball to bucket 'kcsdb-init' in S3..."
 echo "UPLOADING START TIME:"
 date
-/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd put cas-snap-$index.tar.bz2 s3://kcsdb-init --no-progress --no-check-md5 --no-encrypt --no-guess-mime-type
+/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd put cas-snap-$index.tar.bz2 s3://kcsdb-init
 echo "UPLOADING END TIME:"
 date
 

@@ -2411,19 +2411,20 @@ class BenchmarkController < ApplicationController
     logger.debug "::: Sending notification email..."
     state = get_state
     email = state['notification_email']
+    logger.debug "Notification Email: #{email}"
     Pony.mail({
           :to => email,
           :via => :smtp,
           :subject => 'Your KCSDB Service :)',
-          :body => "The workload is already done. Please run 'bash invoke_requester.sh to get results!",
+          :body => "The workload is already done. Please run 'bash invoke_requester.sh' to get results!",
           :via_options => {
           :address              => 'smtp.gmail.com',
           :port                 => '587',
           :enable_starttls_auto => true,
-          :user_name            => 'kcsdb2012',
+          :user_name            => 'kcsdb2012@gmail.com',
           :password             => 'kcsdb2012',
-          :authentication       => :plain, # :plain, :login, :cram_md5, no auth by default
-          :domain               => "localhost.localdomain" # the HELO domain provided by the client to the server,
+          :authentication       => 'plain', # :plain, :login, :cram_md5, no auth by default
+          :domain               => "localhost:3000" # the HELO domain provided by the client to the server,
           }
     })
   end
