@@ -24,7 +24,7 @@ ruby_block "configure_cluster" do
       end
       
       # ALL cache
-      if (node[:cassandra][:key_cache_size_in_mb] != "0") && (! node[:cassandra][:row_cache_size_in_mb] != "0")
+      if (node[:cassandra][:key_cache_size_in_mb] != "0") && (node[:cassandra][:row_cache_size_in_mb] != "0")
         file << "update column family #{node[:cassandra][:column_family]} with caching=all;"
       end
     end
