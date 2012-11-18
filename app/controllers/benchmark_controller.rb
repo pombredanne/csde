@@ -686,6 +686,9 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds...\n"
       @benchmark_run << "-----------------------------------------------------------------------------\n"      
       
+      puts "Stop"
+      exit 0
+      
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
       logger.debug "--------------------------------------------------------"
