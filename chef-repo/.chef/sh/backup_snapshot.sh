@@ -24,14 +24,16 @@ rm -f /var/lib/cassandra/commitlog/*.log
 echo "::: Downloading the snapshot tarball 'cas-snap-$index.tar.bz2' from S3..."
 echo "DOWNLOADING START TIME:"
 date
-/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd get s3://kcsdb-init/cas-snap-$index.tar.bz2 --no-progress --no-check-md5 --no-encrypt --no-guess-mime-type
+#/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd get s3://kcsdb-init/cas-snap-$index.tar.bz2 --no-progress --no-check-md5 --no-encrypt --no-guess-mime-type
+/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd get s3://kcsdb-init/test-cas-snap-$index.tar.bz2 --no-progress --no-check-md5 --no-encrypt --no-guess-mime-type
 echo "DOWNLOADING END TIME:"
 date
 
 echo "::: Decompressing the tarball 'cas-snap-$index.tar.bz2'..."
 echo "DECOMPRESSING START TIME:"
 date
-tar -xf cas-snap-$index.tar.bz2 -I /usr/bin/pbzip2
+#tar -xf cas-snap-$index.tar.bz2 -I /usr/bin/pbzip2
+tar -xf test-cas-snap-$index.tar.bz2 -I /usr/bin/pbzip2
 echo "DECOMPRESSING END TIME:"
 date
 

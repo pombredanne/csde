@@ -24,14 +24,17 @@ sudo chown -R ubuntu /var/lib/cassandra
 echo "::: Compressing snapshot files into 'cas-snap-$index.tar.bz2' tar ball..."
 echo "COMPRESSING START TIME:"
 date
-tar -cf cas-snap-$index.tar.bz2 -I /usr/bin/pbzip2 /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot/
+#tar -cf cas-snap-$index.tar.bz2 -I /usr/bin/pbzip2 /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot/
+tar -cf test-cas-snap-$index.tar.bz2 -I /usr/bin/pbzip2 /var/lib/cassandra/data/usertable/data/snapshots/cassandra-snapshot/
+
 echo "COMPRESSING END TIME:"
 date
 
 echo "::: Uploading the tarball to bucket 'kcsdb-init' in S3..."
 echo "UPLOADING START TIME:"
 date
-/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd put cas-snap-$index.tar.bz2 s3://kcsdb-init
+#/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd put cas-snap-$index.tar.bz2 s3://kcsdb-init
+/home/ubuntu/s3cmd-1.1.0-beta3/./s3cmd put test-cas-snap-$index.tar.bz2 s3://kcsdb-init
 echo "UPLOADING END TIME:"
 date
 
