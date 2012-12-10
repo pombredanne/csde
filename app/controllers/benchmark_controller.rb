@@ -661,6 +661,10 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
+      puts "Break point"
+      exit 0
+      
+      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -1225,7 +1229,12 @@ class BenchmarkController < ApplicationController
       flavor_id: flavor,
       key_name: key_pair,
       groups: security_group,
-      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 30 }] # big enough EBS volume for big data in Cassandra
+      
+      # _device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 30 }] # big enough EBS volume for big data in Cassandra
+    
+      # adding one more ephemeral disk
+      # the ebs image has already an ephemeral disk
+      _device_mapping: [{ 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
     }
     
     # create server with the tag name
@@ -2329,7 +2338,7 @@ class BenchmarkController < ApplicationController
       load = 'load'  
     end
     
-    results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |block|
+    results = Parallel.map(parallel_array, in_threads: parallel_array.size) do ||
       sleep_time = 0
       @mutex.synchronize do
         sleep_time = @sleep_array.pop # first come, first has to wait less  
@@ -2340,16 +2349,16 @@ class BenchmarkController < ApplicationController
       logger.debug "YCSB command:"
 
       # NO output
-      cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
+      cmd = "rvmsudo ssh -i #{[0]} #{no_checking} ubuntu@#{[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string} > /home/ubuntu/ycsb-log.txt'"
 
       # OUTPUT
-      #cmd = "rvmsudo ssh -i #{block[0]} #{no_checking} ubuntu@#{block[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
+      #cmd = "rvmsudo ssh -i #{[0]} #{no_checking} ubuntu@#{[1]} 'sudo /home/ubuntu/ycsb/bin/ycsb #{heap_size} #{load} cassandra-10 -P /home/ubuntu/ycsb/workloads/workload_unique -s #{attributes_string}'"
 
       puts cmd
       system cmd # invoke A YCSB client
       
       logger.debug "Copy YCSB Log back to KCSDB Server:"
-      cmd = "rvmsudo scp -i #{block[0]} #{no_checking} ubuntu@#{block[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
+      cmd = "rvmsudo scp -i #{[0]} #{no_checking} ubuntu@#{[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
       puts cmd      
       system cmd
     end
