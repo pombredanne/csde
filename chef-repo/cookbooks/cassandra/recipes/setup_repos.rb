@@ -9,7 +9,7 @@ execute 'sudo mount -t xfs -o noatime /dev/md0 /mnt'
 execute 'sudo mkdir -p /mnt/cassandra/log'
 execute 'sudo mkdir -p /mnt/cassandra/lib'
 execute 'sudo ln -s /mnt/cassandra/log /var/log'
-execute 'sudo ln -s /mnt/cassandra/ib /var/lib'
+execute 'sudo ln -s /mnt/cassandra/lib /var/lib'
 
 
 # Install DataStax Cassandra
