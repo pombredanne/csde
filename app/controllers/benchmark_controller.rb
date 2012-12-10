@@ -1230,11 +1230,11 @@ class BenchmarkController < ApplicationController
       key_name: key_pair,
       groups: security_group,
       
-      # _device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 30 }] # big enough EBS volume for big data in Cassandra
+      # block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 30 }] # big enough EBS volume for big data in Cassandra
     
       # adding one more ephemeral disk
       # the ebs image has already an ephemeral disk
-      _device_mapping: [{ 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
+      block_device_mapping: [{ 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
     }
     
     # create server with the tag name
