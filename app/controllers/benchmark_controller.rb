@@ -661,10 +661,6 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
-      puts "Break point"
-      exit 0
-      
-      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -689,6 +685,9 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "-----------------------------------------------------------------------------\n"
       @benchmark_run << "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds...\n"
       @benchmark_run << "-----------------------------------------------------------------------------\n"      
+
+      puts "Break point"
+      exit 0
       
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."

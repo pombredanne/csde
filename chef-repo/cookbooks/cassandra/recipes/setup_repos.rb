@@ -1,35 +1,19 @@
-#include_recipe "apt"
+# Configure RAID0
+execute 'sudo apt-get update -qq'
+execute 'export DEBIAN_FRONTEND=noninteractive'
+execute 'sudo apt-get install mdadm xfsprogs -qq'
+execute 'curl -L https://s3.amazonaws.com/kcsdb-init/configure_devices_as_RAID0.sh -o $HOME/configure_devices_as_RAID0.sh'
+execute 'sudo sh $HOME/configure_devices_as_RAID0.sh -m "/dev/md0" -d "/dev/xvdb /dev/xvdc"'
+execute 'sudo blockdev --setra 65536 /dev/md0'
+execute 'sudo mkfs.xfs -f /dev/md0'
+execute 'sudo mount -t xfs -o noatime /dev/md0 /mnt'
+execute 'sudo mkdir -p /mnt/cassandra/log'
+execute 'sudo mkdir -p /mnt/cassandra/lib'
+execute 'sudo ln -s /mnt/cassandra/log /var/log'
+execute 'sudo ln -s /mnt/cassandra/ib /var/lib'
 
-# Find package codenames
-#node[:internal][:codename] = node['lsb']['codename']
-
-# Adds the Cassandra repo:
-# deb http://www.apache.org/dist/cassandra/debian <07x|08x|10x|11x> main
-=begin
-if node[:setup][:deployment] == "07x" or node[:setup][:deployment] == "08x" or node[:setup][:deployment] == "10x" or node[:setup][:deployment] == "11x"
-  apt_repository "cassandra-repo" do
-    uri "http://www.apache.org/dist/cassandra/debian"
-    components [node[:setup][:deployment], "main"]
-    keyserver "pgp.mit.edu"
-    # key "F758CE318D77295D"
-    key "4BD736A82B5C1B00" # for Cassandra 1.1.5
-    action :add
-  end
-end
-
-if node[:setup][:deployment] == "07x" or node[:setup][:deployment] == "08x" or node[:setup][:deployment] == "10x" or node[:setup][:deployment] == "11x"
-  apt_repository "cassandra-repo" do
-    uri "http://www.apache.org/dist/cassandra/debian"
-    components [node[:setup][:deployment], "main"]
-    keyserver "pgp.mit.edu"
-    key "2B5C1B00"
-    action :add
-  end
-end
-=end
 
 # Install DataStax Cassandra
-execute 'sudo apt-get update -qq'
 execute 'echo "deb http://debian.datastax.com/community stable main" | sudo -E tee -a /etc/apt/sources.list'
 execute 'curl -L http://debian.datastax.com/debian/repo_key | sudo apt-key add -'
 execute 'sudo apt-get update -qq'
