@@ -13,7 +13,6 @@ execute 'sudo mkdir -p /var/log/cassandra'
 execute 'sudo ln -s /mnt/cassandra/log /var/log/cassandra'
 execute 'sudo ln -s /mnt/cassandra/lib /var/lib/cassandra'
 
-
 # Install DataStax Cassandra
 execute 'echo "deb http://debian.datastax.com/community stable main" | sudo -E tee -a /etc/apt/sources.list'
 execute 'curl -L http://debian.datastax.com/debian/repo_key | sudo apt-key add -'
