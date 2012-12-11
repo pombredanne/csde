@@ -685,9 +685,6 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "-----------------------------------------------------------------------------\n"
       @benchmark_run << "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds...\n"
       @benchmark_run << "-----------------------------------------------------------------------------\n"      
-
-      puts "Break point"
-      exit 0
       
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
@@ -705,6 +702,9 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "-------------------------------------------------------------------------\n"  
       @benchmark_run << "---> Elapsed time for Service [YCSB]: #{Time.now - start_time} seconds...\n"  
       @benchmark_run << "-------------------------------------------------------------------------\n"
+
+      puts "Break point"
+      exit 0
 
       if profile['snapshot'].to_s == 'true'
         create_snapshot_cassandra
