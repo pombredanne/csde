@@ -7,7 +7,10 @@ execute 'sudo apt-get install python-cql dsc1.1 -qq'
 execute 'sudo service cassandra stop'
 
 # Configure RAID0
-execute 'sudo DEBIAN_FRONTEND=noninteractive apt-get install mdadm xfsprogs -qq'
+
+# image has mdadm and xfsprogs already
+#execute 'sudo DEBIAN_FRONTEND=noninteractive apt-get install mdadm xfsprogs -qq'
+
 execute 'curl -L https://s3.amazonaws.com/kcsdb-init/configure_devices_as_RAID0.sh -o $HOME/configure_devices_as_RAID0.sh'
 execute 'sudo sh $HOME/configure_devices_as_RAID0.sh -m "/dev/md0" -d "/dev/xvdb /dev/xvdc"'
 #execute 'sudo blockdev --setra 65536 /dev/md0'

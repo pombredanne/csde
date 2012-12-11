@@ -7,7 +7,8 @@ security_group_name: dummy # Security Group in AWS EC2
 # Chef Client
 chef_client_ami_us_west_1: ami-95dcf9d0 # US_WEST_1 [N. California]: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
 chef_client_ami_us_west_2: ami-e257d8d2 # US_WEST_2 [Oregon]: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
-chef_client_ami_us_east_1: ami-07b6196e # US_EAST_1 [Virginia]: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
+chef_client_ami_us_east_1: ami-03a92b6a # US_EAST_1 [Virginia]: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
+#chef_client_ami_us_east_1: ami-07b6196e # US_EAST_1 [Virginia]: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
 chef_client_ami_eu_west_1: ami-03636477 # EU_WEST_1 [Ireland]: Own AMI Ubuntu 12.04, Ruby 1.9.3, Gem 1.8.24, Java 6 SUN JDK, Ohai, Chef 10.12.0
 
 chef_client_ssh_user: ubuntu # SSH Login User
