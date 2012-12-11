@@ -2320,8 +2320,9 @@ class BenchmarkController < ApplicationController
     attributes.each do |key, value|
       if key != "heap_size"
         if key == "measurementtype" || key == "timeseries.granularity"
-          attributes_string << "-p #{key}=#{value} "  
+          attributes_string << "-p #{key}=#{value} "  # timeseries
         else
+          # histogram
           attributes_string << "-p phase1.#{key}=#{value} " # use only single phase for YCSB++
         end
       
@@ -2357,7 +2358,7 @@ class BenchmarkController < ApplicationController
       system cmd # invoke A YCSB client
       
       logger.debug "Copy YCSB Log back to KCSDB Server:"
-      cmd = "rvmsudo scp -i #{[0]} #{no_checking} ubuntu@#{[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
+      cmd = "rvmsudo scp -i #{arr[0]} #{no_checking} ubuntu@#{arr[1]}:/home/ubuntu/ycsb-log.txt /home/ubuntu/ycsb-log.txt"
       puts cmd      
       system cmd
     end

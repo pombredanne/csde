@@ -8,8 +8,8 @@ service2:
   name: ycsb
   attributes:
     load: 'yes' # LOADING PHASE
-    measurementtype: timeseries
-    timeseries.granularity: 10000 # 10 s, one status
+    #measurementtype: timeseries
+    #timeseries.granularity: 10000 # 10 s, one status
     heap_size: 8192 # a big enough heap size has to be set in order to generate millions rows
     recordcount: 300000 # 30 Mio rows for all nodes
     operationcount: 300000 # 30 Mio rows for all nodes
