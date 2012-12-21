@@ -703,12 +703,12 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "---> Elapsed time for Service [YCSB]: #{Time.now - start_time} seconds...\n"  
       @benchmark_run << "-------------------------------------------------------------------------\n"
 
-      puts "Break point"
-      exit 0
-
-      if profile['snapshot'].to_s == 'true'
-        create_snapshot_cassandra
-      end
+      
+      # NOTE: active this later
+      #if profile['snapshot'].to_s == 'true'
+      #  create_snapshot_cassandra
+      #end
+      
       
       tmp_array = benchmark_profile_url.to_s.split '/'
       benchmark_name = tmp_array[tmp_array.size - 1]
