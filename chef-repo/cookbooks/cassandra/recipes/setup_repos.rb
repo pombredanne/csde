@@ -13,8 +13,8 @@ execute 'sudo service cassandra stop'
 
 execute 'curl -L https://s3.amazonaws.com/kcsdb-init/configure_devices_as_RAID0.sh -o $HOME/configure_devices_as_RAID0.sh'
 execute 'sudo sh $HOME/configure_devices_as_RAID0.sh -m "/dev/md0" -d "/dev/xvdb /dev/xvdc"'
-#execute 'sudo blockdev --setra 65536 /dev/md0'
-execute 'sudo mkfs.xfs -f /dev/md0'
+#execute 'sudo blockdev --setra 65536 /dev/md0' #already in configure.sh
+#execute 'sudo mkfs.xfs -f /dev/md0' #already in configure.sh
 execute 'sudo mount -t xfs -o noatime /dev/md0 /mnt'
 
 
