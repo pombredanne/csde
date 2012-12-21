@@ -22,7 +22,7 @@ service3:
     send_metadata_interval: 60
 profile1:
   provider: aws
-  snapshot: true
+  snapshot: ec2 # s3: packing data set in a tarball and save it in s3 | ec2: creating a ebs snapshot
   regions:
     region1:
       name: us-east-1

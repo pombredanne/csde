@@ -704,10 +704,11 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "-------------------------------------------------------------------------\n"
 
       
-      # NOTE: active this later
-      #if profile['snapshot'].to_s == 'true'
-      #  create_snapshot_cassandra
-      #end
+      if profile['snapshot'].to_s == 's3'
+        create_snapshot_cassandra_s3
+      elsif profile['snapshot'].to_s == 'ec2'
+        create_snapshot_cassandra_ec2
+      end
       
       
       tmp_array = benchmark_profile_url.to_s.split '/'
@@ -1233,7 +1234,7 @@ class BenchmarkController < ApplicationController
     
       # adding one more ephemeral disk
       # the ebs image has already an ephemeral disk
-      block_device_mapping: [{ 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
+      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }, { 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
     }
     
     # create server with the tag name
@@ -1383,8 +1384,10 @@ class BenchmarkController < ApplicationController
 
     # backup cassandra if needed
     # SERVICE_ID: 2.7
-    if cassandra_config_hash['attributes']['backup'].to_s == 'true'
-      backup_cassandra  
+    if cassandra_config_hash['attributes']['backup'].to_s == 's3'
+      backup_cassandra_s3
+    elsif cassandra_config_hash['attributes']['backup'].to_s == 'ec2'
+      backup_cassandra_ec2
     end
   end
   
@@ -1784,7 +1787,7 @@ class BenchmarkController < ApplicationController
   # ============================================================================================ #
   # SERVICE_ID: 2.7
   # backup cassandra cluster
-  #
+  # by downloading a tarball in s3 and extract it
   # --- cassandra_config_hash ---
   # region1:
   #   name: us-east-1
@@ -1801,7 +1804,7 @@ class BenchmarkController < ApplicationController
   #   backup: true
   # ============================================================================================ #
   private
-  def backup_cassandra
+  def backup_cassandra_s3
     logger.debug "-----------------------------------------------------------------------------------------"
     logger.debug "::: Backing up snapshots for all Cassandra nodes..."
     logger.debug "[NOTE] Backup Function works in the moment only for single region, and for only us-east-1"
@@ -1866,8 +1869,40 @@ class BenchmarkController < ApplicationController
   end
   
   # ============================================================================================ #
+  # SERVICE_ID: 2.7
+  # backup cassandra cluster
+  # attaching the ebs snapshot
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  # attributes:
+  #   replication_factor: 2,1
+  #   backup: true
+  # ============================================================================================ #
+  private
+  def backup_cassandra_ec2
+    logger.debug "-----------------------------------------------------------------------------------------"
+    logger.debug "::: Backing up snapshots for all Cassandra nodes..."
+    logger.debug "[NOTE] Backup Function works in the moment only for single region, and for only us-east-1"
+    logger.debug "-----------------------------------------------------------------------------------------"
+    start_time = Time.now
+    
+  end
+  
+  
+  
+  # ============================================================================================ #
   # SERVICE_ID: 2.8
   # create snapshot for cassandra cluster
+  # by creating a tarball of data set and save it in S3
   #
   # --- cassandra_config_hash ---
   # region1:
@@ -1885,9 +1920,10 @@ class BenchmarkController < ApplicationController
   #   backup: true
   # ============================================================================================ #
   private
-  def create_snapshot_cassandra
+  def create_snapshot_cassandra_s3
     logger.debug "-------------------------------------------------------------------------------------------"
     logger.debug "::: Creating snapshots for all Cassandra nodes..."
+    logger.debug "by packing all data set in a tarball and save it in S3"
     logger.debug "[NOTE] Snapshot Function works in the moment only for single region, and for only us-east-1"
     logger.debug "-------------------------------------------------------------------------------------------"
     start_time = Time.now
@@ -1949,6 +1985,102 @@ class BenchmarkController < ApplicationController
     @benchmark_run << "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds...\n"
     @benchmark_run << "-----------------------------------------------------------------------------\n"
   end
+  
+  # ============================================================================================ #
+  # SERVICE_ID: 2.8
+  # create snapshot for cassandra cluster
+  # by creating a ebs volume in ec2
+  #
+  # --- cassandra_config_hash ---
+  # region1:
+  #   name: us-east-1
+  #   ips: [1,2,3]
+  #   seeds: 1,2,4
+  #   tokens: [0,121212,352345]
+  # region2:
+  #   name: us-west-1
+  #   ips: [4,5]
+  #   seeds: 1,2,4
+  #   tokens: [4545, 32412341234]
+  # attributes:
+  #   replication_factor: 2,1
+  #   backup: true
+  # ============================================================================================ #
+  private
+  def create_snapshot_cassandra_ec2
+    logger.debug "-------------------------------------------------------------------------------------------"
+    logger.debug "::: Creating snapshots for all Cassandra nodes..."
+    logger.debug "by making an EBS snapshot in EC2"
+    logger.debug "[NOTE] Snapshot Function works in the moment only for single region, and for only us-east-1"
+    logger.debug "-------------------------------------------------------------------------------------------"  
+    start_time = Time.now
+    
+    # create snapshot data and move them to EBS store from ephemeral disks
+    
+    
+    # get the IPs of Cassandra nodes
+    ips_arr = @db_regions['region1']['ips']
+    para_arr = []
+    
+    ips_arr.each do |ip|
+      if ip.include? ',' then ip = ip.chomp ',' end
+      para_arr << ip  
+    end
+
+    # get meta info    
+    $stdout.sync = true
+    state = get_state
+    key_pair = state['key_pair_name']
+    region = @db_regions['region1']['name']
+    no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
+    chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    chef_client_ssh_user = state['chef_client_ssh_user']
+    move_snapshot_data_to_ebs_store_file = "#{Rails.root}/chef-repo/.chef/sh/create_snapshot_ec2.sh"
+    
+    # upload the script and execute it parallel on all Cassandra nodes
+    results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
+      cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{move_snapshot_data_to_ebs_store_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"          
+      puts cmd
+      system cmd
+  
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'bash /home/ubuntu/create_snapshot_ec2.sh'"
+      puts cmd
+      system cmd
+    end
+        
+    
+    # create a ec2 object to manipulate machines in the given region1
+    ec2 = create_fog_object 'aws', region, 'compute'
+    
+    # tmp_arry contains all cassandra nodes
+    tmp_arr = []
+    
+    # get the cassandra machines only in the region1
+    ec2.servers.each do |server|
+      if server.tags["Name"].to_s.include? "cassandra-node"
+        tmp_arr << server
+      end
+    end
+    
+    # create for each cassandra node a snapshot in ec2
+    # with a description equal to its tag name
+    tmp_arr.each do |server|
+      server.block_device_mapping.each do |block_device|
+        snap = ec2.snapshots.new :volume_id => block_device['volumeId'], :description => server.tags["Name"]
+        snap.save
+        snap.wait_for { print "."; ready? }
+      end
+    end
+    
+    logger.debug "-----------------------------------------------------------------------------"
+    logger.debug "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds..."
+    logger.debug "-----------------------------------------------------------------------------"
+    @benchmark_run << "-----------------------------------------------------------------------------\n"
+    @benchmark_run << "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds...\n"
+    @benchmark_run << "-----------------------------------------------------------------------------\n"
+  end
+  
+  
   
   # ============================================================================================ #
   # SERVICE_ID: 2.9
