@@ -1234,7 +1234,7 @@ class BenchmarkController < ApplicationController
       ec2.snapshots.each do |s|
         if s.description.include? name.to_s
           cassandra_snapshot_id = s.id  
-          puts "Found Snapshot ID #{cassandra_snapshot_id} for #{name}!"
+          logger.debug "Found Snapshot ID #{cassandra_snapshot_id} for #{name}!"
         end
       end
       
@@ -1253,10 +1253,9 @@ class BenchmarkController < ApplicationController
         groups: security_group,
         block_device_mapping: mapping
       }
-    end
-    
-    # server definition for YCSB
-    server_def = {
+    else  
+      # server definition for YCSB
+      server_def = {
       image_id: ami,
       flavor_id: flavor,
       key_name: key_pair,
@@ -1267,8 +1266,9 @@ class BenchmarkController < ApplicationController
       # adding one more ephemeral disk
       # the ebs image has already an ephemeral disk
       #block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }, { 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
-    }
-    
+      }
+    end
+
     # create server with the tag name
     server = ec2.servers.create server_def
     sleep 3 # a small pause
