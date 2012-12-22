@@ -2057,17 +2057,18 @@ class BenchmarkController < ApplicationController
     
     # get the cassandra machines only in the region1
     ec2.servers.each do |server|
-      if server.tags["Name"].to_s.include? "cassandra-node"
+      if (server.tags["Name"].to_s.include? "cassandra-node" && server.state.to_s == "running")
         tmp_arr << server
       end
     end
     
     # create for each cassandra node a snapshot in ec2
     # with a description equal to its tag name
-    tmp_arr.each do |server|
+    results = Parallel.map(tmp_arr, in_threads: tmp_arr.size) do |server|
       server.block_device_mapping.each do |block_device|
         snap = ec2.snapshots.new :volume_id => block_device['volumeId'], :description => server.tags["Name"]
         snap.save
+        echo "Creating a snapshot for #{server.tags["Name"]}, please wait..."
         snap.wait_for { print "."; ready? }
       end
     end
