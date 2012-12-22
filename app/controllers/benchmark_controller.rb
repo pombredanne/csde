@@ -2064,13 +2064,13 @@ class BenchmarkController < ApplicationController
     
     # create for each cassandra node a snapshot in ec2
     # with a description equal to its tag name
-    results = Parallel.map(tmp_arr, in_threads: tmp_arr.size) do |server|
-      server.block_device_mapping.each do |block_device|
-        snap = ec2.snapshots.new :volume_id => block_device['volumeId'], :description => server.tags["Name"]
-        snap.save
-        echo "Creating a snapshot for #{server.tags["Name"]}, please wait..."
-        snap.wait_for { print "."; ready? }
-      end
+    results = Parallel.map(tmp_arr, in_threads: tmp_arr.size) do |t|
+      volume_id = t.block_device_mapping[0]["volumeId"]
+      name = t.tags["Name"]
+      snap = ec2.snapshots.new :volume_id => volume_id, :description => name
+      logger.debug "::: Creating a snapshot for #{name}"
+      snap.save
+      snap.wait_for { print "."; ready? }
     end
     
     logger.debug "-----------------------------------------------------------------------------"
