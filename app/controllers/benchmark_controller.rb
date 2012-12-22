@@ -2057,7 +2057,7 @@ class BenchmarkController < ApplicationController
     
     # get the cassandra machines only in the region1
     ec2.servers.each do |server|
-      if (server.tags["Name"].to_s.include? "cassandra-node" && server.state.to_s == "running")
+      if (server.tags["Name"].to_s.include? "cassandra-node") && (server.state.to_s == "running")
         tmp_arr << server
       end
     end
