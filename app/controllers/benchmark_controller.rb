@@ -1229,10 +1229,12 @@ class BenchmarkController < ApplicationController
     # Get the corresponding ebs store for cassandra
     if name.to_s.include? "cassandra-node"
       
+      cassandra_snapshot_id = nil
       #find the ID for block_device_mapping
       ec2.snapshots.each do |s|
-        if s.description.include? name
+        if s.description.include? name.to_s
           cassandra_snapshot_id = s.id  
+          puts "Found Snapshot ID #{cassandra_snapshot_id} for #{name}!"
         end
       end
       
