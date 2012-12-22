@@ -599,7 +599,7 @@ class BenchmarkController < ApplicationController
       @bench_nodes_us_west_2 = []
       @bench_nodes_eu_west_1 = []
       
-      # lock for shared temporary varibales
+      # lock for shared temporary variables
       @mutex = Mutex.new
       
       # Service Provision has to be called at first
@@ -660,6 +660,9 @@ class BenchmarkController < ApplicationController
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
       end
+
+      puts "Break point"
+      exit 0
 
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
@@ -1222,19 +1225,46 @@ class BenchmarkController < ApplicationController
     
     # create a fog object in the given region with the corresponding provider (aws, rackspace)
     ec2 = create_fog_object 'aws', region, 'compute'
+
+    # Get the corresponding ebs store for cassandra
+    if name.to_s.include? "cassandra-node"
+      
+      #find the ID for block_device_mapping
+      ec2.snapshots.each do |s|
+        if s.description.include? name
+          cassandra_snapshot_id = s.id  
+        end
+      end
+      
+      mapping = []
+      
+      # ebs disks
+      mapping << { 'DeviceName' => '/dev/sdi', "Ebs.SnapshotId"=> cassandra_snapshot_id, "Ebs.VolumeSize" => 150}
+      
+      # ephemeral disks for RAID0
+      mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
+
+      server_def = {
+        image_id: ami,
+        flavor_id: flavor,
+        key_name: key_pair,
+        groups: security_group,
+        block_device_mapping: mapping
+      }
+    end
     
-    # server definition
+    # server definition for YCSB
     server_def = {
       image_id: ami,
       flavor_id: flavor,
       key_name: key_pair,
       groups: security_group,
       
-      # block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 30 }] # big enough EBS volume for big data in Cassandra
+      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 10 }]
     
       # adding one more ephemeral disk
       # the ebs image has already an ephemeral disk
-      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }, { 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
+      #block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }, { 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
     }
     
     # create server with the tag name
