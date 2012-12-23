@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
-bootstrap_tar_url="https://s3.amazonaws.com/kcsdb-init/chef_10.12.0_bootstrap.tar.gz"
+bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
+#bootstrap_tar_url="https://s3.amazonaws.com/kcsdb-init/chef_10.12.0_bootstrap.tar.gz"
 
 welcome(){
 	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
