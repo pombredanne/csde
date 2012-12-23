@@ -33,6 +33,7 @@ install_kcsdb(){
 	echo ":::::::::::::::::::::::"
 	echo "::: Installing KCSDB..."
 	echo ":::::::::::::::::::::::"
+	sudo apt-get update -y
 	git clone https://github.com/lehoanganh/kcsdb.git
 	(cd $HOME/kcsdb && bundle update)
 	cp $HOME/kcsdb/chef-repo/.chef/conf/state.tmpl.yml $HOME/kcsdb/chef-repo/.chef/conf/state.yml
