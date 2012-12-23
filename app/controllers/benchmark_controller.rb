@@ -711,7 +711,6 @@ class BenchmarkController < ApplicationController
         create_snapshot_cassandra_ec2
       end
       
-      
       tmp_array = benchmark_profile_url.to_s.split '/'
       benchmark_name = tmp_array[tmp_array.size - 1]
       benchmark_name = benchmark_name.to_s.chomp '.yaml'
@@ -1224,46 +1223,39 @@ class BenchmarkController < ApplicationController
     # create a fog object in the given region with the corresponding provider (aws, rackspace)
     ec2 = create_fog_object 'aws', region, 'compute'
 
-    # Get the corresponding ebs store for cassandra
-    if name.to_s.include? "cassandra-node"
+    # indicate if an ebs disk available
+    check = false
+    server_def = nil
+    ec2.snapshots.each do |snapshot|
+      if snapshot.description.include? name.to_s
+        check = true
+        cassandra_snapshot_id = snapshot.id
+        logger.debug "Found Snapshot ID: #{cassandra_snapshot_id} for #{name}"
+        mapping = []
+        # ebs disks
+        mapping << { 'DeviceName' => '/dev/sdi', "Ebs.SnapshotId"=> cassandra_snapshot_id, "Ebs.VolumeSize" => 150}
       
-      cassandra_snapshot_id = nil
-      #find the ID for block_device_mapping
-      ec2.snapshots.each do |s|
-        if s.description.include? name.to_s
-          cassandra_snapshot_id = s.id  
-          logger.debug "Found Snapshot ID #{cassandra_snapshot_id} for #{name}!"
-        end
+        # ephemeral disks for RAID0
+        mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
+        
+        server_def = {
+          image_id: ami,
+          flavor_id: flavor,
+          key_name: key_pair,
+          groups: security_group,
+          block_device_mapping: mapping
+        }       
       end
-      
-      mapping = []
-      
-      # ebs disks
-      mapping << { 'DeviceName' => '/dev/sdi', "Ebs.SnapshotId"=> cassandra_snapshot_id, "Ebs.VolumeSize" => 150}
-      
-      # ephemeral disks for RAID0
-      mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
-
+    end
+    
+    # no EBS available
+    if ! check
       server_def = {
         image_id: ami,
         flavor_id: flavor,
         key_name: key_pair,
         groups: security_group,
-        block_device_mapping: mapping
-      }
-    else  
-      # server definition for YCSB
-      server_def = {
-      image_id: ami,
-      flavor_id: flavor,
-      key_name: key_pair,
-      groups: security_group,
-      
-      block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 10 }]
-    
-      # adding one more ephemeral disk
-      # the ebs image has already an ephemeral disk
-      #block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }, { 'VirtualName' => 'ephemeral1', 'DeviceName' => "/dev/sdc" }]
+        block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }]
       }
     end
 
@@ -2094,13 +2086,15 @@ class BenchmarkController < ApplicationController
     
     # create for each cassandra node a snapshot in ec2
     # with a description equal to its tag name
-    results = Parallel.map(tmp_arr, in_threads: tmp_arr.size) do |t|
-      volume_id = t.block_device_mapping[0]["volumeId"]
-      name = t.tags["Name"]
-      snap = ec2.snapshots.new :volume_id => volume_id, :description => name
-      logger.debug "::: Creating a snapshot for #{name}"
-      snap.save
-      snap.wait_for { print "."; ready? }
+    results = Parallel.map(tmp_arr, in_threads: tmp_arr.size) do |node|
+      node.block_device_mapping.each do |block_device|
+        volume_id = block_device["volumeId"]
+        name = node.tags["Name"]
+        snap = ec2.snapshots.new :volume_id => volume_id, :description => name
+        logger.debug "::: Creating a snapshot for #{name}"
+        snap.save
+        snap.wait_for { print "."; ready? }        
+      end
     end
     
     logger.debug "-----------------------------------------------------------------------------"
