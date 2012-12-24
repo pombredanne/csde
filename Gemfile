@@ -27,8 +27,8 @@ gem 'net-ssh', '2.2.2'
 gem 'moneta', '0.6.0'
 
 # parallel
-#gem 'parallel', '0.5.18'
-gem 'parallel', '0.6.1'
+gem 'parallel', '0.5.18'
+#gem 'parallel', '0.6.1'
 
 # web server, instead of webrick
 #gem 'thin', '1.4.1'

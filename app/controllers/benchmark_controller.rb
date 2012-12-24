@@ -1227,7 +1227,7 @@ class BenchmarkController < ApplicationController
     check = false
     server_def = nil
     ec2.snapshots.each do |snapshot|
-      if snapshot.description.include? name.to_s
+      if snapshot.description.to_s.include? name.to_s
         check = true
         cassandra_snapshot_id = snapshot.id
         logger.debug "Found Snapshot ID: #{cassandra_snapshot_id} for #{name}"
