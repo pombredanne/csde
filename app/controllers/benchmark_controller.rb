@@ -1250,12 +1250,16 @@ class BenchmarkController < ApplicationController
     
     # no EBS available
     if ! check
+      mapping = []
+      mapping << { 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }
+      mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
+      
       server_def = {
         image_id: ami,
         flavor_id: flavor,
         key_name: key_pair,
         groups: security_group,
-        block_device_mapping: [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }]
+        block_device_mapping: mapping
       }
     end
 

@@ -22,7 +22,10 @@ gem 'chef', '10.16.2'
 # chef (10.12.0) depends on net-ssh ~> 2.2.2
 gem 'net-ssh', '2.2.2'
 
+# quickfix for this bug
+# http://tickets.opscode.com/browse/CHEF-3721
 gem 'moneta', '0.6.0'
+
 # parallel
 #gem 'parallel', '0.5.18'
 gem 'parallel', '0.6.1'
