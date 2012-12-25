@@ -2115,6 +2115,7 @@ class BenchmarkController < ApplicationController
     end
 =end
 
+=begin
     tmp_arr.each do |node|
       node.block_device_mapping.each do |block_device|
         volume_id = block_device["volumeId"]
@@ -2125,7 +2126,12 @@ class BenchmarkController < ApplicationController
         #snap.wait_for { print "."; ready? }        
       end
     end
-    
+=end
+
+    tmp_arr.each do |s|
+      snap = ec2.snapshots.new :volume_id => s.block_device_mapping[0]["volumeId"], :description => s.tags["Name"]
+      snap.save
+    end    
     
     
     logger.debug "-----------------------------------------------------------------------------"
