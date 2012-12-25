@@ -661,8 +661,8 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
-      puts "break point"
-      exit 0
+      #puts "break point"
+      #exit 0
 
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
@@ -1234,7 +1234,7 @@ class BenchmarkController < ApplicationController
         logger.debug "Found Snapshot ID: #{cassandra_snapshot_id} for #{name}"
         mapping = []
         # ebs disks
-        mapping << { 'DeviceName' => '/dev/sdi', "Ebs.SnapshotId"=> cassandra_snapshot_id, "Ebs.VolumeSize" => 150}
+        mapping << { 'DeviceName' => '/dev/sdi', "Ebs.SnapshotId"=> cassandra_snapshot_id, "Ebs.VolumeSize" => 10}
       
         # ephemeral disks for RAID0
         mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
@@ -1252,7 +1252,7 @@ class BenchmarkController < ApplicationController
     # no EBS available
     if ! check
       mapping = []
-      mapping << { 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }
+      mapping << { 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 10 }
       mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
       
       server_def = {
@@ -2065,6 +2065,7 @@ class BenchmarkController < ApplicationController
     move_snapshot_data_to_ebs_store_file = "#{Rails.root}/chef-repo/.chef/sh/create_snapshot_ec2.sh"
     
     # upload the script and execute it parallel on all Cassandra nodes
+=begin    
     results = Parallel.map(para_arr, in_threads: para_arr.size) do |node|
       cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{move_snapshot_data_to_ebs_store_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"          
       puts cmd
@@ -2074,7 +2075,17 @@ class BenchmarkController < ApplicationController
       puts cmd
       system cmd
     end
-        
+=end
+
+    para_arr.each do |node|
+      cmd = "rvmsudo scp -i #{chef_client_identity_file} #{no_checking} #{move_snapshot_data_to_ebs_store_file} #{chef_client_ssh_user}@#{node}:/home/#{chef_client_ssh_user}"          
+      puts cmd
+      system cmd
+  
+      cmd = "rvmsudo ssh -i #{chef_client_identity_file} #{no_checking} #{chef_client_ssh_user}@#{node} 'bash /home/ubuntu/create_snapshot_ec2.sh'"
+      puts cmd
+      system cmd  
+    end
     
     # create a ec2 object to manipulate machines in the given region1
     ec2 = create_fog_object 'aws', region, 'compute'
