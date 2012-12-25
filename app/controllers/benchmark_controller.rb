@@ -1249,6 +1249,7 @@ class BenchmarkController < ApplicationController
         server_def = {
           image_id: ami,
           flavor_id: flavor,
+          availability_zone: 'us-east-1b', # quick and dirty for us-east-1
           key_name: key_pair,
           groups: security_group,
           block_device_mapping: mapping
@@ -1265,6 +1266,7 @@ class BenchmarkController < ApplicationController
       server_def = {
         image_id: ami,
         flavor_id: flavor,
+        availability_zone: 'us-east-1b', # quick and dirty for us-east-1
         key_name: key_pair,
         groups: security_group,
         block_device_mapping: mapping
