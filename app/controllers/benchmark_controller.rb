@@ -1226,7 +1226,7 @@ class BenchmarkController < ApplicationController
   def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
     logger.debug "::: Provisioning machine: #{name}..."
     # synchronize stdout
-    $stdout.sync = true
+    #$stdout.sync = true
     
     # create a fog object in the given region with the corresponding provider (aws, rackspace)
     ec2 = create_fog_object 'aws', region, 'compute'
@@ -1249,7 +1249,7 @@ class BenchmarkController < ApplicationController
         server_def = {
           image_id: ami,
           flavor_id: flavor,
-          availability_zone: 'us-east-1b', # quick and dirty for us-east-1
+          #availability_zone: 'us-east-1b', # quick and dirty for us-east-1
           key_name: key_pair,
           groups: security_group,
           block_device_mapping: mapping
@@ -1266,12 +1266,15 @@ class BenchmarkController < ApplicationController
       server_def = {
         image_id: ami,
         flavor_id: flavor,
-        availability_zone: 'us-east-1b', # quick and dirty for us-east-1
+        #availability_zone: 'us-east-1b', # quick and dirty for us-east-1
         key_name: key_pair,
         groups: security_group,
         block_device_mapping: mapping
       }
     end
+
+    logger.debug "::: Server_def"
+    puts server_def
 
     # create server with the tag name
     server = ec2.servers.create server_def
