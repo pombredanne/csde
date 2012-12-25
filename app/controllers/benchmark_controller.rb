@@ -661,8 +661,8 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
-      #puts "break point"
-      #exit 0
+      puts "break point"
+      exit 0
 
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
@@ -2130,6 +2130,7 @@ class BenchmarkController < ApplicationController
 
     tmp_arr.each do |s|
       snap = ec2.snapshots.new :volume_id => s.block_device_mapping[0]["volumeId"], :description => s.tags["Name"]
+      logger.debug "::: Creating snapshot for #{s.tags["Name"]}"
       snap.save
     end    
     
