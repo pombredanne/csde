@@ -2102,6 +2102,7 @@ class BenchmarkController < ApplicationController
     
     # create for each cassandra node a snapshot in ec2
     # with a description equal to its tag name
+=begin
     results = Parallel.map(tmp_arr, in_threads: tmp_arr.size) do |node|
       node.block_device_mapping.each do |block_device|
         volume_id = block_device["volumeId"]
@@ -2112,6 +2113,20 @@ class BenchmarkController < ApplicationController
         snap.wait_for { print "."; ready? }        
       end
     end
+=end
+
+    tmp_arr.each do |node|
+      node.block_device_mapping.each do |block_device|
+        volume_id = block_device["volumeId"]
+        name = node.tags["Name"]
+        snap = ec2.snapshots.new :volume_id => volume_id, :description => name
+        logger.debug "::: Creating a snapshot for #{name}"
+        snap.save
+        #snap.wait_for { print "."; ready? }        
+      end
+    end
+    
+    
     
     logger.debug "-----------------------------------------------------------------------------"
     logger.debug "---> Elapsed time for Service [Snapshot]: #{Time.now - start_time} seconds..."
