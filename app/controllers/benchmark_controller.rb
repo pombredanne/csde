@@ -661,9 +661,6 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
-      puts "break point"
-      exit 0
-
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -706,7 +703,6 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "---> Elapsed time for Service [YCSB]: #{Time.now - start_time} seconds...\n"  
       @benchmark_run << "-------------------------------------------------------------------------\n"
 
-      
       if profile['snapshot'].to_s == 's3'
         create_snapshot_cassandra_s3
       elsif profile['snapshot'].to_s == 'ec2'
