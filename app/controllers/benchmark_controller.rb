@@ -1041,15 +1041,15 @@ class BenchmarkController < ApplicationController
     logger.debug "------------------------------------------------------------------------------------------"
     logger.debug "::: Provisioning ALL machines for DATABASE cluster and BENCHMARK cluster in ALL regions..."
     logger.debug "------------------------------------------------------------------------------------------"
-=begin    
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
       provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
     end
-=end
     
+=begin
     parallel_array.each do |arr|
       provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
     end
+=end
 
 
     # update @db_regions
