@@ -661,9 +661,6 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
-      puts "break point"
-      exit 0
-
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -706,11 +703,13 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "---> Elapsed time for Service [YCSB]: #{Time.now - start_time} seconds...\n"  
       @benchmark_run << "-------------------------------------------------------------------------\n"
 
+=begin
       if profile['snapshot'].to_s == 's3'
         create_snapshot_cassandra_s3
       elsif profile['snapshot'].to_s == 'ec2'
         create_snapshot_cassandra_ec2
       end
+=end
       
       tmp_array = benchmark_profile_url.to_s.split '/'
       benchmark_name = tmp_array[tmp_array.size - 1]
@@ -1226,7 +1225,7 @@ class BenchmarkController < ApplicationController
   def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
     logger.debug "::: Provisioning machine: #{name}..."
     # synchronize stdout
-    #$stdout.sync = true
+    $stdout.sync = true
     
     # create a fog object in the given region with the corresponding provider (aws, rackspace)
     ec2 = create_fog_object 'aws', region, 'compute'
@@ -1241,7 +1240,7 @@ class BenchmarkController < ApplicationController
         logger.debug "Found Snapshot ID: #{cassandra_snapshot_id} for #{name}"
         mapping = []
         # ebs disks
-        mapping << { 'DeviceName' => '/dev/sdi', "Ebs.SnapshotId"=> cassandra_snapshot_id, "Ebs.VolumeSize" => 10}
+        mapping << { 'DeviceName' => '/dev/sdi', "Ebs.SnapshotId"=> cassandra_snapshot_id, "Ebs.VolumeSize" => 150}
       
         # ephemeral disks for RAID0
         mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
@@ -1260,7 +1259,7 @@ class BenchmarkController < ApplicationController
     # no EBS available
     if ! check
       mapping = []
-      mapping << { 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 10 }
+      mapping << { 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 150 }
       mapping << { 'DeviceName' => "/dev/sdc", 'VirtualName' => 'ephemeral1' }
       
       server_def = {
