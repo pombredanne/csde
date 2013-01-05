@@ -9,7 +9,11 @@ KIT Cloud Serving Deployment and Benchmark (KCSDB), which is currently developed
  
 With KCSDB, you can concentrate on your work with the databases, not dealing with setup and configuration. KCSD automates it already for you.
 However, like any software on the earth, written by human, there may be bugs and issues. Therefore, please read the description below carefully.
-  
+
+= MINI DEMO
+
+ https://s3.amazonaws.com/kcsdb-init/KCSDB-Mini-Demo.mov
+
 = INSTALLATION
 
 KCSDB now can be installed on Ubuntu 11.10 x64 and 12.04 x64. 
