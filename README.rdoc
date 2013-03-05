@@ -18,36 +18,42 @@ CSDE was formerly known as KCSD(B) and has now changed its name.
 
 = INSTALLATION
 
-For now, CSDE can only be used in Amazon EC2 and IBM SmartCloud Enterprise. Please use the following machines:
+For now, CSDE can only be used in Amazon EC2 and IBM SCE. Please use the following machines:
 
-Amazon Ubuntu:
+* Amazon EC2:
 
 Region: US-EAST-1
+
 AMI: ami-3d4ff254
+
 OS: Ubuntu 12.04 x64
 
-IBM SmartCloud Enterprise:
+* IBM SCE:
 
 Region: Ehingen, Germany
+
 Image Name: Red Hat Enterprise Linux 6.3 (64-bit)(EHN)
+
 Image ID: 20025207
+
 OS: Red Hat Enterprise Linux 6.3 x64
 
 * Lauch a virtual machine and login via ssh
-* Download and execute prepare_machine_for_kcsdb.sh script
- $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/prepare_machine_for_kcsdb.sh -s | bash
+* Install needed softwares for before install CSDE server
+Amazon EC2
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/prepare_machine_for_csde_rhel_6.sh -s | bash
+IBM SCE
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/prepare_machine_for_csde_ubuntu_12.04.sh -s | bash
 * Load rvm into shell
  $ source $HOME/.bashrc
 * Set ruby 1.9.3 as default
  $ rvm --default use 1.9.3
-* Install Gems for JRuby
- $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_gem_for_jruby.sh -s | bash
 * Install CSDE
- $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh -s | rvmsudo bash
+ $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_csde.sh -s | rvmsudo bash
 
 = USEFUL
 * Oracle does not support direct download of JDK from the officical site any more. You have to read and agree Oracle's rules.
-Thus, use another way to install Sun JDK
+Thus, use another way to install Sun JDK in Ubuntu 12.04.
  $ curl -L https://raw.github.com/flexiondotorg/oab-java6/master/oab-java.sh | sudo bash
  $ sudo apt-get install sun-java6-jdk
  $ export JAVA_HOME=/usr/lib/jvm/java-6-sun
