@@ -32,7 +32,7 @@ install_oracle_jdk_6(){
 	
 	# load the iso file and install
 	curl -L https://s3.amazonaws.com/csde/jdk-6u41-linux-x64-rpm.bin -o $HOME/jdk-6u41-linux-x64-rpm.bin
-	chmod u+x jdk-6u41-linux-x64-rpm.bin
+	chmod 777 jdk-6u41-linux-x64-rpm.bin
 	sudo $HOME/./jdk-6u41-linux-x64-rpm.bin
 	
 	# update java alternatives
@@ -42,7 +42,7 @@ install_oracle_jdk_6(){
 	sudo alternatives --install /usr/bin/jar jar /usr/java/jdk1.6.0_41/bin/jar 20000
 }
 
-install_ruby(){
+install_ruby_1.9.3(){
 	echo "------------------------"
 	echo "Installing Ruby 1.9.3..."
 	echo "------------------------"
@@ -73,7 +73,7 @@ welcome
 yum_update
 install_needed_packages
 install_oracle_jdk_6
-install_ruby
+install_ruby_1.9.3
 
 echo "------------------------------------"
 echo "Machine is ready for installing CSDE"
