@@ -4,9 +4,9 @@ bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
 #bootstrap_tar_url="https://s3.amazonaws.com/kcsdb-init/chef_10.12.0_bootstrap.tar.gz"
 
 welcome(){
-	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	echo "::: KIT Cloud Serving Deployment and Benchmark welcomes you :) :::"
-	echo "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+	echo "------------------------------------------------------------------"
+	echo "Cloud System Deployment and Experiment (CSDE) Tool welcomes you :)"
+	echo "------------------------------------------------------------------"
 }
 
 pause(){
@@ -29,11 +29,11 @@ configure_opscenter(){
 	sudo service opscenterd restart
 }
 
-install_kcsdb(){
-	echo ":::::::::::::::::::::::"
-	echo "::: Installing KCSDB..."
-	echo ":::::::::::::::::::::::"
-	sudo apt-get update -y
+install_csde(){
+	echo "------------------"
+	echo "Installing CSDE..."
+	echo "------------------"
+	#sudo apt-get update -y
 	git clone https://github.com/myownthemepark/csde.git
 	(cd $HOME/csde && bundle update)
 	cp $HOME/csde/chef-repo/.chef/conf/state.tmpl.yml $HOME/csde/chef-repo/.chef/conf/state.yml
@@ -62,40 +62,40 @@ BOOTSTRAP_JSON
 }
 
 run_chef_solo(){
-	echo ":::::::::::::::::::::::::::::::::::::::::::::::"
-	echo "::: Running chef-solo to install chef-server..."
-	echo ":::::::::::::::::::::::::::::::::::::::::::::::"
+	echo "--------------------------------------------"
+	echo ":Running chef-solo to install chef-server..."
+	echo "--------------------------------------------"
 	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
 start_chef_server(){
 	# -d: detach from console
 	
-	echo ":::::::::::::::::::::::::::::"
-	echo "::: Starting Chef Expander..."
-	echo ":::::::::::::::::::::::::::::"
+	echo "-------------------------"
+	echo "Starting Chef Expander..."
+	echo "-------------------------"
 	chef-expander -d -n1
 
-	echo ":::::::::::::::::::::::::"
-	echo "::: Starting Chef Solr..."
-	echo ":::::::::::::::::::::::::"
+	echo "---------------------"
+	echo "Starting Chef Solr..."
+	echo "---------------------"
 	chef-solr -d
 
-	echo ":::::::::::::::::::::::::::"
-	echo "::: Starting Chef Server..."
-	echo ":::::::::::::::::::::::::::"
+	echo "-----------------------"
+	echo "Starting Chef Server..."
+	echo "-----------------------"
 	chef-server -d
 
-	echo ":::::::::::::::::::::::::::::::::"
-	echo "::: Starting Chef Server WebUI..."
-	echo ":::::::::::::::::::::::::::::::::"
+	echo "-----------------------------"
+	echo "Starting Chef Server WebUI..."
+	echo "-----------------------------"
 	chef-server-webui -d
 }
 
 upload_cookbooks(){
-	echo ":::::::::::::::::::::::::::::::::::::::::"
-	echo "::: Uploading cookbooks to chef-server..."
-	echo ":::::::::::::::::::::::::::::::::::::::::"
+	echo "-------------------------------------"
+	echo "Uploading cookbooks to Chef Server..."
+	echo "-------------------------------------"
 	knife cookbook upload --all --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb
 }
 
@@ -110,20 +110,20 @@ no_strict_host_key_checking(){
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: No strict host key checking in ssh connections..."
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	mkdir -p /home/ubuntu/.ssh
-	echo -e "Host *\n\tStrictHostKeyChecking no" > /home/ubuntu/.ssh/config
+	mkdir -p $HOME/.ssh
+	echo -e "Host *\n\tStrictHostKeyChecking no" > $HOME/.ssh/config
 }
 
 bye(){
-	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	echo "::: KCSDB installed successfully!!!"
-	echo "::: Execute 'source $HOME/.bashrc to load environment variables"
-	echo "::: Then execute 'bash start.sh' in 'kcsdb' home folder to start KCSDB Server"
-	echo "::: KCSDB Server     --> [IP]:3000"
-	echo "::: Chef Server      --> [IP]:4040"
-	#echo "::: OpsCenter Server --> [IP]:8888"
-	#echo "::: Gmetad Server    --> [IP]:8651"
-	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+	echo "-----------------------------------------------------------------------"
+	echo "CSDE installed successfully!!!"
+	echo "Execute 'source $HOME/.bashrc to load environment variables"
+	echo "Then execute 'bash start.sh' in 'csde' home folder to start CSDE Server"
+	echo "CSDE Server     --> [IP]:3000"
+	echo "Chef Server      --> [IP]:4040"
+	#echo "OpsCenter Server --> [IP]:8888"
+	#echo "Gmetad Server    --> [IP]:8651"
+	echo "-----------------------------------------------------------------------"
 }
 
 # ================================================================

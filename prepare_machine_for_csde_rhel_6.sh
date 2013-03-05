@@ -6,8 +6,9 @@ welcome(){
 	echo "image is Red Hat Enterprise Linux 6.3"
 	echo "following softwares will be installed:"
 	echo "1. Oracle JDK 6"
-	echo "2. Ruby 1.9.3"
-	echo "3. several packages"
+	echo "2. DataStax OpsCenter 3"
+	echo "3. Ruby 1.9.3"
+	echo "4. several packages"
 	echo "--------------------------------------------------------------------------------------------------"
 }
 
@@ -26,6 +27,23 @@ install_oracle_jdk_6(){
 	sudo alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.6.0_41/jre/bin/javaws 20000
 	sudo alternatives --install /usr/bin/javac javac /usr/java/jdk1.6.0_41/bin/javac 20000
 	sudo alternatives --install /usr/bin/jar jar /usr/java/jdk1.6.0_41/bin/jar 20000
+}
+
+install_opscenter_3(){
+	echo "-------------------------"
+	echo "Installing OpsCenter 3..."
+	echo "-------------------------"
+
+	echo "-- add DataStax repository"
+	sudo touch /etc/yum.repos.d/datastax.repo
+	echo "[datastax]" | sudo tee -a /etc/yum.repos.d/datastax.repo
+	echo "name= DataStax Repo for Apache Cassandra" | sudo tee -a /etc/yum.repos.d/datastax.repo
+	echo "baseurl=http://rpm.datastax.com/community" | sudo tee -a /etc/yum.repos.d/datastax.repo
+	echo "enabled=1" | sudo tee -a /etc/yum.repos.d/datastax.repo
+	echo "gpgcheck=0" | sudo tee -a /etc/yum.repos.d/datastax.repo
+	
+	echo "-- install OpsCenter"
+	sudo yum install opscenter-free -y
 }
 
 yum_update(){
