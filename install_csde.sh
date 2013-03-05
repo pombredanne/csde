@@ -34,9 +34,9 @@ install_kcsdb(){
 	echo "::: Installing KCSDB..."
 	echo ":::::::::::::::::::::::"
 	sudo apt-get update -y
-	git clone https://github.com/lehoanganh/kcsdb.git
-	(cd $HOME/kcsdb && bundle update)
-	cp $HOME/kcsdb/chef-repo/.chef/conf/state.tmpl.yml $HOME/kcsdb/chef-repo/.chef/conf/state.yml
+	git clone https://github.com/myownthemepark/csde.git
+	(cd $HOME/csde && bundle update)
+	cp $HOME/csde/chef-repo/.chef/conf/state.tmpl.yml $HOME/csde/chef-repo/.chef/conf/state.yml
 }
 
 build_chef_solo_config() {

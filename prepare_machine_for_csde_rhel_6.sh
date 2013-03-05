@@ -39,7 +39,7 @@ install_needed_packages(){
 	echo "-----------------------------"
 	echo "Installing needed packages..."
 	echo "-----------------------------"
-	sudo yum install jna bash curl git gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel -y
+	sudo yum install sqlite-devel jna bash curl git gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel -y
 }
 
 install_ruby_1.9.3(){
