@@ -18,19 +18,20 @@ CSDE was formerly known as KCSD(B) and has now changed its name.
 
 = INSTALLATION
 
-	Amazon EC2, Ubuntu 12.04. Image
+For now, CSDE can only be used in Amazon EC2 and IBM SmartCloud Enterprise. Please use the following machines:
 
-CSDE now can be installed on Ubuntu 11.10 x64 and 12.04 x64. 
-
-Please use the EBS AMIs of Canonical in AWS EC2. For example
+Amazon Ubuntu:
 
 Region: US-EAST-1
-
 AMI: ami-3d4ff254
 OS: Ubuntu 12.04 x64
 
-AMI: ami-cdc072a4
-OS: Ubuntu 11.10 x64
+IBM SmartCloud Enterprise:
+
+Region: Ehingen, Germany
+Image Name: Red Hat Enterprise Linux 6.3 (64-bit)(EHN)
+Image ID: 20025207
+OS: Red Hat Enterprise Linux 6.3 x64
 
 * Lauch a virtual machine and login via ssh
 * Download and execute prepare_machine_for_kcsdb.sh script
@@ -44,14 +45,6 @@ OS: Ubuntu 11.10 x64
 * Install CSDE
  $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_kcsdb.sh -s | rvmsudo bash
 
-	IBM SmartCloud Enterprise, Red Hat Enterprise Linux 6.3
-
-Image Name: Red Hat Enterprise Linux 6.3 (64-bit)(EHN)
-Image ID: 20025207
-OS: Red Hat Enterprise Linux 6.3 x64
-
-
-	
 = USEFUL
 * Oracle does not support direct download of JDK from the officical site any more. You have to read and agree Oracle's rules.
 Thus, use another way to install Sun JDK
