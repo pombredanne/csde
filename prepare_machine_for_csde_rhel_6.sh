@@ -16,7 +16,7 @@ yum_update(){
 	echo "Updating all existing packages..."
 	echo "---------------------------------"
 	sudo yum erase java -y
-	sudo yum update -y
+	#sudo yum update -y
 }
 
 install_needed_packages(){
@@ -31,12 +31,12 @@ install_oracle_jdk_6(){
 	echo "Installing Oracle JDK 6..."
 	echo "--------------------------"
 	
-	# load the iso file and install
+	echo "load the iso file and install"
 	curl -L https://s3.amazonaws.com/csde/jdk-6u41-linux-x64-rpm.bin -o $HOME/jdk-6u41-linux-x64-rpm.bin
 	chmod 777 jdk-6u41-linux-x64-rpm.bin
 	yes '' | sudo $HOME/./jdk-6u41-linux-x64-rpm.bin
 	
-	# update java alternatives
+	echo "update java alternatives"
 	sudo alternatives --install /usr/bin/java java /usr/java/jdk1.6.0_41/jre/bin/java 20000
 	sudo alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.6.0_41/jre/bin/javaws 20000
 	sudo alternatives --install /usr/bin/javac javac /usr/java/jdk1.6.0_41/bin/javac 20000
