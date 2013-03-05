@@ -33,7 +33,7 @@ install_oracle_jdk_6(){
 	# load the iso file and install
 	curl -L https://s3.amazonaws.com/csde/jdk-6u41-linux-x64-rpm.bin -o $HOME/jdk-6u41-linux-x64-rpm.bin
 	chmod 777 jdk-6u41-linux-x64-rpm.bin
-	sudo $HOME/./jdk-6u41-linux-x64-rpm.bin
+	yes '' | sudo $HOME/./jdk-6u41-linux-x64-rpm.bin
 	
 	# update java alternatives
 	sudo alternatives --install /usr/bin/java java /usr/java/jdk1.6.0_41/jre/bin/java 20000
