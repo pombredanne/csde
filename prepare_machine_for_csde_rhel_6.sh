@@ -47,17 +47,16 @@ install_ruby_1.9.3(){
 	echo "Installing Ruby 1.9.3..."
 	echo "------------------------"
 	
-	# load the install bash script
+	echo "-- load the install bash script"
 	curl -L https://get.rvm.io -s | bash -s stable
 	
-	# update RVM variables	
+	echo "-- update RVM variables"	
 	echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.' >>$HOME/.bashrc
 	source $HOME/.bashrc
 	source $HOME/.rvm/scripts/rvm
 	
+	echo "-- install Ruby 1.9.3"
 	command rvm install 1.9.3 # rvm is NOT loaded into shell as a function
-	source $HOME/.bashrc
-	rvm --default use 1.9.3
 	
 	echo "-----------------------------------------------------"
 	echo "[INFO] Do NOT forget to set ruby 1.9.3 as default use"
