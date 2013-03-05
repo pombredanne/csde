@@ -39,7 +39,7 @@ Image ID: 20025207
 OS: Red Hat Enterprise Linux 6.3 x64
 
 * Lauch a virtual machine and login via ssh
-* Install needed softwares for before install CSDE server
+* Install needed softwares before install CSDE server
 IBM SCE
  $ curl -L https://raw.github.com/myownthemepark/csde/master/prepare_machine_for_csde_rhel_6.sh -s | bash
 Amazon EC2

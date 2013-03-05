@@ -15,6 +15,7 @@ yum_update(){
 	echo "---------------------------------"
 	echo "Updating all existing packages..."
 	echo "---------------------------------"
+	sudo yum erase java -y
 	sudo yum update -y
 }
 
