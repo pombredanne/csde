@@ -14,15 +14,24 @@ pause(){
 }
 
 configure_opscenter(){
-	echo "::::::::::::::::::::::::::::"
-	echo "::: Configuring OpsCenter..."
-	echo "::::::::::::::::::::::::::::"
+	echo "------------------------"
+	echo "Configuring OpsCenter..."
+	echo "------------------------"
 	
 	# private IP of this machine, NOT public IP
-	#kcsdb=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
+	#csde=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
 	
-	csde=$(ifconfig eth0 | grep "inet " | awk -F: '{print $2}' | awk '{print $1}')
-	sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
+	if grep -q "Ubuntu" /etc/*release
+	then
+		echo "-- Ubuntu detected!"
+		sudo apt-get update -y
+		csde=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
+		sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf	
+	else
+		echo "-- Red Hat detected!"
+		csde=$(ifconfig eth0 | grep "inet " | awk -F: '{print $2}' | awk '{print $1}')
+		sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
+	fi
 	
 	# don't use SSL
 	echo '[agents]' | sudo tee -a /etc/opscenter/opscenterd.conf
@@ -35,16 +44,16 @@ install_csde(){
 	echo "------------------"
 	echo "Installing CSDE..."
 	echo "------------------"
-	#sudo apt-get update -y
 	git clone https://github.com/myownthemepark/csde.git
 	(cd $HOME/csde && bundle update)
 	cp $HOME/csde/chef-repo/.chef/conf/state.tmpl.yml $HOME/csde/chef-repo/.chef/conf/state.yml
 }
 
 build_chef_solo_config() {
-	echo "::::::::::::::::::::::::::::::::::::::::::::"
-	echo "::: Building configurations for chef-solo..."
-  	echo "::::::::::::::::::::::::::::::::::::::::::::"
+	echo "----------------------------------------"
+	echo "Building configurations for chef-solo..."
+	echo "----------------------------------------"
+
 	mkdir -p /etc/chef
 
 	cat > /etc/chef/solo.rb <<SOLO_RB
@@ -98,14 +107,14 @@ upload_cookbooks(){
 	echo "-------------------------------------"
 	echo "Uploading cookbooks to Chef Server..."
 	echo "-------------------------------------"
-	knife cookbook upload --all --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb
+	knife cookbook upload --all --config $HOME/csde/chef-repo/.chef/conf/knife.rb
 }
 
 upload_roles(){
 	echo ":::::::::::::::::::::::::::::::::::::"
 	echo "::: Uploading roles to chef-server..."
 	echo ":::::::::::::::::::::::::::::::::::::"
-	knife role from file /home/ubuntu/kcsdb/chef-repo/roles/cassandra.json --config /home/ubuntu/kcsdb/chef-repo/.chef/conf/knife.rb	
+	knife role from file $HOME/csde/chef-repo/roles/cassandra.json --config $HOME/csde/chef-repo/.chef/conf/knife.rb	
 }
 
 no_strict_host_key_checking(){
@@ -121,9 +130,9 @@ bye(){
 	echo "CSDE installed successfully!!!"
 	echo "Execute 'source $HOME/.bashrc to load environment variables"
 	echo "Then execute 'bash start.sh' in 'csde' home folder to start CSDE Server"
-	echo "CSDE Server     --> [IP]:3000"
+	echo "CSDE Server      --> [IP]:3000"
 	echo "Chef Server      --> [IP]:4040"
-	#echo "OpsCenter Server --> [IP]:8888"
+	echo "OpsCenter Server --> [IP]:8888"
 	#echo "Gmetad Server    --> [IP]:8651"
 	echo "-----------------------------------------------------------------------"
 }
@@ -135,8 +144,8 @@ start=$(date +%s)
 
 welcome
 #pause 'Press [Enter] key to install KCSDB...'
-#configure_opscenter
-install_kcsdb
+configure_opscenter
+install_csde
 build_chef_solo_config
 run_chef_solo
 start_chef_server
