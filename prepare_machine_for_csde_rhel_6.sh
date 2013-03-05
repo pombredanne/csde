@@ -11,7 +11,7 @@ welcome(){
 	echo "--------------------------------------------------------------------------------------------------"
 }
 
-yum_update(){
+#yum_update(){
 	echo "---------------------------------"
 	echo "Updating all existing packages..."
 	echo "---------------------------------"
@@ -26,7 +26,7 @@ install_needed_packages(){
 	sudo yum install jna bash curl git gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel -y
 }
 
-install_oracle_jdk_6(){
+#install_oracle_jdk_6(){
 	echo "--------------------------"
 	echo "Installing Oracle JDK 6..."
 	echo "--------------------------"
@@ -57,6 +57,8 @@ install_ruby_1.9.3(){
 	source $HOME/.rvm/scripts/rvm
 	
 	command rvm install 1.9.3 # rvm is NOT loaded into shell as a function
+	source $HOME/.bashrc
+	rvm --default use 1.9.3
 	
 	echo "-----------------------------------------------------"
 	echo "[INFO] Do NOT forget to set ruby 1.9.3 as default use"
@@ -71,9 +73,9 @@ install_ruby_1.9.3(){
 start=$(date +%s)
 
 welcome
-yum_update
+#yum_update
 install_needed_packages
-install_oracle_jdk_6
+#install_oracle_jdk_6
 install_ruby_1.9.3
 
 echo "------------------------------------"
