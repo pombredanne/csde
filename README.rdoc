@@ -14,7 +14,7 @@ CSDE was formerly known as KCSD(B) and has now changed its name.
 
 = MINI DEMO
 
- https://s3.amazonaws.com/kcsdb-init/KCSDB-Mini-Demo.mov
+ https://s3.amazonaws.com/csde/CSDE-Mini-Demo.mov
 
 = INSTALLATION
 
