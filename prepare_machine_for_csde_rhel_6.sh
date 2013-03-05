@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# 
 
 welcome(){
 	echo "--------------------------------------------------------------------------------------------------"
@@ -58,9 +57,35 @@ install_ruby(){
 	
 	command rvm install 1.9.3 # rvm is NOT loaded into shell as a function
 	
-	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	echo "::: [INFO] Do NOT forget to set ruby 1.9.3 as default use"
-	echo "::: [INFO] $ source $HOME/.bashrc"
-	echo "::: [INFO] $ rvm --default use 1.9.3"
-	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+	echo "-----------------------------------------------------"
+	echo "[INFO] Do NOT forget to set ruby 1.9.3 as default use"
+	echo "[INFO] $ source $HOME/.bashrc"
+	echo "[INFO] $ rvm --default use 1.9.3"
+	echo "-----------------------------------------------------"
 }
+
+# execution
+
+# time measurement
+start=$(date +%s)
+
+welcome
+yum_update
+install_needed_packages
+install_oracle_jdk_6
+install_ruby
+
+echo "------------------------------------"
+echo "Machine is ready for installing CSDE"
+echo "Oracle JDK 6"
+echo "Ruby 1.9.3"
+echo "------------------------------------"
+
+# time measurement
+end=$(date +%s)
+
+diff=$(( $end - $start ))
+
+echo ":::::::::::::::::::::::::::::::::"
+echo "::: Elapsed Time: $diff seconds!!"
+echo ":::::::::::::::::::::::::::::::::"
