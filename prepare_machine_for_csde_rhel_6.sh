@@ -99,6 +99,7 @@ start=$(date +%s)
 
 welcome
 install_oracle_jdk_6
+install_opscenter_3
 yum_update
 install_needed_packages
 install_ruby_1.9.3

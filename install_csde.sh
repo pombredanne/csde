@@ -19,8 +19,10 @@ configure_opscenter(){
 	echo "::::::::::::::::::::::::::::"
 	
 	# private IP of this machine, NOT public IP
-	kcsdb=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
-	sudo sed -i 's/interface = .*/interface = '$kcsdb'/g' /etc/opscenter/opscenterd.conf
+	#kcsdb=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
+	
+	csde=$(ifconfig eth0 | grep "inet " | awk -F: '{print $2}' | awk '{print $1}')
+	sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
 	
 	# don't use SSL
 	echo '[agents]' | sudo tee -a /etc/opscenter/opscenterd.conf
