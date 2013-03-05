@@ -40,16 +40,16 @@ OS: Red Hat Enterprise Linux 6.3 x64
 
 * Lauch a virtual machine and login via ssh
 * Install needed softwares for before install CSDE server
-Amazon EC2
- $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/prepare_machine_for_csde_rhel_6.sh -s | bash
 IBM SCE
- $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/prepare_machine_for_csde_ubuntu_12.04.sh -s | bash
+ $ curl -L https://raw.github.com/myownthemepark/kcsdb/master/prepare_machine_for_csde_rhel_6.sh -s | bash
+Amazon EC2
+ $ curl -L https://raw.github.com/myownthemepark/kcsdb/master/prepare_machine_for_csde_ubuntu_12.04.sh -s | bash
 * Load rvm into shell
  $ source $HOME/.bashrc
 * Set ruby 1.9.3 as default
  $ rvm --default use 1.9.3
 * Install CSDE
- $ curl -L https://raw.github.com/lehoanganh/kcsdb/master/install_csde.sh -s | rvmsudo bash
+ $ curl -L https://raw.github.com/myownthemepark/kcsdb/master/install_csde.sh -s | rvmsudo bash
 
 = USEFUL
 * Oracle does not support direct download of JDK from the officical site any more. You have to read and agree Oracle's rules.
