@@ -11,12 +11,28 @@ welcome(){
 	echo "--------------------------------------------------------------------------------------------------"
 }
 
+install_oracle_jdk_6(){
+	echo "--------------------------"
+	echo "Installing Oracle JDK 6..."
+	echo "--------------------------"
+	
+	echo "-- load the iso file and install"
+	curl -L https://s3.amazonaws.com/csde/jdk-6u41-linux-x64-rpm.bin -o $HOME/jdk-6u41-linux-x64-rpm.bin
+	chmod 777 jdk-6u41-linux-x64-rpm.bin
+	yes '' | sudo $HOME/./jdk-6u41-linux-x64-rpm.bin
+	
+	echo "-- update java alternatives"
+	sudo alternatives --install /usr/bin/java java /usr/java/jdk1.6.0_41/jre/bin/java 20000
+	sudo alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.6.0_41/jre/bin/javaws 20000
+	sudo alternatives --install /usr/bin/javac javac /usr/java/jdk1.6.0_41/bin/javac 20000
+	sudo alternatives --install /usr/bin/jar jar /usr/java/jdk1.6.0_41/bin/jar 20000
+}
+
 yum_update(){
 	echo "---------------------------------"
 	echo "Updating all existing packages..."
 	echo "---------------------------------"
-	sudo yum erase java -y
-	#sudo yum update -y
+	sudo yum update -y
 }
 
 install_needed_packages(){
@@ -24,23 +40,6 @@ install_needed_packages(){
 	echo "Installing needed packages..."
 	echo "-----------------------------"
 	sudo yum install jna bash curl git gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel -y
-}
-
-install_oracle_jdk_6(){
-	echo "--------------------------"
-	echo "Installing Oracle JDK 6..."
-	echo "--------------------------"
-	
-	echo "load the iso file and install"
-	curl -L https://s3.amazonaws.com/csde/jdk-6u41-linux-x64-rpm.bin -o $HOME/jdk-6u41-linux-x64-rpm.bin
-	chmod 777 jdk-6u41-linux-x64-rpm.bin
-	yes '' | sudo $HOME/./jdk-6u41-linux-x64-rpm.bin
-	
-	echo "update java alternatives"
-	sudo alternatives --install /usr/bin/java java /usr/java/jdk1.6.0_41/jre/bin/java 20000
-	sudo alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.6.0_41/jre/bin/javaws 20000
-	sudo alternatives --install /usr/bin/javac javac /usr/java/jdk1.6.0_41/bin/javac 20000
-	sudo alternatives --install /usr/bin/jar jar /usr/java/jdk1.6.0_41/bin/jar 20000
 }
 
 install_ruby_1.9.3(){
@@ -73,10 +72,10 @@ install_ruby_1.9.3(){
 start=$(date +%s)
 
 welcome
+install_oracle_jdk_6
 yum_update
 install_needed_packages
-install_oracle_jdk_6
-#install_ruby_1.9.3
+install_ruby_1.9.3
 
 echo "------------------------------------"
 echo "Machine is ready for installing CSDE"
