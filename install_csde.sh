@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
-bootstrap_tar_url="https://s3.amazonaws.com/csde/chef_10.12.0_bootstrap.tar.gz"
+bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
+#bootstrap_tar_url="https://s3.amazonaws.com/csde/chef_10.12.0_bootstrap.tar.gz"
 
 welcome(){
 	echo "------------------------------------------------------------------"
@@ -18,8 +18,15 @@ install_csde(){
 	echo "Installing CSDE..."
 	echo "------------------"
 	git clone https://github.com/myownthemepark/csde.git
-	(cd $HOME/csde && bundle update)
-	cp $HOME/csde/chef-repo/.chef/conf/state.tmpl.yml $HOME/csde/chef-repo/.chef/conf/state.yml
+	
+	if grep -q "Ubuntu" /etc/*release
+	then
+		(cd /home/ubuntu/csde && bundle update)
+		cp /home/ubuntu/csde/chef-repo/.chef/conf/state.tmpl.yml /home/ubuntu/csde/chef-repo/.chef/conf/state.yml	
+	else
+		(cd /home/idcuser/csde && bundle update)
+		cp /home/idcuser/csde/chef-repo/.chef/conf/state.tmpl.yml /home/idcuser/csde/chef-repo/.chef/conf/state.yml	
+	fi
 }
 
 configure_opscenter(){
@@ -33,22 +40,23 @@ configure_opscenter(){
 	if grep -q "Ubuntu" /etc/*release
 	then
 		echo "-- Ubuntu detected!"
-		sudo apt-get update -y
+		apt-get update -y
 		csde=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
-		sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
-		sudo sed -i 's/os: .*/os: ubuntu/g' $HOME/csde/chef-repo/.chef/conf/state.yml	
+		sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
+		sed -i 's/os: .*/os: ubuntu/g' $HOME/csde/chef-repo/.chef/conf/state.yml	
 	else
 		echo "-- Red Hat detected!"
+		yum update -y
 		csde=$(ifconfig eth0 | grep "inet " | awk -F: '{print $2}' | awk '{print $1}')
-		sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
-		sudo sed -i 's/os: .*/os: redhat/g' $HOME/csde/chef-repo/.chef/conf/state.yml
+		sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
+		sed -i 's/os: .*/os: redhat/g' $HOME/csde/chef-repo/.chef/conf/state.yml
 	fi
 	
 	# don't use SSL
 	echo '[agents]' | sudo tee -a /etc/opscenter/opscenterd.conf
 	echo 'use_ssl = false' | sudo tee -a /etc/opscenter/opscenterd.conf
 	
-	sudo service opscenterd restart
+	service opscenterd restart
 }
 
 build_chef_solo_config() {
@@ -57,12 +65,12 @@ build_chef_solo_config() {
 	echo "----------------------------------------"
 
 	echo "-- create folder /etc/chef"
-	sudo mkdir -p /etc/chef
+	mkdir -p /etc/chef
 
 	echo "-- create file solo.rb in /etc/chef"
-	sudo touch /etc/chef/solo.rb
-	echo "file_cache_path '/tmp/chef-solo'" | sudo tee -a /etc/chef/solo.rb
-	echo "cookbook_path   '/tmp/chef-solo/cookbooks'" | sudo tee -a /etc/chef/solo.rb
+	touch /etc/chef/solo.rb
+	echo "file_cache_path '/tmp/chef-solo'" | tee -a /etc/chef/solo.rb
+	echo "cookbook_path   '/tmp/chef-solo/cookbooks'" | tee -a /etc/chef/solo.rb
 
 #	cat > /etc/chef/solo.rb <<SOLO_RB
 #file_cache_path "/tmp/chef-solo"
@@ -70,14 +78,14 @@ build_chef_solo_config() {
 #SOLO_RB
 
 	echo "-- create file bootstrap.json in /etc/chef"
-	sudo touch /etc/chef/bootstrap.json
-	echo "{" | sudo tee -a /etc/chef/bootstrap.json
-	echo "	\"chef_server\" : {" | sudo tee -a /etc/chef/bootstrap.json
-	echo "		\"server_url\": \"http://localhost:4000\"," | sudo tee -a /etc/chef/bootstrap.json
-	echo "		\"webui_enabled\" : true" | sudo tee -a /etc/chef/bootstrap.json
-	echo "	}," | sudo tee -a /etc/chef/bootstrap.json
-	echo "	\"run_list\": [ \"recipe[chef-server::rubygems-install]\" ]" | sudo tee -a /etc/chef/bootstrap.json
-	echo "}" | sudo tee -a /etc/chef/bootstrap.json
+	touch /etc/chef/bootstrap.json
+	echo "{" | tee -a /etc/chef/bootstrap.json
+	echo "	\"chef_server\" : {" | tee -a /etc/chef/bootstrap.json
+	echo "		\"server_url\": \"http://localhost:4000\"," | tee -a /etc/chef/bootstrap.json
+	echo "		\"webui_enabled\" : true" | tee -a /etc/chef/bootstrap.json
+	echo "	}," | tee -a /etc/chef/bootstrap.json
+	echo "	\"run_list\": [ \"recipe[chef-server::rubygems-install]\" ]" | tee -a /etc/chef/bootstrap.json
+	echo "}" | tee -a /etc/chef/bootstrap.json
 	
 # cat > /etc/chef/bootstrap.json <<BOOTSTRAP_JSON
 #{
@@ -95,7 +103,7 @@ run_chef_solo(){
 	echo "--------------------------------------------"
 	echo ":Running chef-solo to install chef-server..."
 	echo "--------------------------------------------"
-	sudo chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
+	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
 start_chef_server(){
@@ -104,22 +112,22 @@ start_chef_server(){
 	echo "-------------------------"
 	echo "Starting Chef Expander..."
 	echo "-------------------------"
-	sudo chef-expander -d -n1
+  chef-expander -d -n1
 
 	echo "---------------------"
 	echo "Starting Chef Solr..."
 	echo "---------------------"
-	sudo chef-solr -d
+	chef-solr -d
 
 	echo "-----------------------"
 	echo "Starting Chef Server..."
 	echo "-----------------------"
-	sudo chef-server -d
+	chef-server -d
 
 	echo "-----------------------------"
 	echo "Starting Chef Server WebUI..."
 	echo "-----------------------------"
-	sudo chef-server-webui -d
+	chef-server-webui -d
 }
 
 upload_cookbooks(){

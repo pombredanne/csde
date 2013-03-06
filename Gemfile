@@ -13,11 +13,13 @@ gem 'logger', '1.2.8'
 # Universal API for many infrastructure cloud provider
 # good supported for AWS EC2, Rackspace
 # gem 'fog', '1.6.0'
-gem 'fog', '1.8.0'
+#gem 'fog', '1.8.0'
+gem 'fog', '1.10.0'
 
 # Chef
-gem 'chef', '10.12.0'
+#gem 'chef', '10.12.0'
 #gem 'chef', '10.16.2'
+gem 'chef', '10.24.0'
 
 # chef (10.12.0) depends on net-ssh ~> 2.2.2
 gem 'net-ssh', '2.2.2'
@@ -27,8 +29,9 @@ gem 'net-ssh', '2.2.2'
 gem 'moneta', '0.6.0'
 
 # parallel
-gem 'parallel', '0.5.18'
+#gem 'parallel', '0.5.18'
 #gem 'parallel', '0.6.1'
+gem 'parallel', '0.6.2'
 
 # web server, instead of webrick
 #gem 'thin', '1.4.1'
@@ -40,7 +43,8 @@ gem 'pony', '1.4'
 
 # ======================================================================
 #gem 'rails', '3.2.8'
-gem 'rails', '3.2.9'
+#gem 'rails', '3.2.9'
+gem 'rails', '3.2.12'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
