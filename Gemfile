@@ -16,8 +16,8 @@ gem 'logger', '1.2.8'
 gem 'fog', '1.8.0'
 
 # Chef
-#gem 'chef', '10.12.0'
-gem 'chef', '10.16.2'
+gem 'chef', '10.12.0'
+#gem 'chef', '10.16.2'
 
 # chef (10.12.0) depends on net-ssh ~> 2.2.2
 gem 'net-ssh', '2.2.2'

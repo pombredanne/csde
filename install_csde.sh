@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
-#bootstrap_tar_url="https://s3.amazonaws.com/kcsdb-init/chef_10.12.0_bootstrap.tar.gz"
+#bootstrap_tar_url="http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
+bootstrap_tar_url="https://s3.amazonaws.com/csde/chef_10.12.0_bootstrap.tar.gz"
 
 welcome(){
 	echo "------------------------------------------------------------------"
@@ -95,7 +95,7 @@ run_chef_solo(){
 	echo "--------------------------------------------"
 	echo ":Running chef-solo to install chef-server..."
 	echo "--------------------------------------------"
-	chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
+	sudo chef-solo -c /etc/chef/solo.rb -j /etc/chef/bootstrap.json -r $bootstrap_tar_url
 }
 
 start_chef_server(){
@@ -104,22 +104,22 @@ start_chef_server(){
 	echo "-------------------------"
 	echo "Starting Chef Expander..."
 	echo "-------------------------"
-	chef-expander -d -n1
+	sudo chef-expander -d -n1
 
 	echo "---------------------"
 	echo "Starting Chef Solr..."
 	echo "---------------------"
-	chef-solr -d
+	sudo chef-solr -d
 
 	echo "-----------------------"
 	echo "Starting Chef Server..."
 	echo "-----------------------"
-	chef-server -d
+	sudo chef-server -d
 
 	echo "-----------------------------"
 	echo "Starting Chef Server WebUI..."
 	echo "-----------------------------"
-	chef-server-webui -d
+	sudo chef-server-webui -d
 }
 
 upload_cookbooks(){
