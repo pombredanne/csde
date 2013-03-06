@@ -21,14 +21,17 @@ install_csde(){
 	
 	if grep -q "Ubuntu" /etc/*release
 	then
+		echo "-- Ubuntu detected!"
+		(cd /home/ubuntu/csde && bundle update)
+		cp /home/ubuntu/csde/chef-repo/.chef/conf/state.tmpl.yml /home/ubuntu/csde/chef-repo/.chef/conf/state.yml	
+	else
+		echo "-- Red Hat detected!"
+		echo "-- kill the process qpidd which takes control on port 5672. RabbitMQ Server needs this port!!!"
 		# bugfix, rabbitmq server can not start after installing in RHEL 6
 		# cause another process 'qpidd' has already taken the port 5672
 		# http://blog.servergrove.com/2012/04/25/how-to-fix-kernel-pid-terminated-when-starting-rabbitmq/
 		ps aux | grep -e 'qpidd' | grep -v grep | awk '{print $2}' | xargs -i sudo kill {}
 	
-		(cd /home/ubuntu/csde && bundle update)
-		cp /home/ubuntu/csde/chef-repo/.chef/conf/state.tmpl.yml /home/ubuntu/csde/chef-repo/.chef/conf/state.yml	
-	else
 		(cd /home/idcuser/csde && bundle update)
 		cp /home/idcuser/csde/chef-repo/.chef/conf/state.tmpl.yml /home/idcuser/csde/chef-repo/.chef/conf/state.yml	
 	fi
