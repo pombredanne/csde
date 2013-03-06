@@ -72,11 +72,11 @@ build_chef_solo_config() {
 	echo "-- create file bootstrap.json in /etc/chef"
 	sudo touch /etc/chef/bootstrap.json
 	echo "{" | sudo tee -a /etc/chef/bootstrap.json
-	echo "	'chef_server' : {" | sudo tee -a /etc/chef/bootstrap.json
-	echo "		'server_url': 'http://localhost:4000'," | sudo tee -a /etc/chef/bootstrap.json
-	echo "		'webui_enabled' : true" | sudo tee -a /etc/chef/bootstrap.json
+	echo "	\"chef_server\" : {" | sudo tee -a /etc/chef/bootstrap.json
+	echo "		\"server_url\": \"http://localhost:4000\"," | sudo tee -a /etc/chef/bootstrap.json
+	echo "		\"webui_enabled\" : true" | sudo tee -a /etc/chef/bootstrap.json
 	echo "	}," | sudo tee -a /etc/chef/bootstrap.json
-	echo "	'run_list': [ 'recipe[chef-server::rubygems-install]' ]" | sudo tee -a /etc/chef/bootstrap.json
+	echo "	\"run_list\": [ \"recipe[chef-server::rubygems-install]\" ]" | sudo tee -a /etc/chef/bootstrap.json
 	echo "}" | sudo tee -a /etc/chef/bootstrap.json
 	
 # cat > /etc/chef/bootstrap.json <<BOOTSTRAP_JSON
