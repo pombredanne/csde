@@ -2,7 +2,7 @@
 os: dummy # ubuntu | redhat
 
 # IBM SCE
-ibm_user_name: dummy # IBM Credentials
+ibm_username: dummy # IBM Credentials
 ibm_password: dummy # IBM Credentials
 
 # AWS EC2

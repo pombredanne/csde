@@ -2,22 +2,30 @@ require 'helper'
 class DashboardController < ApplicationController
   include Helper
 
-  # KCSDB starts from here
+  # CSDE starts from here
   def show
     update_knife_rb
     
     state = get_state
+    @os = state['os']
+    if @os == 'ubuntu'
+      logger.debug '-- Ubuntu detected!'
+      @aws_access_key_id = state['aws_access_key_id']
+      @aws_secret_access_key = state['aws_secret_access_key']
+      @key_pair_name = state['key_pair_name']
+    else
+      logger.debug '-- Red Hat detected!'    
+      @ibm_username = state['ibm_username']  
+      @ibm_password = state['ibm_password']
+    end
     
-    @aws_access_key_id = state['aws_access_key_id']
-    @aws_secret_access_key = state['aws_secret_access_key']
-    @key_pair_name = state['key_pair_name']
     @notification_email = state['notification_email']
 
     @status = "CSDE welcomes you :).\n"
     @status << "Have a great day !!!\n\n"
 
     @status << "Click on tab <strong>About</strong> to get <strong>more information</strong>\n"
-    @status << "Click on tab <strong>Credentials</strong> to input your <strong>AWS Credentials</strong>\n"
+    @status << "Click on tab <strong>Credentials</strong> to input your <strong>Cloud Credentials</strong>\n"
     @status << "Click on tab <strong>Configuration</strong> to go to <strong>Chef Server</strong>\n"
     @status << "Click on tab <strong>Monitoring</strong> to go to <strong>Ganglia Server</strong>\n"
     @status << "Click on tab <strong>Benchmark</strong> to define your <strong>benchmark profiles</strong>"
