@@ -49,7 +49,7 @@ Amazon EC2
 * Set ruby 1.9.3 as default
  $ rvm --default use 1.9.3
 * Install CSDE
- $ curl -L https://raw.github.com/myownthemepark/csde/master/install_csde.sh -s | rvmsudo bash
+ $ curl -L https://raw.github.com/myownthemepark/csde/master/install_csde.sh -s | bash
 
 = USEFUL
 * Oracle does not support direct download of JDK from the officical site any more. You have to read and agree Oracle's rules.
