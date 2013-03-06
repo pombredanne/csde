@@ -22,7 +22,8 @@ gem 'fog', '1.10.0'
 gem 'chef', '10.24.0'
 
 # chef (10.12.0) depends on net-ssh ~> 2.2.2
-gem 'net-ssh', '2.2.2'
+#gem 'net-ssh', '2.2.2'
+gem 'net-ssh', '2.6.6'
 
 # quickfix for this bug
 # http://tickets.opscode.com/browse/CHEF-3721
