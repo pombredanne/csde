@@ -13,7 +13,7 @@ class DashboardController < ApplicationController
     @key_pair_name = state['key_pair_name']
     @notification_email = state['notification_email']
 
-    @status = "KCSDB welcomes you :).\n"
+    @status = "CSDE welcomes you :).\n"
     @status << "Have a great day !!!\n\n"
 
     @status << "Click on tab <strong>About</strong> to get <strong>more information</strong>\n"

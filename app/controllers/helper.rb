@@ -125,29 +125,36 @@ module Helper
   end
 
   # capture private IP of KCSDB server and save it into kcsdb_private_ip.txt
-  def capture_private_ip_of_kcsdb_server
-    logger.debug "::: Capturing the private IP of KCSDB Server..."
-    system "curl --location http://169.254.169.254/latest/meta-data/local-ipv4 --silent --output #{Rails.root}/chef-repo/.chef/tmp/kcsdb_private_ip.txt"
+  def capture_private_ip_of_csde_server
+    logger.debug "::: Capturing the private IP of CSDE Server..."
+    system "curl --location http://169.254.169.254/latest/meta-data/local-ipv4 --silent --output #{Rails.root}/chef-repo/.chef/tmp/csde_private_ip.txt"
   end
 
   #capture public IP of KCSDB server and save it into kcsdb_public_ip.txt
-  def capture_public_ip_of_kcsdb_server  
-    logger.debug "::: Capturing the public IP of KCSDB Server..."
-    system "curl --location http://169.254.169.254/latest/meta-data/public-ipv4 --silent --output #{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt"
+  def capture_public_ip_of_csde_server
+    state = get_state
+    os = state['os']
+    logger.debug "::: Capturing the public IP of CSDE Server..."
+    if os == 'ubuntu'
+      system "curl --location http://169.254.169.254/latest/meta-data/public-ipv4 --silent --output #{Rails.root}/chef-repo/.chef/tmp/csde_public_ip.txt"
+    else
+      system "(ifconfig eth0 | grep 'inet ' | awk -F: '{print $2}' | awk '{print $1}') > #{Rails.root}/chef-repo/.chef/tmp/csde_public_ip.txt"       
+    end  
   end
 
-  # update knife.rb depends on the KCSDB Server's IP  
+  # update knife.rb depends on the CSDE Server's IP  
   def update_knife_rb
-    capture_public_ip_of_kcsdb_server
+    capture_public_ip_of_csde_server
     
-    kcsdb_public_ip_address = ""
-    File.open("#{Rails.root}/chef-repo/.chef/tmp/kcsdb_public_ip.txt","r").each do |line|
-      kcsdb_public_ip_address = line.to_s.strip
+    csde_public_ip_address = ""
+    File.open("#{Rails.root}/chef-repo/.chef/tmp/csde_public_ip.txt","r").each do |line|
+      csde_public_ip_address = line.to_s.strip
+      logger.debug "CSDE IP: #{csde_public_ip_address}"
     end
     
     logger.debug "::: Updating knife.rb..."
     File.open("#{Rails.root}/chef-repo/.chef/conf/knife.rb",'w') do |file|
-      file << "chef_server_url \'http://#{kcsdb_public_ip_address}:4000\'" << "\n"
+      file << "chef_server_url \'http://#{csde_public_ip_address}:4000\'" << "\n"
       file << "node_name \'chef-webui\'" << "\n"
       file << "client_key \'/etc/chef/webui.pem\'" << "\n"
       file << "validation_client_name \'chef-validator\'" << "\n"

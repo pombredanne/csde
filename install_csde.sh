@@ -13,6 +13,15 @@ pause(){
    read -p "$*"
 }
 
+install_csde(){
+	echo "------------------"
+	echo "Installing CSDE..."
+	echo "------------------"
+	git clone https://github.com/myownthemepark/csde.git
+	(cd $HOME/csde && bundle update)
+	cp $HOME/csde/chef-repo/.chef/conf/state.tmpl.yml $HOME/csde/chef-repo/.chef/conf/state.yml
+}
+
 configure_opscenter(){
 	echo "------------------------"
 	echo "Configuring OpsCenter..."
@@ -26,11 +35,13 @@ configure_opscenter(){
 		echo "-- Ubuntu detected!"
 		sudo apt-get update -y
 		csde=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
-		sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf	
+		sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
+		sudo sed -i 's/os: .*/os: ubuntu/g' $HOME/csde/chef-repo/.chef/conf/state.yml	
 	else
 		echo "-- Red Hat detected!"
 		csde=$(ifconfig eth0 | grep "inet " | awk -F: '{print $2}' | awk '{print $1}')
 		sudo sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
+		sudo sed -i 's/os: .*/os: redhat/g' $HOME/csde/chef-repo/.chef/conf/state.yml
 	fi
 	
 	# don't use SSL
@@ -38,15 +49,6 @@ configure_opscenter(){
 	echo 'use_ssl = false' | sudo tee -a /etc/opscenter/opscenterd.conf
 	
 	sudo service opscenterd restart
-}
-
-install_csde(){
-	echo "------------------"
-	echo "Installing CSDE..."
-	echo "------------------"
-	git clone https://github.com/myownthemepark/csde.git
-	(cd $HOME/csde && bundle update)
-	cp $HOME/csde/chef-repo/.chef/conf/state.tmpl.yml $HOME/csde/chef-repo/.chef/conf/state.yml
 }
 
 build_chef_solo_config() {
@@ -144,8 +146,8 @@ start=$(date +%s)
 
 welcome
 #pause 'Press [Enter] key to install KCSDB...'
-configure_opscenter
 install_csde
+configure_opscenter
 build_chef_solo_config
 run_chef_solo
 start_chef_server
