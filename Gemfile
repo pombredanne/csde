@@ -4,7 +4,12 @@
 source 'https://rubygems.org'
 
 # ======================================================================
-# gems for KCSD
+# gems for CSDE
+
+# JavaScript Runtime Environment
+# http://www.ruby-forum.com/topic/3939885
+gem 'execjs', '1.4.0'
+#gem 'therubyracer', '0.11.4'
 
 # logger
 gem 'logger', '1.2.8'
