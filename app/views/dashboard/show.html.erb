@@ -359,6 +359,7 @@
 						<h2><a href="#">Cloud Credentials</a></h2>
 						<div id="aws_credentials">
 							<div id="aws_credentials_status_dialog"></div>
+							<div id="ibm_credentials_status_dialog"></div>
 							<% if @os == 'ubuntu' %>
 								<%= form_tag('/configuration/edit_aws', :remote => true) do %>
 						        	<table>
@@ -402,7 +403,47 @@
 						        	</table>
 					      		<% end %>
 							<% else %>
-								Hello
+								<%= form_tag('/configuration/edit_ibm', :remote => true) do %>
+						        	<table>
+							        	<tr>
+								          	<td><%= label_tag "IBM Username", "IBM Username" %></td>
+								            <td><%= text_field_tag "ibm_username", @ibm_username, size: 55 %></td>
+						          		</tr>
+						        		<tr>
+								          	<td><%= label_tag "IBM Password", "IBM Password" %></td>
+								            <td><%= text_field_tag "ibm_password", @ibm_password, size: 55 %></td>
+						          		</tr>
+						          		<tr>
+								          	<td><%= label_tag "IBM Private Key", "IBM Private Key" %></td>
+								            <td><%= text_field_tag "ibm_private_key", @ibm_private_key, size: 55 %></td>
+						          		</tr>
+						          		<tr>
+								          	<td><%= label_tag "Notification Email", "Notification Email" %></td>
+								            <td><%= text_field_tag "notification_email", @notification_email, size: 55 %></td>
+						          		</tr>
+						          		<tr>
+								          	<td><button id="submit_ibm" type="submit">Submit</button></td>
+								          	<td>&nbsp;</td>
+						          		</tr>
+						          		<script>
+							          		var button_ibm_credentials_opts = {
+									        	icons:{
+									       			primary:"ui-icon-key"
+									        	}
+								      		};
+								      		$("#submit_ibm").button(button_ibm_credentials_opts);
+											$("#submit_ibm").click(function () {
+									          	$("#ibm_credentials_status_dialog").dialog({
+									              title: "IBM Credentials are already updated. Please ensure they are correct!",
+									              show: "slide",
+									              hide: "puff",
+									              height: "0",
+									              resizable: false
+									          	});
+								      		});
+						          		</script>
+						        	</table>
+					      		<% end %>
 							<% end %>
 							
 							

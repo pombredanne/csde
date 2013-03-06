@@ -4,6 +4,7 @@ os: dummy # ubuntu | redhat
 # IBM SCE
 ibm_username: dummy # IBM Credentials
 ibm_password: dummy # IBM Credentials
+ibm_private_key: dummy # IBM Credentials
 
 # AWS EC2
 aws_access_key_id: dummy # AWS Credentials
