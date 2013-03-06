@@ -139,22 +139,38 @@ upload_cookbooks(){
 	echo "-------------------------------------"
 	echo "Uploading cookbooks to Chef Server..."
 	echo "-------------------------------------"
-	knife cookbook upload --all --config $HOME/csde/chef-repo/.chef/conf/knife.rb
+	if grep -q "Ubuntu" /etc/*release
+	then
+		knife cookbook upload --all --config /home/ubuntu/csde/chef-repo/.chef/conf/knife.rb
+	else
+		knife cookbook upload --all --config /home/idcuser/csde/chef-repo/.chef/conf/knife.rb
+	fi
 }
 
 upload_roles(){
 	echo ":::::::::::::::::::::::::::::::::::::"
 	echo "::: Uploading roles to chef-server..."
 	echo ":::::::::::::::::::::::::::::::::::::"
-	knife role from file $HOME/csde/chef-repo/roles/cassandra.json --config $HOME/csde/chef-repo/.chef/conf/knife.rb	
+	if grep -q "Ubuntu" /etc/*release
+	then
+		knife role from file /home/ubuntu/csde/chef-repo/roles/cassandra.json --config $HOME/csde/chef-repo/.chef/conf/knife.rb		
+	else
+		knife role from file /home/idcuser/csde/chef-repo/roles/cassandra.json --config $HOME/csde/chef-repo/.chef/conf/knife.rb		
+	fi
 }
 
 no_strict_host_key_checking(){
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "::: No strict host key checking in ssh connections..."
 	echo ":::::::::::::::::::::::::::::::::::::::::::::::::::::"
-	mkdir -p $HOME/.ssh
-	echo -e "Host *\n\tStrictHostKeyChecking no" > $HOME/.ssh/config
+	if grep -q "Ubuntu" /etc/*release
+	then
+		mkdir -p /home/ubuntu/.ssh
+		echo -e "Host *\n\tStrictHostKeyChecking no" > /home/ubuntu/.ssh/config	
+	else
+		mkdir -p /home/idcuser/.ssh
+		echo -e "Host *\n\tStrictHostKeyChecking no" > /home/idcuser/.ssh/config	
+	fi
 }
 
 bye(){
