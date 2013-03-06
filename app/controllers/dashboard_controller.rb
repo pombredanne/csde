@@ -17,6 +17,7 @@ class DashboardController < ApplicationController
       logger.debug '-- Red Hat detected!'    
       @ibm_username = state['ibm_username']  
       @ibm_password = state['ibm_password']
+      @ibm_private_key = state['ibm_private_key']
     end
     
     @notification_email = state['notification_email']
