@@ -56,22 +56,39 @@ build_chef_solo_config() {
 	echo "Building configurations for chef-solo..."
 	echo "----------------------------------------"
 
-	mkdir -p /etc/chef
+	echo "-- create folder /etc/chef"
+	sudo mkdir -p /etc/chef
 
-	cat > /etc/chef/solo.rb <<SOLO_RB
-file_cache_path "/tmp/chef-solo"
-cookbook_path   "/tmp/chef-solo/cookbooks"
-SOLO_RB
+	echo "-- create file solo.rb in /etc/chef"
+	sudo touch /etc/chef/solo.rb
+	echo "file_cache_path '/tmp/chef-solo'" | sudo tee -a /etc/chef/solo.rb
+	echo "cookbook_path   '/tmp/chef-solo/cookbooks'" | sudo tee -a /etc/chef/solo.rb
 
-  	cat > /etc/chef/bootstrap.json <<BOOTSTRAP_JSON
-{
-  "chef_server" : {
-	"server_url": "http://localhost:4000",  
-    "webui_enabled" : true
-  },
-  "run_list": [ "recipe[chef-server::rubygems-install]" ]
-}
-BOOTSTRAP_JSON
+#	cat > /etc/chef/solo.rb <<SOLO_RB
+#file_cache_path "/tmp/chef-solo"
+#cookbook_path   "/tmp/chef-solo/cookbooks"
+#SOLO_RB
+
+	echo "-- create file bootstrap.json in /etc/chef"
+	sudo touch /etc/chef/bootstrap.json
+	echo "{" | sudo tee -a /etc/chef/bootstrap.json
+	echo "'chef_server' : {" | sudo tee -a /etc/chef/bootstrap.json
+	echo "'server_url': 'http://localhost:4000'," | sudo tee -a /etc/chef/bootstrap.json
+	echo "'webui_enabled' : true" | sudo tee -a /etc/chef/bootstrap.json
+	echo "}," | sudo tee -a /etc/chef/bootstrap.json
+	echo "'run_list': [ 'recipe[chef-server::rubygems-install]' ]" | sudo tee -a /etc/chef/bootstrap.json
+	echo "}" | sudo tee -a /etc/chef/bootstrap.json
+	
+# cat > /etc/chef/bootstrap.json <<BOOTSTRAP_JSON
+#{
+#  "chef_server" : {
+#	"server_url": "http://localhost:4000",  
+#    "webui_enabled" : true
+#  },
+#  "run_list": [ "recipe[chef-server::rubygems-install]" ]
+#}
+#BOOTSTRAP_JSON
+
 }
 
 run_chef_solo(){
