@@ -359,7 +359,7 @@
 						<h2><a href="#">Cloud Credentials</a></h2>
 						<div id="aws_credentials">
 							<div id="aws_credentials_status_dialog"></div>
-							<%= if @os == 'ubuntu' %>
+							<% if @os == 'ubuntu' %>
 								<%= form_tag('/configuration/edit_aws', :remote => true) do %>
 						        	<table>
 							        	<tr>
@@ -401,9 +401,9 @@
 						          		</script>
 						        	</table>
 					      		<% end %>
-							<%= else %>
+							<% else %>
 								Hello
-							<%= end %>
+							<% end %>
 							
 							
 							
