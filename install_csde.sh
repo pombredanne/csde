@@ -181,7 +181,7 @@ no_strict_host_key_checking(){
 bye(){
 	echo "-----------------------------------------------------------------------"
 	echo "CSDE installed successfully!!!"
-	echo "Execute 'source $HOME/.bashrc to load environment variables"
+	echo "Execute 'source .bashrc to load environment variables"
 	echo "Then execute 'bash start.sh' in 'csde' home folder to start CSDE Server"
 	echo "CSDE Server      --> [IP]:3000"
 	echo "Chef Server      --> [IP]:4040"

@@ -18,6 +18,9 @@ KCSD1::Application.routes.draw do
   get "configuration/edit_aws"
   post "configuration/edit_aws"
 
+  get "configuration/edit_ibm"
+  post "configuration/edit_ibm"
+
   root :to => "dashboard#show", :as => "dashboard"
 
   # The priority is based upon order of creation:
