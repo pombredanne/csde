@@ -12,8 +12,8 @@ class DashboardController < ApplicationController
       logger.debug '-- Ubuntu detected!'
       @aws_access_key_id = state['aws_access_key_id']
       @aws_secret_access_key = state['aws_secret_access_key']
-      @key_pair_name = state['key_pair_name']
-    else
+      @aws_key_pair_name = state['aws_key_pair_name']
+    elsif @os == 'redhat'
       logger.debug '-- Red Hat detected!'    
       @ibm_username = state['ibm_username']  
       @ibm_password = state['ibm_password']

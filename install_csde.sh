@@ -51,13 +51,15 @@ configure_opscenter(){
 		apt-get update -y
 		csde=$(curl -L http://169.254.169.254/latest/meta-data/local-ipv4 -s)
 		sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
-		sed -i 's/os: .*/os: ubuntu/g' /home/ubuntu/csde/chef-repo/.chef/conf/state.yml	
+		sed -i 's/os: .*/os: ubuntu/g' /home/ubuntu/csde/chef-repo/.chef/conf/state.yml
+		sed -i 's/chef_client_ssh_user: .*/chef_client_ssh_user: ubuntu/g' /home/ubuntu/csde/chef-repo/.chef/conf/state.yml	
 	else
 		echo "-- Red Hat detected!"
 		yum update -y
 		csde=$(ifconfig eth0 | grep "inet " | awk -F: '{print $2}' | awk '{print $1}')
 		sed -i 's/interface = .*/interface = '$csde'/g' /etc/opscenter/opscenterd.conf
 		sed -i 's/os: .*/os: redhat/g' /home/idcuser/csde/chef-repo/.chef/conf/state.yml
+		sed -i 's/chef_client_ssh_user: .*/chef_client_ssh_user: idcuser/g' /home/idcuser/csde/chef-repo/.chef/conf/state.yml
 	fi
 	
 	# don't use SSL

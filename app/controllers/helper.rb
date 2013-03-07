@@ -18,6 +18,9 @@ module Helper
       if service == 'storage' then fog_object = create_fog_object_s3 state, region end 
     elsif provider == 'rackspace'
       fog_object = create_fog_object_rackspace state, region
+    elsif provider == 'ibm'
+      if service == 'compute' then fog_object = create_fog_object_sce_compute state, region end
+      if service == 'storage' then fog_object = create_fog_object_sce_storage state, region end
     else
       logger.debug "Provider: #{provider} is not supported...!"  
     end
@@ -56,6 +59,28 @@ module Helper
       region: region
     )
     s3
+  end
+  
+  # Create Fog Object SCE Compute
+  private
+  def create_fog_object_sce_compute state, region
+    # standard region
+    if region.nil?
+      region = 'ehningen'   
+    end
+    
+    sce_compute = Fog::Compute.new(
+      provider: 'IBM',
+      ibm_username: state['ibm_username'],
+      ibm_password: state['ibm_password']
+    )
+    sce_compute 
+  end
+  
+  # Create Fog Object SCE Storage
+  private
+  def create_fog_object_sce_storage state, region
+    
   end
   
   
@@ -137,7 +162,7 @@ module Helper
     logger.debug "::: Capturing the public IP of CSDE Server..."
     if os == 'ubuntu'
       system "curl --location http://169.254.169.254/latest/meta-data/public-ipv4 --silent --output #{Rails.root}/chef-repo/.chef/tmp/csde_public_ip.txt"
-    else
+    elsif os == 'redhat'
       system "(ifconfig eth0 | grep 'inet ' | awk -F: '{print $2}' | awk '{print $1}') > #{Rails.root}/chef-repo/.chef/tmp/csde_public_ip.txt"       
     end  
   end
@@ -149,7 +174,7 @@ module Helper
     csde_public_ip_address = ""
     File.open("#{Rails.root}/chef-repo/.chef/tmp/csde_public_ip.txt","r").each do |line|
       csde_public_ip_address = line.to_s.strip
-      logger.debug "CSDE IP: #{csde_public_ip_address}"
+      logger.debug "-- CSDE IP: #{csde_public_ip_address}"
     end
     
     logger.debug "::: Updating knife.rb..."
@@ -164,9 +189,19 @@ module Helper
   end
   
   # returns the private key path for the given region
-  def get_private_key region
+  # AWS
+  def get_private_key_for_aws region
     state = get_state
-    key_pair = state['key_pair_name']
+    key_pair = state['aws_key_pair_name']
+    private_key_path = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
+    private_key_path
+  end
+  
+  # returns the private key path for the given region
+  # AWS
+  def get_private_key_for_ibm region
+    state = get_state
+    key_pair = state['ibm_private_key']
     private_key_path = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
     private_key_path
   end
