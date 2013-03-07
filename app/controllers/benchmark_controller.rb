@@ -1727,13 +1727,16 @@ class BenchmarkController < ApplicationController
     elsif flavor == 'gold'
       instance_type = image.supported_instance_types.select {|img| img.label == 'Gold 64 bit'}.first
     end
+    
+    # private key
+    private_key = sce.keys.get key_pair
 
     server = sce.servers.new(
      :name => name,
      :image_id => image.id,
      :instance_type => instance_type.id,
      :location_id => location.id,
-     :key_name => key_pair.name
+     :key_name => private_key.name
     )
 
     # Launch the instance
