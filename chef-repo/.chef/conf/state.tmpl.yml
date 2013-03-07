@@ -17,6 +17,11 @@ ibm_chef_client_ssh_key_id: dummy # Private Key for SSH Login
 # those machines have to be prepared before you can use CSDE
 # see README to know how to cook those images
 ibm_chef_client_img_ehningen: dummy
+ibm_chef_client_img_raleigh: dummy
+ibm_chef_client_img_boulder1: dummy
+ibm_chef_client_img_markham: dummy
+ibm_chef_client_img_makuhari: dummy
+ibm_chef_client_img_singapore: dummy
 
 # ======= #
 # AWS EC2 #

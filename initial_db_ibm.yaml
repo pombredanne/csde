@@ -1,0 +1,31 @@
+service1:
+  name: cassandra
+  attributes:
+    replication_factor: 1
+    partitioner: RandomPartitioner
+    backup: false
+service2:
+  name: ycsb
+  attributes:
+    load: 'yes' # LOADING PHASE
+    #measurementtype: timeseries
+    #timeseries.granularity: 10000 # 10 s, one status
+    heap_size: 8192 # a big enough heap size has to be set in order to generate millions rows
+    recordcount: 300000 # 300 Mio rows for all nodes
+    operationcount: 300000 # 300 Mio rows for all nodes
+    fieldcount: 10 # 10 columns pro row
+    fieldlength: 100 # a column is 100 byte
+    threadcount: 30
+profile1:
+  provider: ibm
+  snapshot: ec2 # s3: packing data set in a tarball and save it in s3 | ec2: creating a ebs snapshot
+  regions:
+    region1:
+      name: EHN
+      machine_type: gold
+      template: 3 cassandra, 1 ycsb
+    #region2:
+      #name: RTP
+      #machine_type: gold
+      #template: 3 cassandra, 2 ycsb
+    

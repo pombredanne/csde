@@ -871,6 +871,10 @@ class BenchmarkController < ApplicationController
     # SERVICE_ID: 1.2
     elsif provider == 'rackspace'
       service_provision_rackspace region_hash
+      
+    # SERVICE_ID: 1.3
+    elsif provider == 'ibm'
+      service_provision_ibm region_hash  
     else
       logger.debug "::: Provider: #{provider} is not supported!"
       exit 0
@@ -911,6 +915,7 @@ class BenchmarkController < ApplicationController
   #   name: us-west-1
   #   ips: [9,10]
   # ============================================================================================ #
+  # TODO
   private
   def service_provision_ec2 cloud_config_hash
     # contains all needed meta info for invoking parallel function later
@@ -933,13 +938,13 @@ class BenchmarkController < ApplicationController
       
       # ami
       if region_name == 'us-east-1'
-        machine_ami = state['chef_client_ami_us_east_1']
+        machine_ami = state['aws_chef_client_ami_us_east_1']
       elsif region_name == 'us-west-1'
-        machine_ami = state['chef_client_ami_us_west_1']
+        machine_ami = state['aws_chef_client_ami_us_west_1']
       elsif region_name == 'us-west-2'
-        machine_ami = state['chef_client_ami_us_west_2']
+        machine_ami = state['aws_chef_client_ami_us_west_2']
       elsif region_name == 'eu-west-1'
-        machine_ami = state['chef_client_ami_eu_west_1']
+        machine_ami = state['aws_chef_client_ami_eu_west_1']
       else
         logger.debug "Region: #{region_name} is not supported!"
         exit 0
@@ -1045,13 +1050,6 @@ class BenchmarkController < ApplicationController
       provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
     end
     
-=begin
-    parallel_array.each do |arr|
-      provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
-    end
-=end
-
-
     # update @db_regions
     reg_counter = 1
     
@@ -1336,6 +1334,187 @@ class BenchmarkController < ApplicationController
   def provision_rackspace_machine
     
   end
+
+  # ============================================================================================ #
+  # SERVICE_ID: 1.3
+  # provision IBM machine for database service and benchmark service in parallel mode
+  # each thread is a provision_ibm_machine call
+  #
+  # INPUT:
+  #   region1: 
+  #     name: EHN
+  #     machine_type: gold     
+  #     template: 3 cassandra, 2 ycsb
+  #     
+  #   region2:
+  #     name: RTP
+  #     machine_type: small     
+  #     template: 2 cassandra
+  #
+  # OUTPUT:
+  # fill the two shared variables
+  # --- @db_regions ---
+  # region1:
+  #   name: EHN
+  #   ips: [1,2,3]
+  # region2:
+  #   name: RTP
+  #   ips: [4,5]  
+  #
+  # ---@bench_regions ---
+  # region1:
+  #   name: RHN
+  #   ips: [6,7,8]
+  # region2:
+  #   name: RTP
+  #   ips: [9,10]
+  # ============================================================================================ #
+  # TODO
+  private
+  def service_provision_ibm cloud_config_hash
+    # contains all needed meta info for invoking parallel function later
+    parallel_array = []
+    
+    # build the parallel_array
+    # each element of parallel_array is a array once again with following parameters
+    # region: e.g. EHN
+    # ami: e.g. 20085588
+    # flavor: e.g. gold
+    # key_pair: e.g. CSDE
+    # name: e.g. cassandra-node-1
+    state = get_state
+    db_node_counter = 1
+    bench_node_counter = 1
+    cloud_config_hash.each do |region, values|
+      # region
+      region_name = values['name']
+      
+      # ami
+      if region_name == 'EHN'
+        machine_ami = state['ibm_chef_client_img_ehningen']
+      elsif region_name == 'RTP'
+        machine_ami = state['ibm_chef_client_img_raleigh']
+      elsif region_name == 'us-co-dc1'
+        machine_ami = state['ibm_chef_client_img_boulder1']
+      elsif region_name == 'ca-on-dc1'
+        machine_ami = state['ibm_chef_client_img_markham']
+      elsif region_name == 'ap-jp-dc1'
+        machine_ami = state['ibm_chef_client_img_makuhari']
+      elsif region_name == 'ap-sg-dc1'
+        machine_ami = state['ibm_chef_client_img_singapore']
+      else
+        logger.debug "Region: #{region_name} is not supported!"
+        exit 0
+      end
+      
+      # flavor
+      machine_flavor = values['machine_type']
+      
+      # key pair
+      key_pair = state['key_pair_name']
+      
+      template = values['template']
+
+      # now is the name
+      # FIRST, for DATABASE cluster
+      base_name = ""
+      if template.to_s.include? "cassandra"
+        base_name = "cassandra" 
+      elsif template.to_s.include? "mongodb"
+        base_name = "mongodb"
+      else
+        logger.debug "Do NOT find database nodes like cassandra or mongodb"
+        exit 0
+      end
+      
+      # calculate the machine number of this region for DATABASE from template
+      machine_number_for_db = template_parse_to_find_machine_number_for_database_service(template).to_i
+      
+      # update parallel array
+      db_node_name_array = []
+      machine_number_for_db.times do
+        tmp_array = []
+
+        tmp_array << region_name
+        tmp_array << machine_ami
+        tmp_array << machine_flavor
+        tmp_array << key_pair
+        tmp_array << "#{base_name}-node-" + db_node_counter.to_s
+        
+        parallel_array << tmp_array
+
+        db_node_name_array << "#{base_name}-node-" + db_node_counter.to_s
+        
+        db_node_counter += 1
+      end
+
+      # SECOND, for BENCHMARK cluster
+      # optional
+      base_name = ""
+      machine_number_for_bench = 0
+      bench_node_name_array = []
+      if template.to_s.include? "ycsb"
+        base_name = "ycsb" 
+        
+        # calculate the machine number of this region for DATABASE from template
+        machine_number_for_bench = template_parse_to_find_machine_number_for_benchmark_service(template).to_i
+        
+        # update parallel array
+        machine_number_for_bench.times do
+          tmp_array = []
+  
+          tmp_array << region_name
+          tmp_array << machine_ami
+          
+          # YCSB machine is set up with GOLD type as standard
+          # tmp_array << machine_flavor
+          tmp_array << 'gold'
+          
+          tmp_array << key_pair
+          tmp_array << "#{base_name}-node-" + bench_node_counter.to_s
+  
+          parallel_array << tmp_array
+          
+          bench_node_name_array << "#{base_name}-node-" + bench_node_counter.to_s
+          
+          bench_node_counter += 1
+        end
+      end
+      
+      logger.debug "-------------------------"
+      logger.debug "Region: #{region_name}"
+      logger.debug "Machine number: #{machine_number_for_db + machine_number_for_bench}"
+      logger.debug "Machine flavor: #{machine_flavor}"
+      logger.debug "Machine image: #{machine_ami}"
+      logger.debug "Key pair: #{key_pair}"
+      logger.debug "Node names: "
+      logger.debug "-- Database cluster: " ; puts db_node_name_array ;
+      logger.debug "-- Benchmark Cluster:" ; puts bench_node_name_array ;
+      logger.debug "-------------------------"
+    end
+    
+    puts "-- break point"
+    exit 0
+    
+    # now provision machines in parallel mode
+    logger.debug "------------------------------------------------------------------------------------------"
+    logger.debug "::: Provisioning ALL machines for DATABASE cluster and BENCHMARK cluster in ALL regions..."
+    logger.debug "------------------------------------------------------------------------------------------"
+    results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
+      provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
+    end
+  end
+  
+  # ============================================================================================ #
+  # provision a new IBM machine
+  # used for each thread
+  # ============================================================================================ #
+  private
+  def provision_ibm_machine
+    
+  end
+  
+
 
   # ============================================================================================ #  
   # SERVICE_ID: 2
