@@ -590,6 +590,8 @@ class BenchmarkController < ApplicationController
       
       # temporary shared variable to store IPs of Database nodes or Benchmark nodes in each region
       # used by concurrent threads
+      
+      # AWS EC2
       @db_nodes_us_east_1 = []
       @db_nodes_us_west_1 = []
       @db_nodes_us_west_2 = []
@@ -598,6 +600,20 @@ class BenchmarkController < ApplicationController
       @bench_nodes_us_west_1 = []
       @bench_nodes_us_west_2 = []
       @bench_nodes_eu_west_1 = []
+      
+      # IBM SCE
+      @db_nodes_ehningen = []
+      @db_nodes_raleigh = []
+      @db_nodes_boulder1 = []
+      @db_nodes_markham = []
+      @db_nodes_makuhari = []
+      @db_nodes_singapore = []
+      @bench_nodes_ehningen = []
+      @bench_nodes_raleigh = []
+      @bench_nodes_boulder1 = []
+      @bench_nodes_markham = []
+      @bench_nodes_makuhari = []
+      @bench_nodes_singapore = []
       
       # lock for shared temporary variables
       @mutex = Mutex.new
@@ -1219,13 +1235,14 @@ class BenchmarkController < ApplicationController
   # the IP of the newly created EC2 machine will be added into the corresponding
   # shared variable, e.g. @db_nodes_us_east_1
   # ============================================================================================ #
+  # TODO
   private
   def provision_ec2_machine region, ami, flavor, key_pair, security_group, name
     logger.debug "::: Provisioning machine: #{name}..."
     # synchronize stdout
     $stdout.sync = true
     
-    # create a fog object in the given region with the corresponding provider (aws, rackspace)
+    # create a fog object in the given region with the corresponding provider (aws, rackspace, ibm)
     ec2 = create_fog_object 'aws', region, 'compute'
 
     # indicate if an ebs disk available
@@ -1493,28 +1510,281 @@ class BenchmarkController < ApplicationController
       logger.debug "-------------------------"
     end
     
-    puts "-- break point"
-    exit 0
-    
     # now provision machines in parallel mode
     logger.debug "------------------------------------------------------------------------------------------"
     logger.debug "::: Provisioning ALL machines for DATABASE cluster and BENCHMARK cluster in ALL regions..."
     logger.debug "------------------------------------------------------------------------------------------"
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
-      provision_ec2_machine arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]
+      provision_ibm_machine arr[0], arr[1], arr[2], arr[3], arr[4]
     end
-  end
-  
-  # ============================================================================================ #
-  # provision a new IBM machine
-  # used for each thread
-  # ============================================================================================ #
-  private
-  def provision_ibm_machine
+    
+    puts "-- break point"
+    exit 0
+    
+    # # update @db_regions
+    # reg_counter = 1
+#     
+    # # us-east-1
+    # if ! @db_nodes_us_east_1.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "us-east-1"
+      # @db_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: us-east-1
+#       
+      # ips = Hash.new
+      # ips['ips'] = @db_nodes_us_east_1
+      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: us-east-1
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1
+    # end  
+#      
+    # # us-west-1
+    # if ! @db_nodes_us_west_1.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "us-west-1"
+      # @db_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: us-west-1
+#       
+      # ips = Hash.new
+      # ips['ips'] = @db_nodes_us_west_1
+      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: us-west-1
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1
+    # end
+#       
+    # # us-west-2
+    # if ! @db_nodes_us_west_2.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "us-west-2"
+      # @db_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: us-west-2
+#       
+      # ips = Hash.new
+      # ips['ips'] = @db_nodes_us_west_2
+      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: us-west-2
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1 
+    # end
+#     
+    # # eu-west-1
+    # if ! @db_nodes_eu_west_1.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "eu-west-1"
+      # @db_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: eu-west-1
+#       
+      # ips = Hash.new
+      # ips['ips'] = @db_nodes_eu_west_1
+      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: eu-west-1
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1 
+    # end
+#     
+    # # update @bench_regions
+    # reg_counter = 1
+#     
+    # # us-east-1
+    # if ! @bench_nodes_us_east_1.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "us-east-1"
+      # @bench_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: us-east-1
+#       
+      # ips = Hash.new
+      # ips['ips'] = @bench_nodes_us_east_1
+      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: us-east-1
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1
+    # end  
+#      
+    # # us-west-1
+    # if ! @bench_nodes_us_west_1.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "us-west-1"
+      # @bench_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: us-west-1
+#       
+      # ips = Hash.new
+      # ips['ips'] = @bench_nodes_us_west_1
+      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: us-west-1
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1
+    # end
+#       
+    # # us-west-2
+    # if ! @bench_nodes_us_west_2.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "us-west-2"
+      # @bench_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: us-west-2
+#       
+      # ips = Hash.new
+      # ips['ips'] = @bench_nodes_us_west_2
+      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: us-west-2
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1 
+    # end
+#     
+    # # eu-west-1
+    # if ! @bench_nodes_eu_west_1.empty?
+      # reg_name = Hash.new
+      # reg_name['name'] = "eu-west-1"
+      # @bench_regions["region#{reg_counter}"] = reg_name
+      # # region1
+      # #   name: eu-west-1
+#       
+      # ips = Hash.new
+      # ips['ips'] = @bench_nodes_eu_west_1
+      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # # region1
+      # #   name: eu-west-1
+      # #   ips: [1,2,3]
+#       
+      # reg_counter += 1 
+    # end
     
   end
   
+  # ============================================================================================ #
+  # core function
+  # provision a new IBM machine
+  # used for each thread
+  # a dedicated fog object is responsible for creating a machine
+  # 
+  # INPUT:
+  # region: e.g. EHN
+  # ami: 20085588
+  # flavor: gold
+  # key_pair: CSDE
+  # name: cassandra-node-1
+  #
+  # OUTPUT:
+  # the IP of the newly created IBM machine will be added into the corresponding
+  # shared variable, e.g. @db_nodes_ehningen
+  # ============================================================================================ #
+  # TODO
+  private
+  def provision_ibm_machine region, ami, flavor, key_pair, name
+    logger.debug "::: Provisioning machine: #{name}..."
+    # synchronize stdout
+    $stdout.sync = true
+    
+    # create a fog object in the given region with the corresponding provider (aws, rackspace, ibm)
+    sce = create_fog_object 'ibm', region, 'compute'
 
+    # Image
+    image = sce.images.get ami
+
+    # Location  
+    location = nil
+    if region == "EHN"
+      location = compute.locations.select {|loc| loc.location == "EHN"}.first
+    elsif region == "RTP"
+      location = compute.locations.select {|loc| loc.location == "RTP"}.first
+    elsif region == "us-co-dc1"
+      location = compute.locations.select {|loc| loc.location == "us-co-dc1"}.first  
+    elsif region == "ca-on-dc1"
+      location = compute.locations.select {|loc| loc.location == "ca-on-dc1"}.first
+    elsif region == "ap-jp-dc1"
+      location = compute.locations.select {|loc| loc.location == "ap-jp-dc1"}.first
+    elsif region == "ap-sg-dc1"
+      location = compute.locations.select {|loc| loc.location == "ap-sg-dc1"}.first
+    end
+    
+    # find supported instance type ID
+    # NOTE that, an image does not support all instance type
+    instance_type = nil
+    if flavor == 'silver'
+      instance_type = image.supported_instance_types.select {|img| img.label == 'Silver 64 bit'}.first  
+    elsif flavor == 'gold'
+      instance_type = image.supported_instance_types.select {|img| img.label == 'Gold 64 bit'}.first
+    end
+
+    server = compute.servers.new(
+     :name => name,
+     :image_id => image.id,
+     :instance_type => instance_type.id,
+     :location_id => location.id,
+     :key_name => key_pair.name
+    )
+
+    # Launch the instance
+    server.save
+    
+    # Wait for instance to be launched
+    logger.debug "::: Waiting for machine: #{server.id}..."
+    server.wait_for { ready? }
+    puts "\n"
+
+    # check sshd in the server
+    print "." until tcp_test_ssh(server.ip) { sleep 1 }
+
+    # public IPv4 of the newly created server
+    ip = server.ip
+    
+    # Adding a newly created server to the nodes list
+    # depends on region and cluster type (database or benchmark)
+    # lock    
+    @mutex.synchronize do
+      if name.to_s.include? "cassandra" or name.to_s.include? "mongodb" # add to database cluster
+        if region == "EHN" # in Ehningen
+          @db_nodes_ehningen << ip
+        elsif region == "RTP" # in Raleigh
+          @db_nodes_raleigh << ip
+        elsif region == "us-co-dc1" # in Boulder1
+          @db_nodes_boulder1 << ip
+        elsif region == "ca-on-dc1" # in Markham
+          @db_nodes_markham << ip  
+        elsif region == "ap-jp-dc1" # in Makuhari
+          @bench_nodes_makuhari << ip
+        elsif region == "ap-sg-dc1" # in Singapore
+          @db_nodes_singapore << ip  
+        end
+      elsif name.to_s.include? "ycsb" # add to benchmark cluster
+        if region == "EHN" # in Ehningen
+          @bench_nodes_ehningen << ip
+        elsif region == "RTP" # in Raleigh
+          @bench_nodes_raleigh << ip
+        elsif region == "us-co-dc1" # in Boulder1
+          @bench_nodes_boulder1 << ip
+        elsif region == "ca-on-dc1" # in Markham
+          @bench_nodes_markham << ip  
+        elsif region == "ap-jp-dc1" # in Makuhari
+          @bench_nodes_makuhari << ip
+        elsif region == "ap-sg-dc1" # in Singapore
+          @bench_nodes_singapore << ip  
+        end        
+      end
+    end
+  end
 
   # ============================================================================================ #  
   # SERVICE_ID: 2

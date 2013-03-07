@@ -20,7 +20,7 @@ CSDE was formerly known as KCSD(B) and has now changed its name.
 
 For now, CSDE can only be used in Amazon EC2 and IBM SCE. Please use the following machines:
 
-* Amazon EC2:
+* AWS EC2:
 
 Region: US-EAST-1
 
@@ -44,7 +44,7 @@ OS: Red Hat Enterprise Linux 6.3 x64
 * Execute the following script
 IBM SCE
  $ curl -L https://raw.github.com/myownthemepark/csde/master/cook_image_for_chef_client_in_ibm_sce_rhel_6.sh -s | bash
-Amazon EC2
+AWS EC2
  $ curl -L https://raw.github.com/myownthemepark/csde/master/cook_image_for_chef_client_in_aws_ec2_ubuntu_12.04.sh -s | bash
 * Save the finish instance into an image, NOTE the image ID
 * Replace the image ID in csde/chef-repo/.chef/conf/state.tmpl.yml in the corresponding Region and Cloud Provider. For example
