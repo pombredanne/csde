@@ -40,12 +40,19 @@ default[:cassandra][:seeds] = "dummy"
 # not change
 default[:cassandra][:rpc_address] = "0.0.0.0"
 
+# not change
+# TODO
+default[:cassandra][:snitch] = "dummy"
+
 # :::::::::::::::::::::: #
 # CAN be changed! #
 # :::::::::::::::::::::: #
 
-# RandomPartitioner | ByteOrderedPartitioner
-# will be passed by KCSDB Server
+# RandomPartitioner (NOT default in Cassandra 1.2)
+# Murmur3Partitioner (DEFAULT in Cassandra 1.2)
+# Each Partitioner has a different token range
+# Please use a corresponding token generation mechanism
+# see method calculate_token_position in benchmark controller
 default[:cassandra][:partitioner] = "RandomPartitioner"
 
 # ::::: #
@@ -95,6 +102,9 @@ default[:cassandra][:heap_new_size] = "dummy"
 # :::::::::::::::::::::: #
 
 # the script for cassandra-cli
+# TODO
+# IBM SCE --> idcuser
+# AWS EC2 --> ubuntu
 default[:cassandra][:configure_file] = "/home/ubuntu/configure.txt"
 
 # placement strategy, used to place replicas in each region
@@ -102,7 +112,7 @@ default[:cassandra][:configure_file] = "/home/ubuntu/configure.txt"
 default[:cassandra][:placement_strategy] = "NetworkTopologyStrategy"
 
 # default values, not change
-# habe to be matched with YCSB configurations
+# have to be matched with YCSB configurations
 default[:cassandra][:keyspace] = "usertable"
 default[:cassandra][:column_family] = "data"
 

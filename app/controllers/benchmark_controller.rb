@@ -676,7 +676,7 @@ class BenchmarkController < ApplicationController
         logger.debug "Region: #{values['name']}"
         logger.debug "IPs: #{values['ips']}"       
       end
-
+      
       puts "-- break point"
       exit 0
       
@@ -1395,7 +1395,7 @@ class BenchmarkController < ApplicationController
     # build the parallel_array
     # each element of parallel_array is a array once again with following parameters
     # region: e.g. EHN
-    # ami: e.g. 20085588
+    # ami: e.g. 20085608
     # flavor: e.g. gold
     # key_pair: e.g. CSDE
     # name: e.g. cassandra-node-1
@@ -1815,8 +1815,8 @@ class BenchmarkController < ApplicationController
     
     # Wait for instance to be launched
     logger.debug "::: Waiting for machine: #{server.id}..."
-    logger.debug "::: Each machine can be waited for 30 mins..."
-    server.wait_for(1800) { print "."; ready? } # only wait for 30 mins until the servers are ready
+    logger.debug "::: Each machine can be waited for 60 mins..."
+    server.wait_for(3600) { print "."; ready? } # only wait for 60 mins until the servers are ready
     puts "\n"
 
     # check sshd in the server
@@ -1917,8 +1917,9 @@ class BenchmarkController < ApplicationController
     
     
     # the first node of Cassandra cluster is the collector of the whole cluster
-    gmond_collector_hash = Hash.new
-    gmond_collector_hash['gmond_collector'] = @db_regions['region1']['ips'][0]
+    # use only for gmond service
+    # gmond_collector_hash = Hash.new
+    # gmond_collector_hash['gmond_collector'] = @db_regions['region1']['ips'][0]
     
     # update default.rb
     # SERVICE_ID: 2.4
@@ -1946,11 +1947,14 @@ class BenchmarkController < ApplicationController
 
     # backup cassandra if needed
     # SERVICE_ID: 2.7
-    if cassandra_config_hash['attributes']['backup'].to_s == 's3'
-      backup_cassandra_s3
-    elsif cassandra_config_hash['attributes']['backup'].to_s == 'ec2'
-      backup_cassandra_ec2
-    end
+    
+    # TODO
+    # IBM SCE has a support as well
+    #if cassandra_config_hash['attributes']['backup'].to_s == 's3'
+    #  backup_cassandra_s3
+    #elsif cassandra_config_hash['attributes']['backup'].to_s == 'ec2'
+    #  backup_cassandra_ec2
+    #end
   end
   
   # ============================================================================================ #
@@ -1970,6 +1974,13 @@ class BenchmarkController < ApplicationController
     logger.debug "-------------------------"
     logger.debug "::: Calculating tokens..."
     logger.debug "-------------------------"
+    
+    # NOTE
+    # those tokens can be used only with RandomPartitioner
+    # for Murmur3Partitioner, please use following code
+    # for i in 0..6
+    #   puts (((2**64 / 6) * i) - 2**63)
+    # end
     
     # generate parameter for tokentool.py
     param = ""
@@ -2118,7 +2129,16 @@ class BenchmarkController < ApplicationController
   # ============================================================================================ #
   private
   def deploy_cassandra cassandra_config_hash
-    recipe = "recipe[cassandra]"
+    state = get_state
+    os = state['os']
+    
+    recipe = nil
+    if os == 'ubuntu'
+      recipe = "recipe[cassandra]"
+    elsif os == 'redhat'
+      recipe = "recipe[cassandra::cassandra_rhel]"  
+    end
+    
     region_counter = 1
     cassandra_node_counter = 1
     parallel_array = []
@@ -2148,10 +2168,19 @@ class BenchmarkController < ApplicationController
         logger.debug "--- Node Name: #{node_name}"
         
         token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
-        File.open(token_file,"w") do |file|
-          file << "#!/usr/bin/env bash" << "\n"
-          file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
-          file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+        
+        if os == 'ubuntu'
+          File.open(token_file,"w") do |file|
+            file << "#!/usr/bin/env bash" << "\n"
+            file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
+            file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
+          end
+        elsif os == 'redhat'
+          File.open(token_file,"w") do |file|
+            file << "#!/usr/bin/env bash" << "\n"
+            file << "echo #{token} | tee /home/idcuser/token.txt" << "\n"
+            file << "echo #{seeds} | tee /home/idcuser/seeds.txt" << "\n"
+          end
         end
 
         tmp_array << node_ip
@@ -2201,14 +2230,23 @@ class BenchmarkController < ApplicationController
     $stdout.sync = true
     
     state = get_state
+    os = state['os']
 
-    key_pair = state['key_pair_name']
+    key_pair = nil
+    chef_client_ssh_user = nil
+    if os == 'ubuntu'
+      key_pair = state['aws_key_pair_name']   
+      chef_client_ssh_user = state['aws_chef_client_ssh_user']
+      
+    elsif os == 'redhat'
+      key_pair = state['ibm_private_key']
+      chef_client_ssh_user = state['ibm_chef_client_ssh_user']
+    end
+
     chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
-    
-    chef_client_ssh_user = state['chef_client_ssh_user']
     chef_client_bootstrap_version = state['chef_client_bootstrap_version']
     chef_client_template_file = state['chef_client_template_file']
-    
+   
     no_checking = "-o 'UserKnownHostsFile /dev/null' -o StrictHostKeyChecking=no"
 
     logger.debug "-----------------------------------------------------"
@@ -2241,7 +2279,10 @@ class BenchmarkController < ApplicationController
     end
 
     knife_bootstrap_string = ""
-       
+    
+    # TODO
+    
+    
     knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
     knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
