@@ -1744,7 +1744,7 @@ class BenchmarkController < ApplicationController
     
     # Wait for instance to be launched
     logger.debug "::: Waiting for machine: #{server.id}..."
-    server.wait_for { ready? }
+    server.wait_for(1800) { print "."; ready? } # only wait for 30 mins until the servers are ready
     puts "\n"
 
     # check sshd in the server
