@@ -954,10 +954,10 @@ class BenchmarkController < ApplicationController
       machine_flavor = "m1." + values['machine_type']
       
       # key pair
-      key_pair = state['key_pair_name']
+      key_pair = state['aws_key_pair_name']
       
       # security group
-      security_group = state['security_group_name']
+      security_group = state['aws_security_group_name']
 
       template = values['template']
 
@@ -1411,7 +1411,7 @@ class BenchmarkController < ApplicationController
       machine_flavor = values['machine_type']
       
       # key pair
-      key_pair = state['key_pair_name']
+      key_pair = state['ibm_private_key']
       
       template = values['template']
 
