@@ -38,11 +38,29 @@ Image ID: 20025207
 
 OS: Red Hat Enterprise Linux 6.3 x64
 
-* Lauch a virtual machine and login via ssh
+= Cook Image for Chef Client BEFORE using CSDE Tool
+
+* Lauch a corresponding virtual machine Ubuntu 12.04 in AWS EC2 or RHEL 6 in IBM SCE and login via ssh
+* Execute the following script
+IBM SCE
+ $ curl -L https://raw.github.com/myownthemepark/csde/master/cook_image_for_chef_client_in_ibm_sce_rhel_6.sh -s | bash
+Amazon EC2
+ $ curl -L https://raw.github.com/myownthemepark/csde/master/cook_image_for_chef_client_in_aws_ec2_ubuntu_12.04.sh -s | bash
+* Save the finish instance into an image, NOTE the image ID
+* Replace the image ID in csde/chef-repo/.chef/conf/state.tmpl.yml in the corresponding Region and Cloud Provider. For example
+
+IBM SCE
+ ibm_chef_client_img_ehningen: xxxxxxx # Image in Region Ehningen of IBM SCE
+AWS EC
+ aws_chef_client_ami_us_east_1: xxxxxx # Image in Region US East 1 of AWS EC2
+
+= Install CSDE Server
+
+* Lauch a corresponding virtual machine Ubuntu 12.04 in AWS EC2 or RHEL 6 in IBM SCE and login via ssh
 * Install needed softwares before install CSDE server
 IBM SCE
  $ curl -L https://raw.github.com/myownthemepark/csde/master/prepare_machine_for_csde_rhel_6.sh -s | bash
-Amazon EC2
+AWS EC2
  $ curl -L https://raw.github.com/myownthemepark/csde/master/prepare_machine_for_csde_ubuntu_12.04.sh -s | bash
 * Load rvm into shell
  $ source $HOME/.bashrc
