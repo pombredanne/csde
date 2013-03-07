@@ -64,6 +64,15 @@ install_ruby_1.9.3(){
 	echo "-----------------------------------------------------"
 }
 
+deactive_firewall(){
+	echo "-------------------"
+	echo "Deactiving firewall"
+	echo "-------------------"
+	sudo service iptables save
+	sudo service iptables stop
+	sudo chkconfig iptables off
+}
+
 # execution
 
 # time measurement
@@ -74,6 +83,7 @@ install_oracle_jdk_6
 yum_update
 install_needed_packages
 install_ruby_1.9.3
+deactive_firewall
 
 echo "-----------------------------------------------------"
 echo "Machine is ready for cooking an image for Chef Client"
