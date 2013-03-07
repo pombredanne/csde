@@ -1706,17 +1706,17 @@ class BenchmarkController < ApplicationController
     # Location  
     location = nil
     if region == "EHN"
-      location = compute.locations.select {|loc| loc.location == "EHN"}.first
+      location = sce.locations.select {|loc| loc.location == "EHN"}.first
     elsif region == "RTP"
-      location = compute.locations.select {|loc| loc.location == "RTP"}.first
+      location = sce.locations.select {|loc| loc.location == "RTP"}.first
     elsif region == "us-co-dc1"
-      location = compute.locations.select {|loc| loc.location == "us-co-dc1"}.first  
+      location = sce.locations.select {|loc| loc.location == "us-co-dc1"}.first  
     elsif region == "ca-on-dc1"
-      location = compute.locations.select {|loc| loc.location == "ca-on-dc1"}.first
+      location = sce.locations.select {|loc| loc.location == "ca-on-dc1"}.first
     elsif region == "ap-jp-dc1"
-      location = compute.locations.select {|loc| loc.location == "ap-jp-dc1"}.first
+      location = sce.locations.select {|loc| loc.location == "ap-jp-dc1"}.first
     elsif region == "ap-sg-dc1"
-      location = compute.locations.select {|loc| loc.location == "ap-sg-dc1"}.first
+      location = sce.locations.select {|loc| loc.location == "ap-sg-dc1"}.first
     end
     
     # find supported instance type ID
@@ -1728,7 +1728,7 @@ class BenchmarkController < ApplicationController
       instance_type = image.supported_instance_types.select {|img| img.label == 'Gold 64 bit'}.first
     end
 
-    server = compute.servers.new(
+    server = sce.servers.new(
      :name => name,
      :image_id => image.id,
      :instance_type => instance_type.id,
