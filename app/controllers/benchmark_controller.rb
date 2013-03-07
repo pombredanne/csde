@@ -677,6 +677,9 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
 
+      puts "-- break point"
+      exit 0
+      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -1517,159 +1520,156 @@ class BenchmarkController < ApplicationController
     results = Parallel.map(parallel_array, in_threads: parallel_array.size) do |arr|
       provision_ibm_machine arr[0], arr[1], arr[2], arr[3], arr[4]
     end
+
+    # update @db_regions
+    reg_counter = 1
     
-    puts "-- break point"
-    exit 0
+    # us-east-1
+    if ! @db_nodes_us_east_1.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "us-east-1"
+      @db_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: us-east-1
+      
+      ips = Hash.new
+      ips['ips'] = @db_nodes_us_east_1
+      @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: us-east-1
+      #   ips: [1,2,3]
+      
+      reg_counter += 1
+    end  
+     
+    # us-west-1
+    if ! @db_nodes_us_west_1.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "us-west-1"
+      @db_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: us-west-1
+      
+      ips = Hash.new
+      ips['ips'] = @db_nodes_us_west_1
+      @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: us-west-1
+      #   ips: [1,2,3]
+      
+      reg_counter += 1
+    end
+      
+    # us-west-2
+    if ! @db_nodes_us_west_2.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "us-west-2"
+      @db_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: us-west-2
+      
+      ips = Hash.new
+      ips['ips'] = @db_nodes_us_west_2
+      @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: us-west-2
+      #   ips: [1,2,3]
+      
+      reg_counter += 1 
+    end
     
-    # # update @db_regions
-    # reg_counter = 1
-#     
-    # # us-east-1
-    # if ! @db_nodes_us_east_1.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "us-east-1"
-      # @db_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: us-east-1
-#       
-      # ips = Hash.new
-      # ips['ips'] = @db_nodes_us_east_1
-      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: us-east-1
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1
-    # end  
-#      
-    # # us-west-1
-    # if ! @db_nodes_us_west_1.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "us-west-1"
-      # @db_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: us-west-1
-#       
-      # ips = Hash.new
-      # ips['ips'] = @db_nodes_us_west_1
-      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: us-west-1
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1
-    # end
-#       
-    # # us-west-2
-    # if ! @db_nodes_us_west_2.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "us-west-2"
-      # @db_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: us-west-2
-#       
-      # ips = Hash.new
-      # ips['ips'] = @db_nodes_us_west_2
-      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: us-west-2
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1 
-    # end
-#     
-    # # eu-west-1
-    # if ! @db_nodes_eu_west_1.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "eu-west-1"
-      # @db_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: eu-west-1
-#       
-      # ips = Hash.new
-      # ips['ips'] = @db_nodes_eu_west_1
-      # @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: eu-west-1
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1 
-    # end
-#     
-    # # update @bench_regions
-    # reg_counter = 1
-#     
-    # # us-east-1
-    # if ! @bench_nodes_us_east_1.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "us-east-1"
-      # @bench_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: us-east-1
-#       
-      # ips = Hash.new
-      # ips['ips'] = @bench_nodes_us_east_1
-      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: us-east-1
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1
-    # end  
-#      
-    # # us-west-1
-    # if ! @bench_nodes_us_west_1.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "us-west-1"
-      # @bench_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: us-west-1
-#       
-      # ips = Hash.new
-      # ips['ips'] = @bench_nodes_us_west_1
-      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: us-west-1
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1
-    # end
-#       
-    # # us-west-2
-    # if ! @bench_nodes_us_west_2.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "us-west-2"
-      # @bench_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: us-west-2
-#       
-      # ips = Hash.new
-      # ips['ips'] = @bench_nodes_us_west_2
-      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: us-west-2
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1 
-    # end
-#     
-    # # eu-west-1
-    # if ! @bench_nodes_eu_west_1.empty?
-      # reg_name = Hash.new
-      # reg_name['name'] = "eu-west-1"
-      # @bench_regions["region#{reg_counter}"] = reg_name
-      # # region1
-      # #   name: eu-west-1
-#       
-      # ips = Hash.new
-      # ips['ips'] = @bench_nodes_eu_west_1
-      # @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
-      # # region1
-      # #   name: eu-west-1
-      # #   ips: [1,2,3]
-#       
-      # reg_counter += 1 
-    # end
+    # eu-west-1
+    if ! @db_nodes_eu_west_1.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "eu-west-1"
+      @db_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: eu-west-1
+      
+      ips = Hash.new
+      ips['ips'] = @db_nodes_eu_west_1
+      @db_regions["region#{reg_counter}"] = @db_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: eu-west-1
+      #   ips: [1,2,3]
+      
+      reg_counter += 1 
+    end
+    
+    # update @bench_regions
+    reg_counter = 1
+    
+    # us-east-1
+    if ! @bench_nodes_us_east_1.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "us-east-1"
+      @bench_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: us-east-1
+      
+      ips = Hash.new
+      ips['ips'] = @bench_nodes_us_east_1
+      @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: us-east-1
+      #   ips: [1,2,3]
+      
+      reg_counter += 1
+    end  
+     
+    # us-west-1
+    if ! @bench_nodes_us_west_1.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "us-west-1"
+      @bench_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: us-west-1
+      
+      ips = Hash.new
+      ips['ips'] = @bench_nodes_us_west_1
+      @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: us-west-1
+      #   ips: [1,2,3]
+      
+      reg_counter += 1
+    end
+      
+    # us-west-2
+    if ! @bench_nodes_us_west_2.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "us-west-2"
+      @bench_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: us-west-2
+      
+      ips = Hash.new
+      ips['ips'] = @bench_nodes_us_west_2
+      @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: us-west-2
+      #   ips: [1,2,3]
+      
+      reg_counter += 1 
+    end
+    
+    # eu-west-1
+    if ! @bench_nodes_eu_west_1.empty?
+      reg_name = Hash.new
+      reg_name['name'] = "eu-west-1"
+      @bench_regions["region#{reg_counter}"] = reg_name
+      # region1
+      #   name: eu-west-1
+      
+      ips = Hash.new
+      ips['ips'] = @bench_nodes_eu_west_1
+      @bench_regions["region#{reg_counter}"] = @bench_regions["region#{reg_counter}"].merge ips
+      # region1
+      #   name: eu-west-1
+      #   ips: [1,2,3]
+      
+      reg_counter += 1 
+    end
     
   end
   

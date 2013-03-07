@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 welcome(){
-	echo "--------------------------------------------------------------------------------------------------"
+	echo "----------------------------------------------------------------------------------------"
 	echo "this script is used to install needed packages in order to cook an image for Chef Client"
 	echo "image is Red Hat Enterprise Linux 6.3"
 	echo "following softwares will be installed:"
 	echo "1. Oracle JDK 6"
 	echo "2. Ruby 1.9.3"
 	echo "3. several packages"
-	echo "--------------------------------------------------------------------------------------------------"
+	echo "----------------------------------------------------------------------------------------"
 }
 
 install_oracle_jdk_6(){
@@ -85,11 +85,11 @@ install_needed_packages
 install_ruby_1.9.3
 deactive_firewall
 
-echo "-----------------------------------------------------"
-echo "Machine is ready for cooking an image for Chef Client"
+echo "--------------------------------------------------"
+echo "Machine is ready for cooking image for Chef Client"
 echo "Oracle JDK 6"
 echo "Ruby 1.9.3"
-echo "-----------------------------------------------------"
+echo "--------------------------------------------------"
 
 # time measurement
 end=$(date +%s)
