@@ -2,22 +2,24 @@
 # create log directory
 execute "sudo mkdir -p #{node[:cassandra][:data_dir]}"
 execute "sudo mkdir -p #{node[:cassandra][:commitlog_dir]}"
-#execute "sudo chown -R #{node[:internal][:package_user]} #{node[:cassandra][:data_dir]}"
-#execute "sudo chown -R #{node[:internal][:package_user]} #{node[:cassandra][:commitlog_dir]}"
-
-
 execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:data_dir]}"
 execute "sudo chown -R #{node[:internal][:package_user]}:#{node[:internal][:package_user]} #{node[:cassandra][:commitlog_dir]}"
 
-# read the token.txt which is passed by KCSDB Server to this node
+# read the token.txt which is passed by CSDE Server to this node
 # update node[:cassandra][:initial_token] attribute
 # will be used later to overwrite cassandra.yaml
 ruby_block "read_tokens" do
   block do
-    File.open("/home/ubuntu/token.txt","r").each do |line| 
+    home_user = nil
+    if node[:cassandra][:os] == 'ubuntu'
+      home_user = 'ubuntu'
+    else
+      home_user = 'idcuser'
+    end
+    File.open("/home/#{home_user}/token.txt","r").each do |line| 
       node[:cassandra][:initial_token] = line.to_s.strip
     end
-    File.open("/home/ubuntu/seeds.txt","r").each do |line| 
+    File.open("/home/#{home_user}/seeds.txt","r").each do |line| 
       node[:cassandra][:seeds] = line.to_s.strip
     end
   end
@@ -34,7 +36,13 @@ ruby_block "build_cassandra_env" do
   block do
     filename = node[:cassandra][:conf_path] + "cassandra-env.sh"
     cassandra_env = File.read filename
-    cassandra_env.gsub!(/# JVM_OPTS="\$JVM_OPTS -Djava.rmi.server.hostname=<public name>"/, "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=#{node[:cloud][:private_ips].first}\"")
+
+    if node[:cassandra][:os] == 'ubuntu'
+      cassandra_env.gsub!(/# JVM_OPTS="\$JVM_OPTS -Djava.rmi.server.hostname=<public name>"/, "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=#{node[:cloud][:private_ips].first}\"")
+    else
+      cassandra_env.gsub!(/# JVM_OPTS="\$JVM_OPTS -Djava.rmi.server.hostname=<public name>"/, "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=#{node[:cloud][:public_ips].first}\"")  
+    end
+    
     if node[:cassandra][:heap_size] != "dummy" then cassandra_env.gsub!(/#MAX_HEAP_SIZE=.*/, "MAX_HEAP_SIZE=\"#{node[:cassandra][:heap_size]}M\"") end
     if node[:cassandra][:heap_new_size] != "dummy" then cassandra_env.gsub!(/#HEAP_NEWSIZE=.*/, "HEAP_NEWSIZE=\"#{node[:cassandra][:heap_new_size]}M\"") end
     File.open(filename,'w'){|f| f.write cassandra_env }
@@ -57,14 +65,20 @@ ruby_block "build_cassandra_yaml" do
     cassandra_yaml.gsub!(/rpc_address:.*/,                      "rpc_address: #{node[:cassandra][:rpc_address]}")
     cassandra_yaml.gsub!(/initial_token:.*/,                    "initial_token: #{node[:cassandra][:initial_token]}")
     cassandra_yaml.gsub!(/seeds:.*/,                            "seeds: \"#{node[:cassandra][:seeds]}\"")
-    cassandra_yaml.gsub!(/listen_address:.*/,                   "listen_address: #{node[:cloud][:private_ips].first}")    
     cassandra_yaml.gsub!(/partitioner:.*/,                      "partitioner: org.apache.cassandra.dht.#{node[:cassandra][:partitioner]}")    
     
-    if node[:cassandra][:single_region] == 'true' # single region
-      cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2Snitch")
-      cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:private_ips].first}")
-    else # multiple regions
-      cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2MultiRegionSnitch")
+    if node[:cassandra][:os] == 'ubuntu'
+      cassandra_yaml.gsub!(/listen_address:.*/,                   "listen_address: #{node[:cloud][:private_ips].first}")
+      if node[:cassandra][:single_region] == 'true' # single region
+        cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2Snitch")
+        cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:private_ips].first}")
+      else # multiple regions
+        cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2MultiRegionSnitch")
+        cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:public_ips].first}")
+      end
+    elsif node[:cassandra][:os] == 'redhat'
+      cassandra_yaml.gsub!(/listen_address:.*/,                   "listen_address: #{node[:cloud][:public_ips].first}")
+      cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.RackInferringSnitch")
       cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:public_ips].first}")
     end
     

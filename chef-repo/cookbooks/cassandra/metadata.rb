@@ -1,3 +1,5 @@
+# TODO
+# cleanup meta data
 maintainer       "DataStax"
 maintainer_email "joaquin@datastax.com"
 license          "Apache License"

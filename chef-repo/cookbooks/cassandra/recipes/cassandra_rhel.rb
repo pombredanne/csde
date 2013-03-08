@@ -76,12 +76,18 @@ ruby_block "build_cassandra_yaml" do
     cassandra_yaml.gsub!(/listen_address:.*/,                   "listen_address: #{node[:cloud][:private_ips].first}")    
     cassandra_yaml.gsub!(/partitioner:.*/,                      "partitioner: org.apache.cassandra.dht.#{node[:cassandra][:partitioner]}")    
     
-    # TODO
-    if node[:cassandra][:single_region] == 'true' # single region
-      cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2Snitch")
-      cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:private_ips].first}")
-    else # multiple regions
-      cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2MultiRegionSnitch")
+    if node[:cassandra][:os] == 'ubuntu'
+      cassandra_yaml.gsub!(/listen_address:.*/,                   "listen_address: #{node[:cloud][:private_ips].first}")
+      if node[:cassandra][:single_region] == 'true' # single region
+        cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2Snitch")
+        cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:private_ips].first}")
+      else # multiple regions
+        cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.Ec2MultiRegionSnitch")
+        cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:public_ips].first}")
+      end
+    elsif node[:cassandra][:os] == 'redhat'
+      cassandra_yaml.gsub!(/listen_address:.*/,                   "listen_address: #{node[:cloud][:private_ips].first}")
+      cassandra_yaml.gsub!(/endpoint_snitch:.*/,                "endpoint_snitch: org.apache.cassandra.locator.RackInferringSnitch")
       cassandra_yaml.gsub!(/# broadcast_address:.*/,            "broadcast_address: #{node[:cloud][:public_ips].first}")
     end
     

@@ -677,9 +677,6 @@ class BenchmarkController < ApplicationController
         logger.debug "IPs: #{values['ips']}"       
       end
       
-      puts "-- break point"
-      exit 0
-      
       logger.debug "-----------------------------------------------------------"
       logger.debug "STEP 2: Invoking Service [Database] for Database Cluster..."
       logger.debug "-----------------------------------------------------------"
@@ -704,6 +701,9 @@ class BenchmarkController < ApplicationController
       @benchmark_run << "-----------------------------------------------------------------------------\n"
       @benchmark_run << "---> Elapsed time for Service [Database]: #{Time.now - start_time} seconds...\n"
       @benchmark_run << "-----------------------------------------------------------------------------\n"      
+
+      puts "-- break point"
+      exit 0
       
       logger.debug "--------------------------------------------------------"
       logger.debug "STEP 3: Invoking Service [YCSB] for Benchmark Cluster..."
@@ -1943,7 +1943,8 @@ class BenchmarkController < ApplicationController
     
     # configure cassandra via cassandra-cli
     # SERVICE_ID: 2.6
-    configure_cassandra cassandra_config_hash
+    # TODO
+    # configure_cassandra cassandra_config_hash
 
     # backup cassandra if needed
     # SERVICE_ID: 2.7
@@ -2101,6 +2102,18 @@ class BenchmarkController < ApplicationController
     param_hash.each do |key, value|
       default_rb.gsub!(/.*default\[:cassandra\]\[:#{key}\].*/, "default[:cassandra][:#{key}] = \'#{value}\'")
     end  
+    state = get_state
+    os = state['os']
+    if os == 'ubuntu'
+      puts '-- Ubuntu detected!'
+      default_rb.gsub!(/.*default\[:cassandra\]\[:os\].*/, "default[:cassandra][:os] = \'ubuntu\'")
+    elsif os == 'redhat'
+      puts '-- Red Hat detected!'
+      default_rb.gsub!(/.*default\[:cassandra\]\[:os\].*/, "default[:cassandra][:os] = \'redhat\'")
+    else
+      puts '-- This OS is not supported: #{os}. Program exits!!!'
+      exit 0  
+    end   
     File.open(file_name,'w') {|f| f.write default_rb }
     
     logger.debug "-----------------------------------------"
@@ -2129,16 +2142,24 @@ class BenchmarkController < ApplicationController
   # ============================================================================================ #
   private
   def deploy_cassandra cassandra_config_hash
+    logger.debug "---------------------------"
+    logger.debug "::: Deploying Cassandra ..."
+    logger.debug "---------------------------"
     state = get_state
     os = state['os']
-    
-    recipe = nil
+    home_user = nil
     if os == 'ubuntu'
-      recipe = "recipe[cassandra]"
+      puts '-- Ubuntu detected!'
+      home_user = 'ubuntu'
     elsif os == 'redhat'
-      recipe = "recipe[cassandra::cassandra_rhel]"  
+      puts '-- Red Hat detected'
+      home_user = 'idcuser'
+    else
+      puts '-- This OS is not supported: #{os}. Program exits!!!'
+      exit 0  
     end
-    
+
+    recipe = "recipe[cassandra]"
     region_counter = 1
     cassandra_node_counter = 1
     parallel_array = []
@@ -2169,18 +2190,10 @@ class BenchmarkController < ApplicationController
         
         token_file = "#{Rails.root}/chef-repo/.chef/tmp/#{token}.sh"
         
-        if os == 'ubuntu'
-          File.open(token_file,"w") do |file|
-            file << "#!/usr/bin/env bash" << "\n"
-            file << "echo #{token} | tee /home/ubuntu/token.txt" << "\n"
-            file << "echo #{seeds} | tee /home/ubuntu/seeds.txt" << "\n"
-          end
-        elsif os == 'redhat'
-          File.open(token_file,"w") do |file|
-            file << "#!/usr/bin/env bash" << "\n"
-            file << "echo #{token} | tee /home/idcuser/token.txt" << "\n"
-            file << "echo #{seeds} | tee /home/idcuser/seeds.txt" << "\n"
-          end
+        File.open(token_file,"w") do |file|
+          file << "#!/usr/bin/env bash" << "\n"
+          file << "echo #{token} | tee /home/#{home_user}/token.txt" << "\n"
+          file << "echo #{seeds} | tee /home/#{home_user}/seeds.txt" << "\n"
         end
 
         tmp_array << node_ip
@@ -2235,12 +2248,16 @@ class BenchmarkController < ApplicationController
     key_pair = nil
     chef_client_ssh_user = nil
     if os == 'ubuntu'
+      puts '-- Ubuntu detected!'
       key_pair = state['aws_key_pair_name']   
       chef_client_ssh_user = state['aws_chef_client_ssh_user']
-      
     elsif os == 'redhat'
+      puts '-- Red Hat detected!'
       key_pair = state['ibm_private_key']
       chef_client_ssh_user = state['ibm_chef_client_ssh_user']
+    else
+      puts '-- This OS is not supported: #{os}. Program exits!!!'
+      exit 0    
     end
 
     chef_client_identity_file = "#{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem"
@@ -2280,15 +2297,16 @@ class BenchmarkController < ApplicationController
 
     knife_bootstrap_string = ""
     
-    # TODO
-    
-    
     knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
     knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
     knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
     knife_bootstrap_string << "--bootstrap-version #{chef_client_bootstrap_version} "
-    knife_bootstrap_string << "--template-file #{chef_client_template_file} "
+    
+    if os == 'ubuntu'
+      knife_bootstrap_string << "--template-file #{chef_client_template_file} "
+    end
+    
     knife_bootstrap_string << "--run-list \'#{recipe}\' "
     knife_bootstrap_string << "--node-name \'#{name}\' "
     knife_bootstrap_string << "--yes "

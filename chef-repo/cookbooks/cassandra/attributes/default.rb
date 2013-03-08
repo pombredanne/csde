@@ -10,6 +10,9 @@ default[:cassandra][:single_region] = "dummy"
 # the Gmond collector node among all Gmond nodes
 default[:cassandra][:gmond_collector] = "dummy"
 
+# OS
+default[:cassandra][:os] = "dummy"
+
 # =============================================== #
 # Configuration via Cassandra YAML (cassandra.yaml)
 # =============================================== #
@@ -17,7 +20,10 @@ default[:cassandra][:gmond_collector] = "dummy"
 # :::::::::::::::::::::: #
 # should NOT be changed! #
 # :::::::::::::::::::::: #
-default[:cassandra][:conf_path] = "/etc/cassandra/"
+# TODO
+# Check!
+#default[:cassandra][:conf_path] = "/etc/cassandra/"
+default[:cassandra][:conf_path] = "/etc/cassandra/conf"
 
 # It is best to have the commit log and the data
 # directory on two separate drives
@@ -102,10 +108,9 @@ default[:cassandra][:heap_new_size] = "dummy"
 # :::::::::::::::::::::: #
 
 # the script for cassandra-cli
-# TODO
 # IBM SCE --> idcuser
 # AWS EC2 --> ubuntu
-default[:cassandra][:configure_file] = "/home/ubuntu/configure.txt"
+default[:cassandra][:configure_file] = "/home/dummy/configure.txt"
 
 # placement strategy, used to place replicas in each region
 # not change!
