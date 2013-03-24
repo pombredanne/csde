@@ -1944,7 +1944,7 @@ class BenchmarkController < ApplicationController
     # configure cassandra via cassandra-cli
     # SERVICE_ID: 2.6
     # TODO
-    # configure_cassandra cassandra_config_hash
+    configure_cassandra cassandra_config_hash
 
     # backup cassandra if needed
     # SERVICE_ID: 2.7
@@ -2353,7 +2353,11 @@ class BenchmarkController < ApplicationController
     logger.debug "------------------------------------"
     
     # delete the recipe[cassandra] in cassandra-node-1
-    system "rvmsudo knife node run_list remove cassandra-node-1 'recipe[cassandra]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    # system "rvmsudo knife node run_list remove cassandra-node-1 'recipe[cassandra]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+
+    # deactive rvmsudo
+    system "knife node run_list remove cassandra-node-1 'recipe[cassandra]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+
     
     # update replication_factor
     rep_fac_arr = []
@@ -2392,7 +2396,10 @@ class BenchmarkController < ApplicationController
     
     update_default_rb_of_cookbooks rep_fac_hash
     
-    system "rvmsudo knife node run_list add cassandra-node-1 'recipe[cassandra::configure_cluster]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    # system "rvmsudo knife node run_list add cassandra-node-1 'recipe[cassandra::configure_cluster]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    
+    # deactive rvmsudo
+    system "knife node run_list add cassandra-node-1 'recipe[cassandra::configure_cluster]' --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
     
     # invoke the recipe[cassandra::configure_cluster]
     state = get_state
@@ -2404,7 +2411,19 @@ class BenchmarkController < ApplicationController
     cmd << "rvmsudo knife ssh name:cassandra-node-1 --config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     cmd << "--ssh-user #{ssh_user} "
     cmd << "--identity-file #{Rails.root}/chef-repo/.chef/pem/#{key_pair}-#{region}.pem "
-    cmd << "--attribute ec2.public_hostname "
+    
+    state = get_state
+    os = state['os']
+    if os == 'ubuntu'
+      puts '-- Ubuntu detected!'
+      cmd << "--attribute ec2.public_hostname "
+    elsif os == 'redhat'
+      puts '-- Red Hat detected!'
+    else
+      puts '-- This OS is not supported: #{os}. Program exits!!!'
+      exit 0  
+    end   
+    
     cmd << "\'sudo chef-client\'"
     
     puts cmd
