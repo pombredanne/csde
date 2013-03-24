@@ -23,7 +23,7 @@ default[:cassandra][:os] = "dummy"
 # TODO
 # Check!
 #default[:cassandra][:conf_path] = "/etc/cassandra/"
-default[:cassandra][:conf_path] = "/etc/cassandra/conf"
+default[:cassandra][:conf_path] = "/etc/cassandra/conf/"
 
 # It is best to have the commit log and the data
 # directory on two separate drives

@@ -17,10 +17,10 @@ ruby_block "read_tokens" do
       home_user = 'idcuser'
     end
     File.open("/home/#{home_user}/token.txt","r").each do |line| 
-      node[:cassandra][:initial_token] = line.to_s.strip
+      node.set[:cassandra][:initial_token] = line.to_s.strip
     end
     File.open("/home/#{home_user}/seeds.txt","r").each do |line| 
-      node[:cassandra][:seeds] = line.to_s.strip
+      node.set[:cassandra][:seeds] = line.to_s.strip
     end
   end
   action :create
