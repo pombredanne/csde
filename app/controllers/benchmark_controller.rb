@@ -2119,7 +2119,10 @@ class BenchmarkController < ApplicationController
     logger.debug "-----------------------------------------"
     logger.debug "::: Uploading cookbooks to Chef Server..."
     logger.debug "-----------------------------------------"
-    system "rvmsudo knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    #system "rvmsudo knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
+    
+    # deactive rvmsudo
+    system "knife cookbook upload cassandra --config #{Rails.root}/chef-repo/.chef/conf/knife.rb"
   end
   
   # ============================================================================================ #
@@ -2297,7 +2300,11 @@ class BenchmarkController < ApplicationController
 
     knife_bootstrap_string = ""
     
-    knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
+    #knife_bootstrap_string << "rvmsudo knife bootstrap #{node} "
+    
+    #deactive rvmsudo
+    knife_bootstrap_string << "knife bootstrap #{node} "
+    
     knife_bootstrap_string << "--config #{Rails.root}/chef-repo/.chef/conf/knife.rb "
     knife_bootstrap_string << "--identity-file #{chef_client_identity_file} "
     knife_bootstrap_string << "--ssh-user #{chef_client_ssh_user} "
