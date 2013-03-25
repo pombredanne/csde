@@ -16,7 +16,7 @@ ibm_chef_client_ssh_key_id: dummy # Private Key for SSH Login
 # cooked images in IBM SCE that are used to instantiate Chef Client machines
 # those machines have to be prepared before you can use CSDE
 # see README to know how to cook those images
-ibm_chef_client_img_ehningen: 20085608
+ibm_chef_client_img_ehningen: 20087076
 ibm_chef_client_img_raleigh: dummy
 ibm_chef_client_img_boulder1: dummy
 ibm_chef_client_img_markham: dummy
