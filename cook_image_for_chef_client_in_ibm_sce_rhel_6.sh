@@ -61,6 +61,7 @@ install_ruby_1.9.3(){
 	echo "[INFO] Do NOT forget to set ruby 1.9.3 as default use"
 	echo "[INFO] $ source $HOME/.bashrc"
 	echo "[INFO] $ rvm --default use 1.9.3"
+	echo "[INFO] $ gem install chef -v 10.24.0"
 	echo "-----------------------------------------------------"
 }
 
