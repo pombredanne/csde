@@ -61,4 +61,4 @@ else
   execute 'sudo service cassandra stop'
 end
 
-node[:internal][:package_user] = "cassandra"
+node.set[:internal][:package_user] = "cassandra"
